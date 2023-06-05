@@ -21,7 +21,32 @@ module.exports = {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
 		let guild = interaction.guild;
-		let serverConfig = require(path.join(__dirname, "data/server-config-" + guild.Id + ".json"));
+
+		let serverConfig = require("../data/server-config-" + guild.id + ".json");
+
+		// Does this user have permission to add winners?
+		let callingMember = await guild.members.fetch(interaction.user.id);
+		let hasPermission = false;
+		serverConfig.modRoles.forEach(modRole => {
+			if (callingMember.roles.cache.some(role => role.id === modRole)) {
+				hasPermission = true;
+			}
+		});
+
+		if (!hasPermission) {
+			await interaction.reply({
+				content: "Only " + serverConfig.accessDescription + " have permission to add discord winners", ephemeral: true
+			});
+			return;
+		}
+
+		// Are we in the correct channel to manage winners?
+		if (interaction.channel.id != serverConfig.modChannel) {
+			await interaction.reply({
+				content: "Please manage discord winners in the " + serverConfig.modChannelDescription + " channel", ephemeral: true
+			});
+			return;
+		}
 
 		// Set the date won based on passed in parameter or today's date
 		let dateWon = dayjs(Date.now());
@@ -30,8 +55,7 @@ module.exports = {
 			dateWon = dayjs(dateWonInput);
 			if (!dateWon.isValid()) {
 				await interaction.reply({
-					embeds: [new EmbedBuilder().setDescription("Invalid Date String. Use YYYY-MM-DD format, or skip this parameter to use today's date.")],
-					ephemeral: true
+					content: "Invalid Date String. Use YYYY-MM-DD format, or skip this parameter to use today's date.", ephemeral: true
 				});
 				return;
 			}
@@ -57,7 +81,6 @@ module.exports = {
 		let newWinner = true;
 		winnerList[guild.id].forEach(async existingWinner => {
 			if (winner.id == existingWinner.id) {
-				console.log("Updating existing winner")
 				winnerObject = existingWinner;
 				newWinner = false;
 			}
@@ -77,7 +100,7 @@ module.exports = {
 			winnerList[guild.id].push(winnerObject);
 		}
 
-		let replyString = winner.user.username + " won the discord for " + reason + "!";
+		let replyString = "Winner added:\n" + "● " + winnerObject.username + ": " + winnerObject.reason + " (" + winnerObject.date + ")";
 
 		if (winnerList[guild.id].length == serverConfig.celebrationThreshold) {
 			//Terror!!
@@ -92,6 +115,10 @@ module.exports = {
 		}
 
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
+
+		// Post a congradulatory message in fanworks
+		let fanworksChannel = await interaction.guild.channels.fetch(serverConfig.fanworksChannel);
+		fanworksChannel.send("Congratulations <@" + winner.id + "> on winning the discord for " + reason + "!");
 
 		// reply to the command
 		await interaction.reply(replyString);
