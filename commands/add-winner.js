@@ -33,13 +33,38 @@ module.exports = {
 			winnerList[guild.id] = [];
 		}
 
-		console.log("Current winner list:\n" + winnerList[guild.id]);
-
 		let replyString = "";
 
-		if (winnerList[guild.id].length == 2) {
+		// Check if this user is already a winner
+		let winnerObject = {};
+		let newWinner = true;
+		winnerList[guild.id].forEach(async existingWinner => {
+			if (winner.id == existingWinner.id) {
+				console.log("Updating existing winner")
+				winnerObject = existingWinner;
+				newWinner = false;
+			}
+		});
+
+		// Fill in the winner object
+		winnerObject.username = winner.user.username;
+		winnerObject.id = winner.id;
+		winnerObject.date = dayjs(Date.now()).format("YYYY-MM-DD");
+		winnerObject.reason = reason;
+
+		// Set the winner role
+		let winnerRole = await guild.roles.fetch('1115079835912507433');
+		winner.roles.add(winnerRole);
+
+		if (newWinner) {
+			winnerList[guild.id].push(winnerObject);
+		}
+
+		replyString = winner.user.username + " won the discord for " + reason + "!";
+
+		if (winnerList[guild.id].length == 3) {
 			//Terror!!
-			replyString = `Terror of Astandalas!`;
+			replyString+=  "\nTerror of Astandalas!";
 
 			winnerList[guild.id].forEach(async winner => {
 				let currentMember = await guild.members.fetch(winner.id)
@@ -47,23 +72,6 @@ module.exports = {
 			});
 
 			winnerList[guild.id] = []
-		}
-		else {
-			// Set the winner role
-			let winnerRole = await guild.roles.fetch('1115079835912507433');
-			winner.roles.add(winnerRole);
-
-			// Write the winner data to file
-			let winnerObject = {};
-			winnerObject.username = winner.user.username;
-			winnerObject.id = winner.id;
-			winnerObject.date = dayjs(Date.now()).format("YYYY-MM-DD");
-			winnerObject.reason = reason;
-
-			winnerList[guild.id].push(winnerObject);
-
-
-			replyString = winner.user.username + " won the discord for " + reason + "!";
 		}
 
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
