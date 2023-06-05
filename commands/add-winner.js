@@ -1,3 +1,4 @@
+var fs = require("fs");
 const { SlashCommandBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 
@@ -16,32 +17,58 @@ module.exports = {
 	async execute(interaction) {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
-		let role = interaction.options.getRole('role');
+		let guild = interaction.guild;
 
+		winnerFilename = "winner-arrays.json";
 
-		let winnerRole = await interaction.guild.roles.fetch('1115079835912507433');
-
-		let replyString = `${winner} won the discord`;
-
-		if (reason) {
-			replyString += " for " + reason;
+		let winnerList = {}
+		try {
+			winnerList = require("..\\" + winnerFilename);
+		}
+		catch (error) {
+			console.log("Failed to load serverArrays from file");
 		}
 
-		replyString += "!";
+		if (winnerList[guild.id] == null) {
+			winnerList[guild.id] = [];
+		}
 
-		await interaction.reply(replyString);	
-		
-		winner.roles.add(winnerRole);
+		console.log("Current winner list:\n" + winnerList[guild.id]);
 
+		let replyString = "";
 
-		let winnerObject = {};
-		winnerObject.username = winner.username;
-		winnerObject.id = winner.id;
-		winnerObject.dateTimestamp = Date.now();
-		winnerObject.date = dayjs(winnerObject.dateTimestamp).format("YYYY-MM-DD");
+		if (winnerList[guild.id].length == 2) {
+			//Terror!!
+			replyString = `Terror of Astandalas!`;
 
-		if (reason) {
+			winnerList[guild.id].forEach(async winner => {
+				let currentMember = await guild.members.fetch(winner.id)
+				currentMember.roles.remove('1115079835912507433');
+			});
+
+			winnerList[guild.id] = []
+		}
+		else {
+			// Set the winner role
+			let winnerRole = await guild.roles.fetch('1115079835912507433');
+			winner.roles.add(winnerRole);
+
+			// Write the winner data to file
+			let winnerObject = {};
+			winnerObject.username = winner.user.username;
+			winnerObject.id = winner.id;
+			winnerObject.date = dayjs(Date.now()).format("YYYY-MM-DD");
 			winnerObject.reason = reason;
+
+			winnerList[guild.id].push(winnerObject);
+
+
+			replyString = winner.user.username + " won the discord for " + reason + "!";
 		}
+
+		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
+
+		// reply to the command
+		await interaction.reply(replyString);
 	},
 };

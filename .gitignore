@@ -2,4 +2,6 @@ config.json
 package-lock.json
 package.json
 
+winner-arrays.json
+
 node_modules/
