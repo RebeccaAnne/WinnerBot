@@ -21,6 +21,7 @@ module.exports = {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
 		let guild = interaction.guild;
+		let serverConfig = require(path.join(__dirname, "data/server-config-" + guild.Id + ".json"));
 
 		// Set the date won based on passed in parameter or today's date
 		let dateWon = dayjs(Date.now());
@@ -69,7 +70,7 @@ module.exports = {
 		winnerObject.reason = reason;
 
 		// Set the winner role
-		let winnerRole = await guild.roles.fetch('1115079835912507433');
+		let winnerRole = await guild.roles.fetch(serverConfig.winnerRoleId);
 		winner.roles.add(winnerRole);
 
 		if (newWinner) {
@@ -78,13 +79,13 @@ module.exports = {
 
 		let replyString = winner.user.username + " won the discord for " + reason + "!";
 
-		if (winnerList[guild.id].length == 3) {
+		if (winnerList[guild.id].length == serverConfig.celebrationThreshold) {
 			//Terror!!
-			replyString += "\nTerror of Astandalas!";
+			replyString += "\n" + serverConfig.celebrationName + "!";
 
 			winnerList[guild.id].forEach(async winner => {
 				let currentMember = await guild.members.fetch(winner.id)
-				currentMember.roles.remove('1115079835912507433');
+				currentMember.roles.remove(serverConfig.winnerRoleId);
 			});
 
 			winnerList[guild.id] = []

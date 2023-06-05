@@ -39,7 +39,6 @@ module.exports = {
 			winnerList[guild.id].forEach(winner => {
 				replyString += "● " + winner.username + ": " + winner.reason + " (" + winner.date + ")" + "\n";
 			});
-
 		}
 
 		// reply to the command
