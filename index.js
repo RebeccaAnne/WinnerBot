@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
+const { CronJob } = require('cron');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -26,6 +27,63 @@ for (const file of commandFiles) {
 		console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
 	}
 }
+
+const job = new CronJob("0 0 0 * * *", async function () {
+
+	try {
+		const dataPath = path.join(__dirname, 'data');
+		const serverConfigFiles = fs.readdirSync(dataPath).filter(file => file.startsWith('server-config-'));
+
+		winnerFilename = "winner-arrays.json";
+		let winnerList = {}
+		try {
+			winnerList = require(winnerFilename);
+		}
+		catch (error) {
+			console.log("Failed to load serverArrays from file");
+		}
+
+		serverConfigFiles.forEach(serverConfigFile => {
+
+			const filePath = path.join(dataPath, serverConfigFile);
+			console.log(serverConfigFile);
+			const serverConfig = require(filePath);
+
+			winnerList[serverConfig.guildId + "-winners"] = winnerList[serverConfig.guildId + "-winners"].filter(winner => {
+				let winDate = dayjs(winner.date);
+				let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
+
+				return winDate.isAfter(dateCutoff);
+			});
+		});
+	}
+	catch (error) {
+		console.log("CronJob failed. Error: " + error);
+	}
+}, null, true);
+
+
+
+const dataPath = path.join(__dirname, 'data');
+const serverConfigFiles = fs.readdirSync(dataPath).filter(file => file.startsWith('server-config-'));
+
+winnerFilename = "winner-arrays.json";
+let winnerList = {}
+try {
+	winnerList = require(winnerFilename);
+}
+catch (error) {
+	console.log("Failed to load serverArrays from file");
+}
+
+serverConfigFiles.forEach(serverConfigFile => {
+
+	const filePath = path.join(dataPath, serverConfigFile);
+	console.log(serverConfigFile);
+	const serverConfig = require(filePath);
+
+	winnerList[serverConfig.guildId + "-winners"]
+});
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;

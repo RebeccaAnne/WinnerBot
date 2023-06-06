@@ -21,11 +21,11 @@ module.exports = {
 		}
 
 		let replyString = "";
-		if (winnerList[guild.id] == null || winnerList[guild.id].length == 0) {
+		if (winnerList[guild.id + "Winners"] == null || winnerList[guild.id + "Winners"].length == 0) {
 			replyString = "No current winners!"
 		}
 		else {
-			winnerList[guild.id].sort((a, b) => {
+			winnerList[guild.id + "Winners"].sort((a, b) => {
 				let aDate = dayjs(a.date);
 				let bDate = dayjs(b.date);
 
@@ -36,9 +36,12 @@ module.exports = {
 
 			replyString = "Current Winners of the Discord:\n"
 
-			winnerList[guild.id].forEach(winner => {
+			winnerList[guild.id + "Winners"].forEach(winner => {
 				replyString += "● " + winner.username + ": " + winner.reason + " (" + winner.date + ")" + "\n";
 			});
+
+			let serverConfig = require("../data/server-config-" + guild.id + ".json");
+			replyString += winnerList[guild.id + "Winners"].length + " out of " + serverConfig.celebrationThreshold + " needed for " + serverConfig.celebrationName;
 		}
 
 		// reply to the command

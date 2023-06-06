@@ -1,10 +1,16 @@
 {
-    "modChannel": "1115163710663704606",
-    "modChannelDescription": "junior-secretaries",
+    "guildId": "1071247508732395550",
     "fanworksChannel": "1090053691840659556",
     "celebrationThreshold": 2,
-    "celebrationName": "Terror of Astandalas",
+    "celebrationName": "Bot Party",
+    "celebrationChannel": "1115166046874239077",
     "winnerRoleId": "1115079835912507433",
-    "modRoles":["1115384280504340623"],
-    "accessDescription": "mods and junior secretaries"
+    "winnerDuration": "",
+    "modChannel": "1115163710663704606",
+    "modChannelDescription": "junior-secretaries",
+    "modRoles": [
+        "1115384280504340623"
+    ],
+    "accessDescription": "mods and junior secretaries",
+    "winDurationInDays": 1
 }

@@ -21,26 +21,29 @@ function getOrdinal(n) {
 async function declareTerror(guild, serverConfig, winnerList) {
 
 	terrorCount = 1;
-	if (winnerList[guild.id + "celebrationCount"]) {
-		terrorCount = winnerList[guild.id + "celebrationCount"] + 1;
+	if (winnerList[guild.id + "-celebrationCount"]) {
+		terrorCount = winnerList[guild.id + "-celebrationCount"] + 1;
 	}
 
-	let terrorString = "The " + terrorCount + getOrdinal(terrorCount) + " Terror of Astandalas! "
+	let terrorString = "The " + terrorCount + getOrdinal(terrorCount) + " " + serverConfig.celebrationName + "! ";
 
-	winnerList[guild.id].forEach(async (winner) => {
+	winnerList[guild.id + "-winners"].forEach(async (winner) => {
 		terrorString += "<@" + winner.id + "> ";
 
 		let currentMember = await guild.members.fetch(winner.id);
 		currentMember.roles.remove(serverConfig.winnerRoleId);
 	});
 
-	let fanworksChannel = await guild.channels.fetch(serverConfig.fanworksChannel);
-	fanworksChannel.send(terrorString);
+	try {
+		let terrorChannel = await guild.channels.fetch(serverConfig.celebrationChannel);
+		await terrorChannel.send(terrorString);
+	}
+	catch (error) {
+		console.log(error);
+	}
 
-	winnerList[guild.id] = [];
-	winnerList[guild.id + "celebrationCount"] = terrorCount;
-
-	console.log(JSON.stringify(winnerList));
+	winnerList[guild.id + "-winners"] = [];
+	winnerList[guild.id + "-celebrationCount"] = terrorCount;
 }
 
 module.exports = {
@@ -113,14 +116,14 @@ module.exports = {
 		}
 
 		// Create a winner list for this server if one doesn't already exist
-		if (winnerList[guild.id] == null) {
-			winnerList[guild.id] = [];
+		if (winnerList[guild.id + "-winners"] == null) {
+			winnerList[guild.id + "-winners"] = [];
 		}
 
 		// Check if this user is already a winner
 		let winnerObject = {};
 		let newWinner = true;
-		winnerList[guild.id].forEach(async existingWinner => {
+		winnerList[guild.id + "-winners"].forEach(async existingWinner => {
 			if (winner.id == existingWinner.id) {
 				winnerObject = existingWinner;
 				newWinner = false;
@@ -133,23 +136,22 @@ module.exports = {
 		winnerObject.date = dateWon.format("YYYY-MM-DD");
 		winnerObject.reason = reason;
 
-		// Set the winner role
+		// Set the winner role 
 		let winnerRole = await guild.roles.fetch(serverConfig.winnerRoleId);
 		winner.roles.add(winnerRole);
 
 		if (newWinner) {
-			winnerList[guild.id].push(winnerObject);
+			winnerList[guild.id + "-winners"].push(winnerObject);
 		}
 
 		let replyString = "Winner added:\n" + "● " + winnerObject.username + ": " + winnerObject.reason + " (" + winnerObject.date + ")";
 
-		if (winnerList[guild.id].length == serverConfig.celebrationThreshold) {
+		if (winnerList[guild.id + "-winners"].length >= serverConfig.celebrationThreshold) {
 			//Terror!!
 			await declareTerror(guild, serverConfig, winnerList);
 			replyString += "\n" + serverConfig.celebrationName + "!";
 		}
 
-		console.log(JSON.stringify(winnerList));
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
 
 		// Post a congradulatory message in fanworks
