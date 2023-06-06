@@ -155,6 +155,9 @@ module.exports = {
 
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
 
+		let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
+		fileLogStream.write(winnerObject.date + "\t" + winnerObject.username +"\t" + winnerObject.reason + "\n");
+
 		// Post a congradulatory message in fanworks
 		let fanworksChannel = await interaction.guild.channels.fetch(serverConfig.fanworksChannel);
 		fanworksChannel.send("Congratulations <@" + winner.id + "> on winning the discord for " + reason + "!");
