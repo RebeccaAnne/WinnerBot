@@ -14,7 +14,7 @@ module.exports = {
 		winnerFilename = "winner-arrays.json";
 		let winnerList = {}
 		try {
-			winnerList = require("..\\" + winnerFilename);
+			winnerList = require("../" + winnerFilename);
 		}
 		catch (error) {
 			console.log("Failed to load serverArrays from file");
