@@ -4,6 +4,8 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 const { CronJob } = require('cron');
+const dayjs = require('dayjs');
+const { ServerResponse } = require('node:http');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -28,34 +30,51 @@ for (const file of commandFiles) {
 	}
 }
 
+let winnerList = {}
+try {
+	winnerList = require("./winner-arrays.json");
+}
+catch (error) {
+	console.log("Failed to load winner-arrays from file");
+}
+
+
 const job = new CronJob("0 0 0 * * *", async function () {
 
 	try {
-		const dataPath = path.join(__dirname, 'data');
-		const serverConfigFiles = fs.readdirSync(dataPath).filter(file => file.startsWith('server-config-'));
+		console.log("Checking for expired winners")
 
-		winnerFilename = "winner-arrays.json";
-		let winnerList = {}
-		try {
-			winnerList = require(winnerFilename);
-		}
-		catch (error) {
-			console.log("Failed to load serverArrays from file");
-		}
+		const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
 
-		serverConfigFiles.forEach(serverConfigFile => {
+		for (const serverConfigFile of serverConfigFiles) {
 
 			const filePath = path.join(dataPath, serverConfigFile);
-			console.log(serverConfigFile);
 			const serverConfig = require(filePath);
 
-			winnerList[serverConfig.guildId + "-winners"] = winnerList[serverConfig.guildId + "-winners"].filter(winner => {
+			let filteredMembers = [];
+
+			winnerList[serverConfig.guildId + "-winners"] = await winnerList[serverConfig.guildId + "-winners"].filter(winner => {
 				let winDate = dayjs(winner.date);
 				let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
 
-				return winDate.isAfter(dateCutoff);
+				if (!winDate.isAfter(dateCutoff)) {
+					console.log(winner.username + "'s win has expired");
+					filteredMembers.push(winner.id);
+					return false;
+				}
+				else {
+					return true;
+				}
 			});
-		});
+
+			// Remove all filtered members from the winner role
+			let guild = await client.guilds.fetch(serverConfig.guildId);
+			for (const filteredMember of filteredMembers) {
+				let winnerMember = await guild.members.fetch(filteredMember);
+				await winnerMember.roles.remove(serverConfig.winnerRoleId);
+			}
+		};
+		fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerList), () => { });
 	}
 	catch (error) {
 		console.log("CronJob failed. Error: " + error);
@@ -66,24 +85,6 @@ const job = new CronJob("0 0 0 * * *", async function () {
 
 const dataPath = path.join(__dirname, 'data');
 const serverConfigFiles = fs.readdirSync(dataPath).filter(file => file.startsWith('server-config-'));
-
-winnerFilename = "winner-arrays.json";
-let winnerList = {}
-try {
-	winnerList = require(winnerFilename);
-}
-catch (error) {
-	console.log("Failed to load serverArrays from file");
-}
-
-serverConfigFiles.forEach(serverConfigFile => {
-
-	const filePath = path.join(dataPath, serverConfigFile);
-	console.log(serverConfigFile);
-	const serverConfig = require(filePath);
-
-	winnerList[serverConfig.guildId + "-winners"]
-});
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
