@@ -27,12 +27,12 @@ async function declareTerror(guild, serverConfig, winnerList) {
 
 	let terrorString = "The " + terrorCount + getOrdinal(terrorCount) + " " + serverConfig.celebrationName + "! ";
 
-	winnerList[guild.id + "-winners"].forEach(async (winner) => {
+	for (winner of winnerList[guild.id + "-winners"]) {
 		terrorString += "<@" + winner.id + "> ";
 
 		let currentMember = await guild.members.fetch(winner.id);
 		currentMember.roles.remove(serverConfig.winnerRoleId);
-	});
+	};
 
 	try {
 		let terrorChannel = await guild.channels.fetch(serverConfig.celebrationChannel);
@@ -123,12 +123,13 @@ module.exports = {
 		// Check if this user is already a winner
 		let winnerObject = {};
 		let newWinner = true;
-		winnerList[guild.id + "-winners"].forEach(async existingWinner => {
+		for (existingWinner of winnerList[guild.id + "-winners"]) {
 			if (winner.id == existingWinner.id) {
 				winnerObject = existingWinner;
 				newWinner = false;
+				break;
 			}
-		});
+		};
 
 		// Fill in the winner object
 		winnerObject.username = winner.user.username;

@@ -51,8 +51,9 @@ const job = new CronJob("0 0 0 * * *", async function () {
 			const filePath = path.join(dataPath, serverConfigFile);
 			const serverConfig = require(filePath);
 
+			// Keep track of the filtered members so we can remove their roles. 
+			// Don't try to do this in the filter because async and filter don't play nicely together
 			let filteredMembers = [];
-
 			winnerList[serverConfig.guildId + "-winners"] = await winnerList[serverConfig.guildId + "-winners"].filter(winner => {
 				let winDate = dayjs(winner.date);
 				let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
