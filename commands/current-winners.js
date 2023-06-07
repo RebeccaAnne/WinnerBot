@@ -9,6 +9,15 @@ module.exports = {
 	async execute(interaction) {
 
 		let guild = interaction.guild;
+		let serverConfig = require("../data/server-config-" + guild.id + ".json");
+
+		// Make sure we're in the fanworks channel
+		if (interaction.channel.id != serverConfig.fanworksChannel) {
+			await interaction.reply({
+				content: "Please run this command in the " + serverConfig.fanworksChannelDescription + " channel", ephemeral: true
+			});
+			return;
+		}
 
 		// Load the winner array from file
 		winnerFilename = "winner-arrays.json";
@@ -20,9 +29,11 @@ module.exports = {
 			console.log("Failed to load serverArrays from file");
 		}
 
-		let replyString = "";
 		if (winnerList[guild.id + "-winners"] == null || winnerList[guild.id + "-winners"].length == 0) {
-			replyString = "No current winners!"
+			await interaction.reply({
+				embeds: [new EmbedBuilder()
+					.setTitle("No current winners!")]
+			});
 		}
 		else {
 			winnerList[guild.id + "-winners"].sort((a, b) => {
@@ -34,18 +45,21 @@ module.exports = {
 				else { return 0; }
 			});
 
-			replyString = "Current Winners of the Discord:\n"
-
+			let winnerString = "";
 			winnerList[guild.id + "-winners"].forEach(winner => {
-				replyString += "● " + winner.username + ": " + winner.reason + " (" + winner.date + ")" + "\n";
+				winnerString += "**" + winner.username + "**: " + winner.reason + " (" + winner.date + ")" + "\n";
 			});
 
-			let serverConfig = require("../data/server-config-" + guild.id + ".json");
-			replyString += winnerList[guild.id + "-winners"].length + " out of " + serverConfig.celebrationThreshold + " needed for " + serverConfig.celebrationName;
+			footer = winnerList[guild.id + "-winners"].length + " out of " + serverConfig.celebrationThreshold + " needed for " + serverConfig.celebrationName;
+			// reply to the command
+			await interaction.reply({
+				embeds: [new EmbedBuilder()
+					.setTitle("Current Winners of the Discord")
+					.setDescription(winnerString)
+					.setFooter({ text: footer })
+					.setColor(0xd81b0e)]
+			});
 		}
-
-		// reply to the command
-		await interaction.reply(replyString);
 	},
 };
 

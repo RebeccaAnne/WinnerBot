@@ -1,6 +1,7 @@
 {
     "guildId": "1071247508732395550",
     "fanworksChannel": "1090053691840659556",
+    "fanworksChannelDescription": "fanworks",
     "celebrationThreshold": 4,
     "celebrationName": "Bot Party",
     "celebrationChannel": "1115166046874239077",

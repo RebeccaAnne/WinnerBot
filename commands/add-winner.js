@@ -112,7 +112,7 @@ module.exports = {
 			winnerList = require("../" + winnerFilename);
 		}
 		catch (error) {
-			console.log("Failed to load serverArrays from file");
+			console.log("Failed to load winner-arrays from file");
 		}
 
 		// Create a winner list for this server if one doesn't already exist
@@ -132,9 +132,9 @@ module.exports = {
 		};
 
 		// Fill in the winner object
-		winnerObject.username = winner.user.username;
+		winnerObject.username = winner.displayName;
 		winnerObject.id = winner.id;
-		winnerObject.date = dateWon.format("YYYY-MM-DD");
+		winnerObject.date = dateWon.format("YYYY-M-D");
 		winnerObject.reason = reason;
 
 		// Set the winner role 
@@ -145,24 +145,27 @@ module.exports = {
 			winnerList[guild.id + "-winners"].push(winnerObject);
 		}
 
-		let replyString = "Winner added:\n" + "● " + winnerObject.username + ": " + winnerObject.reason + " (" + winnerObject.date + ")";
+		let replyString = "**Winner added:**\n" + "**" + winnerObject.username + "**: " + winnerObject.reason + " (" + winnerObject.date + ")";
 
 		if (winnerList[guild.id + "-winners"].length >= serverConfig.celebrationThreshold) {
 			//Terror!!
 			await declareTerror(guild, serverConfig, winnerList);
-			replyString += "\n" + serverConfig.celebrationName + "!";
+			replyString += "\n\n**" + serverConfig.celebrationName + "**!";
 		}
 
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
 
 		let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
-		fileLogStream.write(winnerObject.date + "\t" + winnerObject.username +"\t" + winnerObject.reason + "\n");
+		fileLogStream.write(winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason + "\n");
 
 		// Post a congradulatory message in fanworks
 		let fanworksChannel = await interaction.guild.channels.fetch(serverConfig.fanworksChannel);
 		fanworksChannel.send("Congratulations <@" + winner.id + "> on winning the discord for " + reason + "!");
 
 		// reply to the command
-		await interaction.reply(replyString);
+		await interaction.reply({
+			embeds: [new EmbedBuilder()
+				.setDescription(replyString)]
+		});
 	},
 };
