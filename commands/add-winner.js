@@ -155,8 +155,10 @@ module.exports = {
 
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
 
+		let logstring = winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason;
 		let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
-		fileLogStream.write(winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason + "\n");
+		fileLogStream.write(logstring + "\n");
+		console.log(logstring);
 
 		// Post a congradulatory message in fanworks
 		let fanworksChannel = await interaction.guild.channels.fetch(serverConfig.fanworksChannel);
