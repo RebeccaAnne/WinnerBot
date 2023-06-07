@@ -50,7 +50,7 @@ module.exports = {
 				winnerString += "**" + winner.username + "**: " + winner.reason + " (" + winner.date + ")" + "\n";
 			});
 
-			footer = winnerList[guild.id + "-winners"].length + " out of " + serverConfig.celebrationThreshold + " needed for " + serverConfig.celebrationName;
+			footer = winnerList[guild.id + "-winners"].length + " out of " + serverConfig.celebration.threshold + " needed for " + serverConfig.celebration.name;
 			// reply to the command
 			await interaction.reply({
 				embeds: [new EmbedBuilder()

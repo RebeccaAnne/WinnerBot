@@ -25,7 +25,7 @@ async function declareTerror(guild, serverConfig, winnerList) {
 		terrorCount = winnerList[guild.id + "-celebrationCount"] + 1;
 	}
 
-	let terrorString = "The " + terrorCount + getOrdinal(terrorCount) + " " + serverConfig.celebrationName + "! ";
+	let terrorString = "The " + terrorCount + getOrdinal(terrorCount) + " " + serverConfig.celebration.name + "! ";
 
 	for (winner of winnerList[guild.id + "-winners"]) {
 		terrorString += "<@" + winner.id + "> ";
@@ -34,16 +34,21 @@ async function declareTerror(guild, serverConfig, winnerList) {
 		currentMember.roles.remove(serverConfig.winnerRoleId);
 	};
 
-	try {
-		let terrorChannel = await guild.channels.fetch(serverConfig.celebrationChannel);
-		await terrorChannel.send(terrorString);
-	}
-	catch (error) {
-		console.log(error);
-	}
+	let terrorChannel = await guild.channels.fetch(serverConfig.celebration.announcementChannel);
+	await terrorChannel.send(terrorString);
+
+	// if (winnerList[guild.id + "-lastTerror"]) {
+	// 	let lastTerrorDate = dayjs(winnerList[guild.id + "-lastTerror"]);
+	// 	let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
+
+	// 	if (lastTerrorDate.isAfter(dateCutoff)) {
+	// 		// Update the terror threshold
+	// 	}
+	// }
 
 	winnerList[guild.id + "-winners"] = [];
 	winnerList[guild.id + "-celebrationCount"] = terrorCount;
+	//winnerList[guild.id + "-lastTerror"] = dayjs(Date.now()).format("YYYY-M-D");
 }
 
 module.exports = {
@@ -147,22 +152,30 @@ module.exports = {
 
 		let replyString = "**Winner added:**\n" + "**" + winnerObject.username + "**: " + winnerObject.reason + " (" + winnerObject.date + ")";
 
-		if (winnerList[guild.id + "-winners"].length >= serverConfig.celebrationThreshold) {
-			//Terror!!
-			await declareTerror(guild, serverConfig, winnerList);
-			replyString += "\n\n**" + serverConfig.celebrationName + "**!";
-		}
-
-		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
 
 		let logstring = winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason;
 		let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
 		fileLogStream.write(logstring + "\n");
 		console.log(logstring);
 
-		// Post a congradulatory message in fanworks
+		// Construct a congratulatory message to post in fanworks
+		congratsMessage = "Congratulations <@" + winner.id + "> on winning the discord for " + reason;
+
+		// Check for a terror
+		if (winnerList[guild.id + "-winners"].length >= serverConfig.celebration.threshold) {
+			// declareTerror will manage removing the winners from the list, 
+			// removing their roles, and posting the terror message.
+			await declareTerror(guild, serverConfig, winnerList);
+
+			// Update the command reply and the congrats message to indicate the terror
+			replyString += "\n\n**" + serverConfig.celebration.name + "**!";
+			congratsMessage += " and triggering a " + serverConfig.celebration.name;
+		}
+		congratsMessage += "!";
+
 		let fanworksChannel = await interaction.guild.channels.fetch(serverConfig.fanworksChannel);
-		fanworksChannel.send("Congratulations <@" + winner.id + "> on winning the discord for " + reason + "!");
+		fanworksChannel.send(congratsMessage);
+		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
 
 		// reply to the command
 		await interaction.reply({
