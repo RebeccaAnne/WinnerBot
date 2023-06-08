@@ -11,8 +11,11 @@ module.exports = {
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
+		console.log(interaction.channel);
+		console.log(interaction.thread);
+
 		// Make sure we're in the fanworks channel
-		if (interaction.channel.id != serverConfig.fanworksChannel) {
+		if (interaction.channelId != serverConfig.fanworksChannel) {
 			await interaction.reply({
 				content: "Please run this command in the " + serverConfig.fanworksChannelDescription + " channel", ephemeral: true
 			});
@@ -30,7 +33,6 @@ module.exports = {
 					.setTitle("No current winners!")
 					.setFooter({ text: winnerList.currentTerrorThreshold + " needed for Terror of Astandalas" })
 					.setColor(0xd81b0e)]
-
 			});
 		}
 		else {

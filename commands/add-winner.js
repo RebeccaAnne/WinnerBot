@@ -101,7 +101,7 @@ module.exports = {
 		}
 
 		// Are we in the correct channel to manage winners?
-		if (interaction.channel.id != serverConfig.modChannel) {
+		if (interaction.channelId != serverConfig.modChannel) {
 			await interaction.reply({
 				content: "Please manage discord winners in the " + serverConfig.modChannelDescription + " channel", ephemeral: true
 			});
