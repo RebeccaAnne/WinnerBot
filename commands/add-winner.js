@@ -21,34 +21,45 @@ function getOrdinal(n) {
 async function declareTerror(guild, serverConfig, winnerList) {
 
 	terrorCount = 1;
-	if (winnerList[guild.id + "-celebrationCount"]) {
-		terrorCount = winnerList[guild.id + "-celebrationCount"] + 1;
+	if (winnerList.terrorCount) {
+		terrorCount = winnerList.terrorCount + 1;
 	}
 
-	let terrorString = "The " + terrorCount + getOrdinal(terrorCount) + " " + serverConfig.celebration.name + "! ";
+	let terrorString = "The " + terrorCount + getOrdinal(terrorCount) + " Terror of Astandalas! ";
 
-	for (winner of winnerList[guild.id + "-winners"]) {
+	for (winner of winnerList.winners) {
 		terrorString += "<@" + winner.id + "> ";
 
 		let currentMember = await guild.members.fetch(winner.id);
 		currentMember.roles.remove(serverConfig.winnerRoleId);
 	};
 
-	let terrorChannel = await guild.channels.fetch(serverConfig.celebration.announcementChannel);
+	let terrorChannel = await guild.channels.fetch(serverConfig.terrorAnnouncementChannel);
 	await terrorChannel.send(terrorString);
 
-	// if (winnerList[guild.id + "-lastTerror"]) {
-	// 	let lastTerrorDate = dayjs(winnerList[guild.id + "-lastTerror"]);
-	// 	let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
+	if (winnerList.lastTerrorDate) {
+		let lastTerrorDate = dayjs(winnerList.lastTerrorDate);
+		let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
 
-	// 	if (lastTerrorDate.isAfter(dateCutoff)) {
-	// 		// Update the terror threshold
-	// 	}
-	// }
+		if (lastTerrorDate.isAfter(dateCutoff)) {
+			// Update the terror threshold
+			winnerList.currentTerrorThreshold++;
 
-	winnerList[guild.id + "-winners"] = [];
-	winnerList[guild.id + "-celebrationCount"] = terrorCount;
-	//winnerList[guild.id + "-lastTerror"] = dayjs(Date.now()).format("YYYY-M-D");
+			let fanworksChannel = await guild.channels.fetch(serverConfig.fanworksChannel);
+			fanworksChannel.send({
+				embeds: [new EmbedBuilder()
+					.setTitle("The Terrors of Astandalas have Leveled Up!")
+					.setDescription("Due to Terrors successfully striking the glorious Empire of Astandalas twice in one week, the empire has increased its guard. It will now take "
+						+ winnerList.currentTerrorThreshold +
+						" members to create a Terror!")
+					.setColor(0xd81b0e)]
+			})
+		}
+	}
+
+	winnerList.winners = [];
+	winnerList.terrorCount = terrorCount;
+	winnerList.lastTerrorDate = dayjs(Date.now()).format("YYYY-M-D");
 }
 
 module.exports = {
@@ -112,23 +123,22 @@ module.exports = {
 
 		// Load the winner array from file
 		winnerFilename = "winner-arrays.json";
-		let winnerList = {}
-		try {
-			winnerList = require("../" + winnerFilename);
-		}
-		catch (error) {
-			console.log("Failed to load winner-arrays from file");
+		let winnerListFile = require("../" + winnerFilename);
+		if (winnerListFile[guild.id] == null) {
+			winnerListFile[guild.id] = {};
 		}
 
+		let winnerList = winnerListFile[guild.id];
+
 		// Create a winner list for this server if one doesn't already exist
-		if (winnerList[guild.id + "-winners"] == null) {
-			winnerList[guild.id + "-winners"] = [];
+		if (winnerList.winners == null) {
+			winnerList.winners = [];
 		}
 
 		// Check if this user is already a winner
 		let winnerObject = {};
 		let newWinner = true;
-		for (existingWinner of winnerList[guild.id + "-winners"]) {
+		for (existingWinner of winnerList.winners) {
 			if (winner.id == existingWinner.id) {
 				winnerObject = existingWinner;
 				newWinner = false;
@@ -147,7 +157,7 @@ module.exports = {
 		winner.roles.add(winnerRole);
 
 		if (newWinner) {
-			winnerList[guild.id + "-winners"].push(winnerObject);
+			winnerList.winners.push(winnerObject);
 		}
 
 		let replyString = "**Winner added:**\n" + "**" + winnerObject.username + "**: " + winnerObject.reason + " (" + winnerObject.date + ")";
@@ -162,20 +172,27 @@ module.exports = {
 		congratsMessage = "Congratulations <@" + winner.id + "> on winning the discord for " + reason;
 
 		// Check for a terror
-		if (winnerList[guild.id + "-winners"].length >= serverConfig.celebration.threshold) {
-			// declareTerror will manage removing the winners from the list, 
-			// removing their roles, and posting the terror message.
-			await declareTerror(guild, serverConfig, winnerList);
+		let terror = false;
+		if (winnerList.winners.length >= winnerList.currentTerrorThreshold) {
 
 			// Update the command reply and the congrats message to indicate the terror
-			replyString += "\n\n**" + serverConfig.celebration.name + "**!";
-			congratsMessage += " and triggering a " + serverConfig.celebration.name;
+			replyString += "\n\n**Terror of Astandalas**!";
+			congratsMessage += " and triggering a Terror of Astandalas";
+			terror = true;
 		}
 		congratsMessage += "!";
 
+		// Set the congrats message before declaring the terror, because terror declarations can also cause posts to fanworks
 		let fanworksChannel = await interaction.guild.channels.fetch(serverConfig.fanworksChannel);
 		fanworksChannel.send(congratsMessage);
-		fs.writeFileSync(winnerFilename, JSON.stringify(winnerList), () => { });
+
+		if (terror) {
+			// declareTerror will manage removing the winners from the list, 
+			// removing their roles, and posting the terror message.
+			await declareTerror(guild, serverConfig, winnerList);
+		}
+
+		fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
 
 		// reply to the command
 		await interaction.reply({

@@ -30,31 +30,39 @@ for (const file of commandFiles) {
 	}
 }
 
-let winnerList = {}
-try {
-	winnerList = require("./winner-arrays.json");
-}
-catch (error) {
-	console.log("Failed to load winner-arrays from file");
+let winnerListFile = require("./winner-arrays.json");
+const dataPath = path.join(__dirname, 'data');
+const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
+
+for (const serverConfigFile of serverConfigFiles) {
+	const filePath = path.join(dataPath, serverConfigFile);
+	const serverConfig = require(filePath);
+
+	winnerList = winnerListFile[serverConfig.guildId];
+
+	if (!winnerList.currentTerrorThreshold) {
+		winnerList.currentTerrorThreshold = serverConfig.terrorThreshold;
+	}
 }
 
+fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { });
 
 const job = new CronJob("0 0 0 * * *", async function () {
 
 	try {
-		console.log("Checking for expired winners")
-
-		const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
+		console.log(dayjs().format("YYYY-M-D") + "Checking for expired winners")
 
 		for (const serverConfigFile of serverConfigFiles) {
 
 			const filePath = path.join(dataPath, serverConfigFile);
 			const serverConfig = require(filePath);
 
+			winnerList = winnerListFile[serverConfig.guildId];
+
 			// Keep track of the filtered members so we can remove their roles. 
 			// Don't try to do this in the filter because async and filter don't play nicely together
 			let filteredMembers = [];
-			winnerList[serverConfig.guildId + "-winners"] = await winnerList[serverConfig.guildId + "-winners"].filter(winner => {
+			winnerList.winners = await winnerList.winners.filter(winner => {
 				let winDate = dayjs(winner.date);
 				let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
 
@@ -75,17 +83,12 @@ const job = new CronJob("0 0 0 * * *", async function () {
 				await winnerMember.roles.remove(serverConfig.winnerRoleId);
 			}
 		};
-		fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerList), () => { });
+		fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { });
 	}
 	catch (error) {
 		console.log("CronJob failed. Error: " + error);
 	}
 }, null, true);
-
-
-
-const dataPath = path.join(__dirname, 'data');
-const serverConfigFiles = fs.readdirSync(dataPath).filter(file => file.startsWith('server-config-'));
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;

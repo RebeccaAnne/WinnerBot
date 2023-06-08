@@ -21,22 +21,20 @@ module.exports = {
 
 		// Load the winner array from file
 		winnerFilename = "winner-arrays.json";
-		let winnerList = {}
-		try {
-			winnerList = require("../" + winnerFilename);
-		}
-		catch (error) {
-			console.log("Failed to load serverArrays from file");
-		}
+		let winnerListFile = require("../" + winnerFilename);
+		let winnerList = winnerListFile[guild.id];
 
-		if (winnerList[guild.id + "-winners"] == null || winnerList[guild.id + "-winners"].length == 0) {
+		if (winnerList.winners == null || winnerList.winners.length == 0) {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setTitle("No current winners!")]
+					.setTitle("No current winners!")
+					.setFooter({ text: winnerList.currentTerrorThreshold + " needed for Terror of Astandalas" })
+					.setColor(0xd81b0e)]
+
 			});
 		}
 		else {
-			winnerList[guild.id + "-winners"].sort((a, b) => {
+			winnerList.winners.sort((a, b) => {
 				let aDate = dayjs(a.date);
 				let bDate = dayjs(b.date);
 
@@ -46,17 +44,18 @@ module.exports = {
 			});
 
 			let winnerString = "";
-			winnerList[guild.id + "-winners"].forEach(winner => {
+			winnerList.winners.forEach(winner => {
 				winnerString += "**" + winner.username + "**: " + winner.reason + " (" + winner.date + ")" + "\n";
 			});
 
-			footer = winnerList[guild.id + "-winners"].length + " out of " + serverConfig.celebration.threshold + " needed for " + serverConfig.celebration.name;
 			// reply to the command
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
 					.setTitle("Current Winners of the Discord")
 					.setDescription(winnerString)
-					.setFooter({ text: footer })
+					.setFooter({
+						text: winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " needed for Terror of Astandalas"
+					})
 					.setColor(0xd81b0e)]
 			});
 		}

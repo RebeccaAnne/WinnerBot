@@ -2,11 +2,8 @@
     "guildId": "849347713547501588",
     "fanworksChannel": "849350971544830013",
     "fanworksChannelDescription": "nine-worlds-fanworks",
-    "celebration": {
-        "threshold": 10,
-        "name": "Terror of Astandalas",
-        "announcementChannel": "1103753786889081012"
-    },
+    "terrorAnnouncementChannel": "1103753786889081012",
+    "baseTerrorThreshold": 10,
     "winnerRoleId": "886049644038201345",
     "modChannel": "1056229199028961350",
     "modChannelDescription": "junior-secretaries-corner",
