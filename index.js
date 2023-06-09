@@ -50,7 +50,7 @@ fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { }
 const job = new CronJob("0 0 0 * * *", async function () {
 
 	try {
-		console.log(dayjs().format("YYYY-M-D") + "Checking for expired winners")
+		console.log(dayjs().format("YYYY-M-D") + " Checking for expired winners")
 
 		for (const serverConfigFile of serverConfigFiles) {
 

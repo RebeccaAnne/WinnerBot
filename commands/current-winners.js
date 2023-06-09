@@ -11,9 +11,6 @@ module.exports = {
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
-		console.log(interaction.channel);
-		console.log(interaction.thread);
-
 		// Make sure we're in the fanworks channel
 		if (interaction.channelId != serverConfig.fanworksChannel) {
 			await interaction.reply({
