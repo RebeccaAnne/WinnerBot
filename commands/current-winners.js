@@ -2,6 +2,22 @@ var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 
+function getOrdinal(n) {
+	let ord = 'th';
+
+	if (n % 10 == 1 && n % 100 != 11) {
+		ord = 'st';
+	}
+	else if (n % 10 == 2 && n % 100 != 12) {
+		ord = 'nd';
+	}
+	else if (n % 10 == 3 && n % 100 != 13) {
+		ord = 'rd';
+	}
+
+	return ord;
+}
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('current-winners')
@@ -44,7 +60,9 @@ module.exports = {
 
 			let winnerString = "";
 			winnerList.winners.forEach(winner => {
-				winnerString += "**" + winner.username + "**: " + winner.reason + " (" + winner.date + ")" + "\n";
+				let winDate = dayjs(winner.date);
+				let displayDate = winDate.format("MMM D") + getOrdinal(winDate.day());
+				winnerString += "**" + winner.username + "**: " + winner.reason + ", " + displayDate + "\n";
 			});
 
 			// reply to the command

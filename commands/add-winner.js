@@ -160,8 +160,8 @@ module.exports = {
 			winnerList.winners.push(winnerObject);
 		}
 
-		let replyString = "**Winner added:**\n" + "**" + winnerObject.username + "**: " + winnerObject.reason + " (" + winnerObject.date + ")";
-
+		let replyDate = dateWon.format("MMM D") + getOrdinal(dateWon.day());
+		let replyString = "**Winner added:**\n" + "**" + winnerObject.username + "**: " + winnerObject.reason + ", " + replyDate;
 
 		let logstring = winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason;
 		let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
