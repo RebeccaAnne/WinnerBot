@@ -61,7 +61,7 @@ module.exports = {
 			let winnerString = "";
 			winnerList.winners.forEach(winner => {
 				let winDate = dayjs(winner.date);
-				let displayDate = winDate.format("MMM D") + getOrdinal(winDate.day());
+				let displayDate = winDate.format("MMM D") + getOrdinal(winDate.date());
 				winnerString += "**" + winner.username + "**: " + winner.reason + ", " + displayDate + "\n";
 			});
 

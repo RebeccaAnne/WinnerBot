@@ -160,7 +160,7 @@ module.exports = {
 			winnerList.winners.push(winnerObject);
 		}
 
-		let replyDate = dateWon.format("MMM D") + getOrdinal(dateWon.day());
+		let replyDate = dateWon.format("MMM D") + getOrdinal(dateWon.date());
 		let replyString = "**Winner added:**\n" + "**" + winnerObject.username + "**: " + winnerObject.reason + ", " + replyDate;
 
 		let logstring = winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason;
