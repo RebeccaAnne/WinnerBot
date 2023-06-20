@@ -30,6 +30,7 @@ for (const file of commandFiles) {
 	}
 }
 
+
 let winnerListFile = require("./winner-arrays.json");
 const dataPath = path.join(__dirname, 'data');
 const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
@@ -47,29 +48,6 @@ for (const serverConfigFile of serverConfigFiles) {
 
 fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { });
 
-for (const serverConfigFile of serverConfigFiles) {
-
-	const filePath = path.join(dataPath, serverConfigFile);
-	const serverConfig = require(filePath);
-
-	winnerList = winnerListFile[serverConfig.guildId];
-	for (const winner of winnerList.winners) {
-		let winDate = dayjs(winner.date);
-		let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
-
-		if (expireDate.minute() != 0 && expireDate.hour() != 0) {
-			scheduleExpirationCheck(winner, serverConfig);
-		}
-	}
-
-	// Temp code: Schedule checks for midnight to handle winners who don't have their full date/time. 
-	// Those that do schedule with scheduleExpirationCheck above.
-	console.log("Scheduling check for midnight for " + serverConfig.guildId);
-	const job = new CronJob("0 0 0 * * *", async function () {
-		expirationCheck(serverConfig);
-	}, null, true);
-
-}
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
@@ -93,11 +71,38 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 });
 
+
 // When the client is ready, run this code (only once)
 // We use 'c' for the event parameter to keep it separate from the already defined 'client'
-client.once(Events.ClientReady, c => {
+client.once(Events.ClientReady, async c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
+
+	for (const serverConfigFile of serverConfigFiles) {
+
+		const filePath = path.join(dataPath, serverConfigFile);
+		const serverConfig = require(filePath);
+
+		let guild = await client.guilds.fetch(serverConfig.guildId);
+
+		winnerList = winnerListFile[serverConfig.guildId];
+		for (const winner of winnerList.winners) {
+			let winDate = dayjs(winner.date);
+			let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
+
+			if (expireDate.minute() != 0 && expireDate.hour() != 0) {
+				await scheduleExpirationCheck(winner, guild, serverConfig);
+			}
+		}
+
+		// Temp code: Schedule checks for midnight to handle winners who don't have their full date/time. 
+		// Those that do schedule with scheduleExpirationCheck above.
+		console.log("Scheduling check for midnight for " + serverConfig.guildId);
+		const job = new CronJob("0 0 0 * * *", async function () {
+			await expirationCheck(guild, serverConfig);
+		}, null, true);
+	}
 });
 
 // Log in to Discord with your client's token
 client.login(token);
+

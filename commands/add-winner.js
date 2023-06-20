@@ -195,7 +195,7 @@ module.exports = {
 		}
 		else {
 			// If there's not a terror, schedule a expiration check for this winner
-			scheduleExpirationCheck(winnerObject, serverConfig)
+			scheduleExpirationCheck(winnerObject, guild, serverConfig)
 		}
 
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
