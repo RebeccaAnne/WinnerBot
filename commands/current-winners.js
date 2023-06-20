@@ -63,6 +63,7 @@ module.exports = {
 				let winDate = dayjs(winner.date);
 				let displayDate = winDate.format("MMM D") + getOrdinal(winDate.date());
 				winnerString += "**" + winner.username + "**: " + winner.reason + ", " + displayDate + "\n";
+				//winnerString += "**" + winner.username + "**: " + winner.reason + ", <t:" + winDate.unix() + ":f>\n";
 			});
 
 			// reply to the command

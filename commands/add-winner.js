@@ -1,6 +1,8 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
+const { scheduleExpirationCheck } = require('../expire-schedule');
+
 
 function getOrdinal(n) {
 	let ord = 'th';
@@ -76,7 +78,7 @@ module.exports = {
 				.setRequired(true))
 		.addStringOption(option =>
 			option.setName('date')
-				.setDescription("Date won (YYYY-MM-DD), defaults to today's date")),
+				.setDescription("Date won")),
 	async execute(interaction) {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
@@ -149,7 +151,7 @@ module.exports = {
 		// Fill in the winner object
 		winnerObject.username = winner.displayName;
 		winnerObject.id = winner.id;
-		winnerObject.date = dateWon.format("YYYY-M-D");
+		winnerObject.date = dateWon.format();
 		winnerObject.reason = reason;
 
 		// Set the winner role 
@@ -160,7 +162,7 @@ module.exports = {
 			winnerList.winners.push(winnerObject);
 		}
 
-		let replyDate = dateWon.format("MMM D") + getOrdinal(dateWon.date());
+		let replyDate = "<t:" + dateWon.unix() + ":f>";
 		let replyString = "**Winner added:**\n" + "**" + winnerObject.username + "**: " + winnerObject.reason + ", " + replyDate;
 
 		let logstring = winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason;
@@ -190,6 +192,11 @@ module.exports = {
 			// declareTerror will manage removing the winners from the list, 
 			// removing their roles, and posting the terror message.
 			await declareTerror(guild, serverConfig, winnerList);
+		}
+		else {
+			// If there's not a terror, schedule a expiration check for this winner
+			console.log(winnerObject);
+			scheduleExpirationCheck(winnerObject, serverConfig)
 		}
 
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });

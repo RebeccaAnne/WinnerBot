@@ -1,4 +1,3 @@
-// Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
@@ -6,6 +5,7 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const dayjs = require('dayjs');
 const { ServerResponse } = require('node:http');
+const { scheduleExpirationCheck, expirationCheck } = require('./expire-schedule');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -47,48 +47,29 @@ for (const serverConfigFile of serverConfigFiles) {
 
 fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { });
 
-const job = new CronJob("0 0 0 * * *", async function () {
+for (const serverConfigFile of serverConfigFiles) {
 
-	try {
-		console.log(dayjs().format("YYYY-M-D") + " Checking for expired winners")
+	const filePath = path.join(dataPath, serverConfigFile);
+	const serverConfig = require(filePath);
 
-		for (const serverConfigFile of serverConfigFiles) {
+	winnerList = winnerListFile[serverConfig.guildId];
+	for (const winner of winnerList.winners) {
+		let winDate = dayjs(winner.date);
+		let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
 
-			const filePath = path.join(dataPath, serverConfigFile);
-			const serverConfig = require(filePath);
-
-			winnerList = winnerListFile[serverConfig.guildId];
-
-			// Keep track of the filtered members so we can remove their roles. 
-			// Don't try to do this in the filter because async and filter don't play nicely together
-			let filteredMembers = [];
-			winnerList.winners = await winnerList.winners.filter(winner => {
-				let winDate = dayjs(winner.date);
-				let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
-
-				if (!winDate.isAfter(dateCutoff)) {
-					console.log(winner.username + "'s win has expired");
-					filteredMembers.push(winner.id);
-					return false;
-				}
-				else {
-					return true;
-				}
-			});
-
-			// Remove all filtered members from the winner role
-			let guild = await client.guilds.fetch(serverConfig.guildId);
-			for (const filteredMember of filteredMembers) {
-				let winnerMember = await guild.members.fetch(filteredMember);
-				await winnerMember.roles.remove(serverConfig.winnerRoleId);
-			}
-		};
-		fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { });
+		if (expireDate.minute() != 0 && expireDate.hour() != 0) {
+			scheduleExpirationCheck(winner, serverConfig);
+		}
 	}
-	catch (error) {
-		console.log("CronJob failed. Error: " + error);
-	}
-}, null, true);
+
+	// Temp code: Schedule checks for midnight to handle winners who don't have their full date/time. 
+	// Those that do schedule with scheduleExpirationCheck above.
+	console.log("Scheduling check for midnight for " + serverConfig.guildId);
+	const job = new CronJob("0 0 0 * * *", async function () {
+		expirationCheck(serverConfig);
+	}, null, true);
+
+}
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
