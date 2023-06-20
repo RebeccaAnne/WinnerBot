@@ -195,7 +195,6 @@ module.exports = {
 		}
 		else {
 			// If there's not a terror, schedule a expiration check for this winner
-			console.log(winnerObject);
 			scheduleExpirationCheck(winnerObject, serverConfig)
 		}
 
