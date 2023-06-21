@@ -7,7 +7,7 @@ expirationCheck = async (guild, serverConfig) => {
     let winnerListFile = require("./winner-arrays.json");
     winnerList = winnerListFile[serverConfig.guildId];
 
-    console.log(dayjs().format("YYYY-M-D h:mm") + " Checking for expired winners in " + serverConfig.guildId)
+    console.log(dayjs().format("YYYY-M-D h:mm:ss a") + " Checking for expired winners in " + serverConfig.guildId)
 
     // Keep track of the filtered members so we can remove their roles. 
     // Don't try to do this in the filter because async and filter don't play nicely together
@@ -39,10 +39,10 @@ scheduleExpirationCheck = async (winner, guild, serverConfig) => {
     let winDate = dayjs(winner.date);
     let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
 
-    console.log("Scheduling expire check for " + expireDate.format("YYYY-M-D h:mm") + " for " + winner.username);
+    console.log("Scheduling expire check for " + expireDate.format("YYYY-M-D h:mm:ss a") + " for " + winner.username);
 
     let cronTime =
-        "0 " + // Seconds
+        expireDate.second() + " " +
         expireDate.minute() + " " +
         expireDate.hour() + " " +
         expireDate.date() + " " +
