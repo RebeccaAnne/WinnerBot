@@ -27,10 +27,19 @@ module.exports = {
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
-		// Make sure we're in the fanworks channel
-		if (interaction.channelId != serverConfig.fanworksChannel) {
+		// Make sure we're in a fanworks channel
+		let isAllowedChannel = false;
+		for (channel of serverConfig.winnerListAllowed) {
+			if (interaction.channelId == channel) {
+				console.log("Allowed!")
+				isAllowedChannel = true;
+				break;
+			}
+		}
+
+		if (!isAllowedChannel) {
 			await interaction.reply({
-				content: "Please run this command in the " + serverConfig.fanworksChannelDescription + " channel", ephemeral: true
+				content: "Please run this command in the " + serverConfig.winnerListAllowedDescription + " channel", ephemeral: true
 			});
 			return;
 		}

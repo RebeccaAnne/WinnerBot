@@ -47,8 +47,8 @@ async function declareTerror(guild, serverConfig, winnerList) {
 			// Update the terror threshold
 			winnerList.currentTerrorThreshold++;
 
-			let fanworksChannel = await guild.channels.fetch(serverConfig.fanworksChannel);
-			fanworksChannel.send({
+			let fanworksAnnouncementChannel = await guild.channels.fetch(serverConfig.fanworksAnnouncementChannel);
+			fanworksAnnouncementChannel.send({
 				embeds: [new EmbedBuilder()
 					.setTitle("The Terrors of Astandalas have Leveled Up!")
 					.setDescription("Due to Terrors successfully striking the glorious Empire of Astandalas twice in one week, the empire has increased its guard. It will now take "
@@ -185,8 +185,8 @@ module.exports = {
 		congratsMessage += "!";
 
 		// Set the congrats message before declaring the terror, because terror declarations can also cause posts to fanworks
-		let fanworksChannel = await interaction.guild.channels.fetch(serverConfig.fanworksChannel);
-		fanworksChannel.send(congratsMessage);
+		let fanworksAnnouncementChannel = await interaction.guild.channels.fetch(serverConfig.fanworksAnnouncementChannel);
+		fanworksAnnouncementChannel.send(congratsMessage);
 
 		if (terror) {
 			// declareTerror will manage removing the winners from the list, 

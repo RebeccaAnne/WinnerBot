@@ -1,7 +1,11 @@
 {
     "guildId": "1071247508732395550",
-    "fanworksChannel": "1090053691840659556",
-    "fanworksChannelDescription": "fanworks",
+    "winnerListAllowed": [
+        "1090053691840659556",
+        "1071539034645614713"
+    ],
+    "winnerListAllowedDescription": "#nine-worlds-fanworks or #nine-worlds",
+    "fanworksAnnouncementChannel": "1090053691840659556",
     "terrorAnnouncementChannel": "1115166046874239077",
     "baseTerrorThreshold": 2,
     "winnerRoleId": "1115079835912507433",
