@@ -75,10 +75,7 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('reason')
 				.setDescription('The reason for winning')
-				.setRequired(true))
-		.addStringOption(option =>
-			option.setName('date')
-				.setDescription("Date won")),
+				.setRequired(true)),
 	async execute(interaction) {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
@@ -112,16 +109,18 @@ module.exports = {
 
 		// Set the date won based on passed in parameter or today's date
 		let dateWon = dayjs(Date.now());
-		let dateWonInput = interaction.options.getString('date');
-		if (dateWonInput) {
-			dateWon = dayjs(dateWonInput);
-			if (!dateWon.isValid()) {
-				await interaction.reply({
-					content: "Invalid Date String. Use YYYY-MM-DD format, or skip this parameter to use today's date.", ephemeral: true
-				});
-				return;
-			}
-		}
+
+		// Removed this parameter for now, as it's not really used, and it's tricky with time zones in the picture
+		// let dateWonInput = interaction.options.getString('date');
+		// if (dateWonInput) {
+		// 	dateWon = dayjs(dateWonInput);
+		// 	if (!dateWon.isValid()) {
+		// 		await interaction.reply({
+		// 			content: "Invalid Date String. Use YYYY-MM-DD format, or skip this parameter to use today's date.", ephemeral: true
+		// 		});
+		// 		return;
+		// 	}
+		// }
 
 		// Load the winner array from file
 		winnerFilename = "winner-arrays.json";

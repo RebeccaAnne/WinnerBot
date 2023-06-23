@@ -31,7 +31,6 @@ module.exports = {
 		let isAllowedChannel = false;
 		for (channel of serverConfig.winnerListAllowed) {
 			if (interaction.channelId == channel) {
-				console.log("Allowed!")
 				isAllowedChannel = true;
 				break;
 			}
@@ -70,7 +69,8 @@ module.exports = {
 			let winnerString = "";
 			winnerList.winners.forEach(winner => {
 				let winDate = dayjs(winner.date);
-				let displayDate = winDate.format("MMM D") + getOrdinal(winDate.date());
+				let displayDate = "<t:" + winDate.unix() + ":f>";
+				//let displayDate = winDate.format("MMM D") + getOrdinal(winDate.date());
 				winnerString += "**" + winner.username + "**: " + winner.reason + ", " + displayDate + "\n";
 				//winnerString += "**" + winner.username + "**: " + winner.reason + ", <t:" + winDate.unix() + ":f>\n";
 			});
