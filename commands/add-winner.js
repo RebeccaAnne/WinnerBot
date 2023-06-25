@@ -61,7 +61,7 @@ async function declareTerror(guild, serverConfig, winnerList) {
 
 	winnerList.winners = [];
 	winnerList.terrorCount = terrorCount;
-	winnerList.lastTerrorDate = dayjs(Date.now()).format("YYYY-M-D");
+	winnerList.lastTerrorDate = dayjs(Date.now()).format();
 }
 
 module.exports = {
