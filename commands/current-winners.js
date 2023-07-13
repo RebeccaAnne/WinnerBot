@@ -1,6 +1,7 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
+const { formatWinnerString } = require("../utils");
 
 function getOrdinal(n) {
 	let ord = 'th';
@@ -68,11 +69,7 @@ module.exports = {
 
 			let winnerString = "";
 			winnerList.winners.forEach(winner => {
-				let winDate = dayjs(winner.date);
-				let displayDate = "<t:" + winDate.unix() + ":f>";
-				//let displayDate = winDate.format("MMM D") + getOrdinal(winDate.date());
-				winnerString += "**" + winner.username + "**: " + winner.reason + ", " + displayDate + "\n";
-				//winnerString += "**" + winner.username + "**: " + winner.reason + ", <t:" + winDate.unix() + ":f>\n";
+				winnerString += formatWinnerString(winner) + "\n";
 			});
 
 			// reply to the command

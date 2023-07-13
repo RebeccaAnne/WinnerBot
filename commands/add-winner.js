@@ -2,6 +2,7 @@ var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 const { scheduleExpirationCheck } = require('../expire-schedule');
+const { formatWinnerString, foramtWinnerReason } = require('../utils');
 
 
 function getOrdinal(n) {
@@ -75,10 +76,15 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('reason')
 				.setDescription('The reason for winning')
-				.setRequired(true)),
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('link')
+				.setDescription('Link to the winning work. (ao3, message link, etc.)')
+				.setRequired(false)),
 	async execute(interaction) {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
+		let link = interaction.options.getString('link');
 		let guild = interaction.guild;
 
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
@@ -152,6 +158,7 @@ module.exports = {
 		winnerObject.id = winner.id;
 		winnerObject.date = dateWon.format();
 		winnerObject.reason = reason;
+		winnerObject.link = link;
 
 		// Set the winner role 
 		let winnerRole = await guild.roles.fetch(serverConfig.winnerRoleId);
@@ -161,8 +168,7 @@ module.exports = {
 			winnerList.winners.push(winnerObject);
 		}
 
-		let replyDate = "<t:" + dateWon.unix() + ":f>";
-		let replyString = "**Winner added:**\n" + "**" + winnerObject.username + "**: " + winnerObject.reason + ", " + replyDate;
+		let replyString = "**Winner added:**\n" + formatWinnerString(winnerObject, true);
 
 		let logstring = winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason;
 		let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
@@ -170,7 +176,7 @@ module.exports = {
 		console.log(logstring);
 
 		// Construct a congratulatory message to post in fanworks
-		congratsMessage = "Congratulations <@" + winner.id + "> on winning the discord for " + reason;
+		congratsMessage = "Congratulations <@" + winner.id + "> on winning the discord for " + foramtWinnerReason(winnerObject);
 
 		// Check for a terror
 		let terror = false;
@@ -185,7 +191,11 @@ module.exports = {
 
 		// Set the congrats message before declaring the terror, because terror declarations can also cause posts to fanworks
 		let fanworksAnnouncementChannel = await interaction.guild.channels.fetch(serverConfig.fanworksAnnouncementChannel);
-		fanworksAnnouncementChannel.send(congratsMessage);
+		fanworksAnnouncementChannel.send({
+			embeds: [new EmbedBuilder()
+				.setDescription(congratsMessage)
+				.setColor(0xd81b0e)]
+		});
 
 		if (terror) {
 			// declareTerror will manage removing the winners from the list, 
