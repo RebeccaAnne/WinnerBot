@@ -2,7 +2,7 @@ var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 const { scheduleExpirationCheck } = require('../expire-schedule');
-const { formatWinnerString, foramtWinnerReason } = require('../utils');
+const { formatWinnerString, formatWinnerReason } = require('../utils');
 
 
 function getOrdinal(n) {
@@ -80,7 +80,7 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('link')
 				.setDescription('Link to the winning work. (ao3, message link, etc.)')
-				.setRequired(false)),
+				.setRequired(true)),
 	async execute(interaction) {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
@@ -168,7 +168,7 @@ module.exports = {
 			winnerList.winners.push(winnerObject);
 		}
 
-		let replyString = "**Winner added:**\n" + formatWinnerString(winnerObject, true);
+		let replyString = "**Winner added:**\n" + formatWinnerString(winnerObject);
 
 		let logstring = winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason;
 		let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
@@ -176,7 +176,7 @@ module.exports = {
 		console.log(logstring);
 
 		// Construct a congratulatory message to post in fanworks
-		congratsMessage = "Congratulations <@" + winner.id + "> on winning the discord for " + foramtWinnerReason(winnerObject);
+		congratsMessage = "Congratulations <@" + winner.id + "> on winning the discord for " + formatWinnerReason(winnerObject);
 
 		// Check for a terror
 		let terror = false;
