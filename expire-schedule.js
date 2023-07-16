@@ -9,15 +9,29 @@ expirationCheck = async (guild, serverConfig) => {
 
     console.log(dayjs().format("YYYY-M-D h:mm:ss a") + " Checking for expired winners in " + serverConfig.guildId)
 
+    winnerList.forEach(winner => {
+        winner.wins = winner.wins.filter(win => {
+            let winDate = dayjs(win.date);
+            let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
+
+            if (!winDate.isAfter(dateCutoff)) {
+                console.log(winner.username + "'s win from" + winDate.format() + "has expired");
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        );
+    })
+
     // Keep track of the filtered members so we can remove their roles. 
     // Don't try to do this in the filter because async and filter don't play nicely together
     let filteredMembers = [];
     winnerList.winners = await winnerList.winners.filter(winner => {
-        let winDate = dayjs(winner.date);
-        let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
 
-        if (!winDate.isAfter(dateCutoff)) {
-            console.log(winner.username + "'s win has expired");
+        if (winners.wins.lenth == 0) {
+            console.log("All of " + winner.username + "'s wins have expired");
             filteredMembers.push(winner.id);
             return false;
         }
@@ -36,23 +50,31 @@ expirationCheck = async (guild, serverConfig) => {
 
 scheduleExpirationCheck = async (winner, guild, serverConfig) => {
 
-    let winDate = dayjs(winner.date);
-    let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
+    try {
+        winner.wins.forEach(win => {
 
-    console.log("Scheduling expire check for " + expireDate.format("YYYY-M-D h:mm:ss a") + " for " + winner.username);
+            let winDate = dayjs(win.date);
+            let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
 
-    let cronTime =
-        expireDate.second() + " " +
-        expireDate.minute() + " " +
-        expireDate.hour() + " " +
-        expireDate.date() + " " +
-        expireDate.month() +
-        " *";  // Day of week
+            console.log("Scheduling expire check for " + expireDate.format("YYYY-M-D h:mm:ss a") + " for " + winner.username);
 
-    const job = new CronJob(cronTime, async function () {
-        expirationCheck(guild, serverConfig);
-        this.stop(); // Run this once and then stop
-    }, null, true);
+            let cronTime =
+                expireDate.second() + " " +
+                expireDate.minute() + " " +
+                expireDate.hour() + " " +
+                expireDate.date() + " " +
+                expireDate.month() +
+                " *";  // Day of week
+
+            const job = new CronJob(cronTime, async function () {
+                expirationCheck(guild, serverConfig);
+                this.stop(); // Run this once and then stop
+            }, null, true);
+        })
+    }
+    catch (error) {
+        console.log(error);
+    }
 }
 
 module.exports.scheduleExpirationCheck = scheduleExpirationCheck;

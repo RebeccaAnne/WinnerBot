@@ -2,24 +2,7 @@ var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 const { scheduleExpirationCheck } = require('../expire-schedule');
-const { formatWinnerString, formatWinnerReason } = require('../utils');
-
-
-function getOrdinal(n) {
-	let ord = 'th';
-
-	if (n % 10 == 1 && n % 100 != 11) {
-		ord = 'st';
-	}
-	else if (n % 10 == 2 && n % 100 != 12) {
-		ord = 'nd';
-	}
-	else if (n % 10 == 3 && n % 100 != 13) {
-		ord = 'rd';
-	}
-
-	return ord;
-}
+const { formatWinnerString, formatWinnerReason, getOrdinal } = require('../utils');
 
 async function declareTerror(guild, serverConfig, winnerList) {
 
@@ -113,20 +96,8 @@ module.exports = {
 			return;
 		}
 
-		// Set the date won based on passed in parameter or today's date
+		// Set the date won 
 		let dateWon = dayjs(Date.now());
-
-		// Removed this parameter for now, as it's not really used, and it's tricky with time zones in the picture
-		// let dateWonInput = interaction.options.getString('date');
-		// if (dateWonInput) {
-		// 	dateWon = dayjs(dateWonInput);
-		// 	if (!dateWon.isValid()) {
-		// 		await interaction.reply({
-		// 			content: "Invalid Date String. Use YYYY-MM-DD format, or skip this parameter to use today's date.", ephemeral: true
-		// 		});
-		// 		return;
-		// 	}
-		// }
 
 		// Load the winner array from file
 		winnerFilename = "winner-arrays.json";
@@ -153,12 +124,21 @@ module.exports = {
 			}
 		};
 
-		// Fill in the winner object
+		// Fill in the winner object with the user information
 		winnerObject.username = winner.displayName;
 		winnerObject.id = winner.id;
-		winnerObject.date = dateWon.format();
-		winnerObject.reason = reason;
-		winnerObject.link = link;
+
+		// Create a win array if one doesn't already exist
+		if (winnerObject.wins == null) {
+			winnerObject.wins = [];
+		}
+
+		// Create a win object and add it to the winner
+		win = {}
+		win.date = dateWon.format();
+		win.reason = reason;
+		win.link = link;
+		winnerObject.wins.push(win);
 
 		// Set the winner role 
 		let winnerRole = await guild.roles.fetch(serverConfig.winnerRoleId);
@@ -170,13 +150,13 @@ module.exports = {
 
 		let replyString = "**Winner added:**\n" + formatWinnerString(winnerObject);
 
-		let logstring = winnerObject.date + "\t" + winnerObject.username + "\t" + winnerObject.reason;
+		let logstring = dateWon.format() + "\t" + winner.displayName + "\t" + reason;
 		let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
 		fileLogStream.write(logstring + "\n");
 		console.log(logstring);
 
 		// Construct a congratulatory message to post in fanworks
-		congratsMessage = "Congratulations <@" + winner.id + "> on winning the discord for " + formatWinnerReason(winnerObject);
+		congratsMessage = "Congratulations <@" + winner.id + "> on winning the discord for " + formatWinnerReason(win);
 
 		// Check for a terror
 		let terror = false;

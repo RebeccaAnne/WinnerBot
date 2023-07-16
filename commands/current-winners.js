@@ -1,23 +1,7 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
-const { formatWinnerString } = require("../utils");
-
-function getOrdinal(n) {
-	let ord = 'th';
-
-	if (n % 10 == 1 && n % 100 != 11) {
-		ord = 'st';
-	}
-	else if (n % 10 == 2 && n % 100 != 12) {
-		ord = 'nd';
-	}
-	else if (n % 10 == 3 && n % 100 != 13) {
-		ord = 'rd';
-	}
-
-	return ord;
-}
+const { } = require("../utils");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -59,8 +43,9 @@ module.exports = {
 		}
 		else {
 			winnerList.winners.sort((a, b) => {
-				let aDate = dayjs(a.date);
-				let bDate = dayjs(b.date);
+
+				let aDate = dayjs(a.wins[a.wins.length - 1]);
+				let bDate = dayjs(b.wins[b.wins.length - 1]);
 
 				if (aDate.isBefore(bDate)) { return -1; }
 				else if (bDate.isBefore(aDate)) { return 1; }
