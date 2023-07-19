@@ -43,9 +43,8 @@ module.exports = {
 		}
 		else {
 			winnerList.winners.sort((a, b) => {
-
-				let aDate = dayjs(a.wins[a.wins.length - 1]);
-				let bDate = dayjs(b.wins[b.wins.length - 1]);
+				let aDate = dayjs(a.wins[a.wins.length - 1].date);
+				let bDate = dayjs(b.wins[b.wins.length - 1].date);
 
 				if (aDate.isBefore(bDate)) { return -1; }
 				else if (bDate.isBefore(aDate)) { return 1; }

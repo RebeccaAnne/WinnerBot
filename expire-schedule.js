@@ -9,7 +9,7 @@ expirationCheck = async (guild, serverConfig) => {
 
     console.log(dayjs().format("YYYY-M-D h:mm:ss a") + " Checking for expired winners in " + serverConfig.guildId)
 
-    winnerList.forEach(winner => {
+    winnerList.winners.forEach(winner => {
         winner.wins = winner.wins.filter(win => {
             let winDate = dayjs(win.date);
             let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
@@ -30,7 +30,7 @@ expirationCheck = async (guild, serverConfig) => {
     let filteredMembers = [];
     winnerList.winners = await winnerList.winners.filter(winner => {
 
-        if (winners.wins.lenth == 0) {
+        if (winner.wins.length == 0) {
             console.log("All of " + winner.username + "'s wins have expired");
             filteredMembers.push(winner.id);
             return false;
