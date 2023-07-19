@@ -71,30 +71,16 @@ module.exports = {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
 		let link = interaction.options.getString('link');
-		let guild = interaction.guild;
 
+		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
-		// Does this user have permission to add winners?
-		let callingMember = await guild.members.fetch(interaction.user.id);
-		let hasPermission = false;
-		serverConfig.modRoles.forEach(modRole => {
-			if (callingMember.roles.cache.some(role => role.id === modRole)) {
-				hasPermission = true;
-			}
-		});
-
-		if (!hasPermission) {
+		let permissionErrorMessage = await winnerUpdatePermissionCheck(interaction);
+		console.log(permissionErrorMessage);
+		if(permissionErrorMessage)
+		{
 			await interaction.reply({
-				content: "Only " + serverConfig.accessDescription + " have permission to add discord winners", ephemeral: true
-			});
-			return;
-		}
-
-		// Are we in the correct channel to manage winners?
-		if (interaction.channelId != serverConfig.modChannel) {
-			await interaction.reply({
-				content: "Please manage discord winners in the " + serverConfig.modChannelDescription + " channel", ephemeral: true
+				content: permissionErrorMessage, ephemeral: true
 			});
 			return;
 		}

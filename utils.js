@@ -33,22 +33,48 @@ formatWinnerString = (winnerObject) => {
 }
 
 
-// 
 // formatWinnerString = (winnerObject) => {
 
 //     let winnerString = "**" + winnerObject.username + "**: ";
 
-//     foreach(win in winnerObject.wins)
-//     {
-//         winnerString += "\n\t";
-//         winnerString += formatWinnerReason(win) + ", " 
+//     winnerObject.wins.forEach(win => {
+//         winnerString += "\n- ";
+//         winnerString += formatWinnerReason(win) + ", "
 
 //         winnerString += "<t:" + dayjs(win.date).unix() + ":f>";
-//     }
+//     })
+
+//     console.log(winnerString);
 
 //     return winnerString;
 // }
 
+winnerUpdatePermissionCheck = async (interaction) => {
+    let guild = interaction.guild;
+    let serverConfig = require("./data/server-config-" + guild.id + ".json");
+
+    // Does this user have permission to edit winners?
+    let callingMember = await guild.members.fetch(interaction.user.id);
+    let hasPermission = false;
+    serverConfig.modRoles.forEach(modRole => {
+        if (callingMember.roles.cache.some(role => role.id === modRole)) {
+            hasPermission = true;
+        }
+    });
+
+    if (!hasPermission) {
+        return "Only " + serverConfig.accessDescription + " have permission to manage discord winners";
+    }
+
+    // Are we in the correct channel to manage winners?
+    if (interaction.channelId != serverConfig.modChannel) {
+        return "Please manage discord winners in the " + serverConfig.modChannelDescription + " channel";
+    }
+
+    return null;
+}
+
 module.exports.formatWinnerString = formatWinnerString;
 module.exports.formatWinnerReason = formatWinnerReason;
 module.exports.getOrdinal = getOrdinal;
+module.exports.winnerUpdatePermissionCheck = winnerUpdatePermissionCheck;
