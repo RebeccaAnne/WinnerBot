@@ -27,6 +27,9 @@ async function declareTerror(guild, serverConfig, winnerList) {
 		let lastTerrorDate = dayjs(winnerList.lastTerrorDate);
 		let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
 
+		// Add an extra hour of buffer
+		dateCutoff = dateCutoff.subtract(1, "hour");
+
 		if (lastTerrorDate.isAfter(dateCutoff)) {
 			// Update the terror threshold
 			winnerList.currentTerrorThreshold++;

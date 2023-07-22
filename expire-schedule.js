@@ -13,6 +13,9 @@ expirationCheck = async (guild, serverConfig) => {
         winner.wins = winner.wins.filter(win => {
             let winDate = dayjs(win.date);
             let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
+            
+            // Add an extra hour of buffer time
+            dateCutoff = dateCutoff.subtract(1, "hour")
 
             if (!winDate.isAfter(dateCutoff)) {
                 console.log(winner.username + "'s win from" + winDate.format() + "has expired");
@@ -55,6 +58,9 @@ scheduleExpirationCheck = async (winner, guild, serverConfig) => {
 
             let winDate = dayjs(win.date);
             let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
+            
+            // Add an extra hour of buffer
+            expireDate = expireDate.add(1, "hour");
 
             console.log("Scheduling expire check for " + expireDate.format("YYYY-M-D h:mm:ss a") + " for " + winner.username);
 
