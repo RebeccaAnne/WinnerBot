@@ -17,7 +17,7 @@ async function declareTerror(guild, serverConfig, winnerList) {
 		terrorString += "<@" + winner.id + "> ";
 
 		let currentMember = await guild.members.fetch(winner.id);
-		currentMember.roles.remove(serverConfig.winnerRoleId);
+		await currentMember.roles.remove(serverConfig.winnerRoleId);
 	};
 
 	let terrorChannel = await guild.channels.fetch(serverConfig.terrorAnnouncementChannel);
@@ -72,18 +72,24 @@ module.exports = {
 		let reason = interaction.options.getString('reason');
 		let link = interaction.options.getString('link');
 
+
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
 		let permissionErrorMessage = await winnerUpdatePermissionCheck(interaction);
 		console.log(permissionErrorMessage);
-		if(permissionErrorMessage)
-		{
+		if (permissionErrorMessage) {
 			await interaction.reply({
 				content: permissionErrorMessage, ephemeral: true
 			});
 			return;
 		}
+
+		// There was an unknown interaction crash in this code after a large terror. I think possibly the issue is
+		// that with so many things to do we actually reach the timeout? Although 3 seconds should be plenty of 
+		// time... Anyway, deferring reply, just in case. 
+		await interaction.deferReply();
+
 
 		// Set the date won 
 		let dateWon = dayjs(Date.now());
@@ -173,13 +179,13 @@ module.exports = {
 		}
 		else {
 			// If there's not a terror, schedule a expiration check for this winner
-			scheduleExpirationCheck(winnerObject, guild, serverConfig)
+			await scheduleExpirationCheck(winnerObject, guild, serverConfig)
 		}
 
 		fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
 
 		// reply to the command
-		await interaction.reply({
+		await interaction.editReply({
 			embeds: [new EmbedBuilder()
 				.setDescription(replyString)]
 		});
