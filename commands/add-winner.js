@@ -77,7 +77,6 @@ module.exports = {
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
 		let permissionErrorMessage = await winnerUpdatePermissionCheck(interaction);
-		console.log(permissionErrorMessage);
 		if (permissionErrorMessage) {
 			await interaction.reply({
 				content: permissionErrorMessage, ephemeral: true
