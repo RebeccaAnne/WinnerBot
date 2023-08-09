@@ -74,7 +74,38 @@ winnerUpdatePermissionCheck = async (interaction) => {
     return null;
 }
 
+function getListSeparator(index, length) {
+    let separator = "";
+
+    if (index > 0) {
+
+        if (length > 2) {
+            separator += ", ";
+        }
+        else {
+            separator += " ";
+        }
+
+        if (index == (length - 1)) {
+            separator += "and ";
+        }
+    }
+    return separator;
+}
+
+function winnerNameList(winners) {
+    let winnerListString = "";
+    for (let i = 0; i < winners.length; i++) {
+        winnerListString += getListSeparator(i, winners.length);
+        winnerListString += "<@" + winners[i].id + ">";
+    }
+
+    return winnerListString;
+}
+
 module.exports.formatWinnerString = formatWinnerString;
 module.exports.formatWinnerReason = formatWinnerReason;
 module.exports.getOrdinal = getOrdinal;
 module.exports.winnerUpdatePermissionCheck = winnerUpdatePermissionCheck;
+module.exports.winnerNameList = winnerNameList;
+module.exports.getListSeparator = getListSeparator;
