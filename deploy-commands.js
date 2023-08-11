@@ -2,7 +2,7 @@ const { REST, Routes } = require('discord.js');
 const { clientId, guildId, token } = require('./config.json');
 const fs = require('node:fs');
 
-const commands = []; 
+const commands = [];
 // Grab all the command files from the commands directory you created earlier
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
@@ -20,14 +20,14 @@ const rest = new REST({ version: '10' }).setToken(token);
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-		// The put method is used to fully refresh all commands with the current set
 		const data = await rest.put(
-			Routes.applicationCommands(clientId), 
+			Routes.applicationGuildCommands(clientId, "1071247508732395550"),
 			{ body: commands },
 		);
 
+		// The put method is used to fully refresh all commands with the current set
 		// const data = await rest.put(
-		// 	Routes.applicationGuildCommands(clientId, "1071247508732395550"),
+		// 	Routes.applicationCommands(clientId),
 		// 	{ body: commands },
 		// );
 
