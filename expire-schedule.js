@@ -4,7 +4,7 @@ const fs = require('node:fs');
 
 expirationCheck = async (guild, serverConfig) => {
 
-    let winnerListFile = require("./winner-arrays.json");
+    let winnerListFile = require("./winner-and-event-data.json");
     winnerList = winnerListFile[serverConfig.guildId];
 
     console.log(dayjs().format("YYYY-M-D h:mm:ss a") + " Checking for expired winners in " + serverConfig.guildId)
@@ -48,7 +48,7 @@ expirationCheck = async (guild, serverConfig) => {
         let winnerMember = await guild.members.fetch(filteredMember);
         await winnerMember.roles.remove(serverConfig.winnerRoleId);
     }
-    fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { });
+    fs.writeFileSync("winner-and-event-data.json", JSON.stringify(winnerListFile), () => { });
 }
 
 scheduleExpirationCheck = async (winner, guild, serverConfig) => {

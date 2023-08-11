@@ -2,7 +2,7 @@ config.json
 package-lock.json
 package.json
 
-winner-arrays.json
+winner-and-event-data.json
 permanentRecord.txt
 
 node_modules/

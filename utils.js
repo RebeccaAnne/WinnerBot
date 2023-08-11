@@ -49,7 +49,7 @@ formatWinnerString = (winnerObject) => {
 //     return winnerString;
 // }
 
-winnerUpdatePermissionCheck = async (interaction) => {
+async function modPermissionCheck(interaction) {
     let guild = interaction.guild;
     let serverConfig = require("./data/server-config-" + guild.id + ".json");
 
@@ -63,12 +63,12 @@ winnerUpdatePermissionCheck = async (interaction) => {
     });
 
     if (!hasPermission) {
-        return "Only " + serverConfig.accessDescription + " have permission to manage discord winners";
+        return "Only " + serverConfig.accessDescription + " have permission to manage discord winners and events";
     }
 
     // Are we in the correct channel to manage winners?
     if (interaction.channelId != serverConfig.modChannel) {
-        return "Please manage discord winners in the " + serverConfig.modChannelDescription + " channel";
+        return "Please manage discord winners and events in the " + serverConfig.modChannelDescription;
     }
 
     return null;
@@ -106,6 +106,6 @@ function winnerNameList(winners) {
 module.exports.formatWinnerString = formatWinnerString;
 module.exports.formatWinnerReason = formatWinnerReason;
 module.exports.getOrdinal = getOrdinal;
-module.exports.winnerUpdatePermissionCheck = winnerUpdatePermissionCheck;
+module.exports.modPermissionCheck = modPermissionCheck;
 module.exports.winnerNameList = winnerNameList;
 module.exports.getListSeparator = getListSeparator;

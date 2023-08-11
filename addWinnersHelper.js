@@ -66,7 +66,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
     let dateWon = dayjs(Date.now());
 
     // Load the winner array from file
-    winnerFilename = "winner-arrays.json";
+    winnerFilename = "winner-and-event-data.json";
     let winnerListFile = require("./" + winnerFilename);
     if (winnerListFile[guild.id] == null) {
         winnerListFile[guild.id] = {};

@@ -31,7 +31,7 @@ for (const file of commandFiles) {
 }
 
 
-let winnerListFile = require("./winner-arrays.json");
+let winnerListFile = require("./winner-and-event-data.json");
 const dataPath = path.join(__dirname, 'data');
 const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
 
@@ -46,7 +46,7 @@ for (const serverConfigFile of serverConfigFiles) {
 	}
 }
 
-fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { });
+fs.writeFileSync("winner-and-event-data.json", JSON.stringify(winnerListFile), () => { });
 
 
 client.on(Events.InteractionCreate, async interaction => {

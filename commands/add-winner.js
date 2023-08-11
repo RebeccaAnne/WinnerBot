@@ -1,8 +1,7 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
-const { scheduleExpirationCheck } = require('../expire-schedule');
-const { formatWinnerString, formatWinnerReason, getOrdinal } = require('../utils');
+const { formatWinnerString, modPermissionCheck } = require('../utils');
 const { addWinners, getWinObject } = require('../addWinnersHelper');
 
 module.exports = {
@@ -29,7 +28,7 @@ module.exports = {
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
-		let permissionErrorMessage = await winnerUpdatePermissionCheck(interaction);
+		let permissionErrorMessage = await modPermissionCheck(interaction);
 		if (permissionErrorMessage) {
 			await interaction.reply({
 				content: permissionErrorMessage, ephemeral: true

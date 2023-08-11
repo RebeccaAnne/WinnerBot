@@ -1,24 +1,30 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
-const { formatWinnerString, modPermissionCheck } = require('../utils');
+const { scheduleExpirationCheck } = require('../expire-schedule');
+const { formatWinnerString, formatWinnerReason, getOrdinal } = require('../utils');
 
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('remove-win')
-		.setDescription('Removes the most recent win from a winner. Will revert to an earlier unexpired win if present.')
+		.setName('add-bot-event')
+		.setDescription('Add an event to the bot for event reminders')
+		.addStringOption(option =>
+			option.setName('name')
+				.setDescription('Name of the event')
+				.setRequired(true))
 		.addUserOption(option =>
-			option.setName('winner')
-				.setDescription('The user to remove a win from')
+			option.setName('organizer')
+				.setDescription('The user in charge of organizing the event.')
 				.setRequired(true)),
 	async execute(interaction) {
+		let eventName = interaction.options.getString('name');
 		let winner = interaction.options.getMember('winner');
 		let guild = interaction.guild;
 
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
-		// Does this user have permission to edit winners?
+		// Does this user have permission to add an event?
 		let permissionErrorMessage = await modPermissionCheck(interaction);
 		if (permissionErrorMessage) {
 			await interaction.reply({
@@ -28,7 +34,7 @@ module.exports = {
 		}
 
 		// Load the winner array from file
-		winnerFilename = "winner-and-event-data.json";
+		winnerFilename = "winner-arrays.json";
 		let winnerListFile = require("../" + winnerFilename);
 		if (winnerListFile[guild.id] == null) {
 			winnerListFile[guild.id] = {};
