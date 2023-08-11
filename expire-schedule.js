@@ -7,7 +7,7 @@ expirationCheck = async (guild, serverConfig) => {
     let winnerListFile = require("./winner-arrays.json");
     winnerList = winnerListFile[serverConfig.guildId];
 
-    console.log(dayjs().format("YYYY-M-D h:mm:ss a") + " Checking for expired winners in " + serverConfig.guildId)
+    console.log(dayjs().format() + " Checking for expired winners in " + serverConfig.guildId)
 
     winnerList.winners.forEach(winner => {
         winner.wins = winner.wins.filter(win => {
@@ -18,7 +18,7 @@ expirationCheck = async (guild, serverConfig) => {
             dateCutoff = dateCutoff.subtract(1, "hour")
 
             if (!winDate.isAfter(dateCutoff)) {
-                console.log(winner.username + "'s win from" + winDate.format() + "has expired");
+                console.log(winner.username + "'s win from " + winDate.format() + " has expired");
                 return false;
             }
             else {
@@ -62,7 +62,7 @@ scheduleExpirationCheck = async (winner, guild, serverConfig) => {
             // Add an extra hour of buffer
             expireDate = expireDate.add(1, "hour");
 
-            console.log("Scheduling expire check for " + expireDate.format("YYYY-M-D h:mm:ss a") + " for " + winner.username);
+            console.log("Scheduling expire check for " + expireDate.format() + " for " + winner.username);
 
             let cronTime =
                 expireDate.second() + " " +
