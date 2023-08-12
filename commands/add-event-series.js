@@ -1,7 +1,7 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
-const { modPermissionCheck } = require('../utils');
+const { modjsPermissionChannelCheck } = require('../utils');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -11,22 +11,17 @@ module.exports = {
 			option.setName('name')
 				.setDescription('Name of the event series')
 				.setRequired(true))
-		.addStringOption(option =>
-			option.setName('description')
-				.setDescription('Description of the event seies')
-				.setRequired(true))
 		.addUserOption(option =>
 			option.setName('organizer')
 				.setDescription('The user in charge of organizing the event series.')
 				.setRequired(true)),
 	async execute(interaction) {
 		let seriesName = interaction.options.getString('name');
-		let description = interaction.options.getString('description');
 		let organizer = interaction.options.getMember('organizer');
 		let guild = interaction.guild;
 
 		// Does this user have permission to add an event series?
-		let permissionErrorMessage = await modPermissionCheck(interaction);
+		let permissionErrorMessage = await modjsPermissionChannelCheck(interaction);
 		if (permissionErrorMessage) {
 			await interaction.reply({
 				content: permissionErrorMessage, ephemeral: true
@@ -55,12 +50,12 @@ module.exports = {
 
 		let newSeries = {
 			name: seriesName,
-			description: description,
 			organizers: [
 				{
 					username: organizer.displayName,
 					id: organizer.id
-				}]
+				}],
+			events: []
 		}
 
 		serverData.eventSeries.push(newSeries);

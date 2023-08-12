@@ -49,12 +49,7 @@ formatWinnerString = (winnerObject) => {
 //     return winnerString;
 // }
 
-async function modPermissionCheck(interaction) {
-    let guild = interaction.guild;
-    let serverConfig = require("./data/server-config-" + guild.id + ".json");
-
-    // Does this user have permission to edit winners?
-    let callingMember = await guild.members.fetch(interaction.user.id);
+function isMemeberModJs(serverConfig, callingMember) {
     let hasPermission = false;
     serverConfig.modRoles.forEach(modRole => {
         if (callingMember.roles.cache.some(role => role.id === modRole)) {
@@ -62,7 +57,17 @@ async function modPermissionCheck(interaction) {
         }
     });
 
-    if (!hasPermission) {
+    return hasPermission;
+}
+
+async function modjsPermissionChannelCheck(interaction) {
+    let guild = interaction.guild;
+    let serverConfig = require("./data/server-config-" + guild.id + ".json");
+
+    // Does this user have permission to edit winners?
+    let callingMember = await guild.members.fetch(interaction.user.id);
+    if (!isMemeberModJs(serverConfig, callingMember)) {
+        //    if (!isMemeberModJs(serverConfig, callingMember)) {
         return "Only " + serverConfig.accessDescription + " have permission to manage discord winners and events";
     }
 
@@ -103,9 +108,39 @@ function winnerNameList(winners) {
     return winnerListString;
 }
 
+function tryParseHammerTime(dateTimeString) {
+    // Check if we match the hammer time regex
+    const hammerTimeRegex = /<t:\d{10}:[dDtTfFR]>/g;
+    if (!dateTimeString.match(hammerTimeRegex)) { return null; }
+
+    try {
+        // Parse the timestamp as a dayjs
+        let date = dayjs(Number(dateTimeString.slice(3, 13)) * 1000).format();
+        return date;
+    }
+    catch { return null; }
+}
+
+function tryParseYYYYMMDD(dateTimeString) {
+
+    // Check if we match the regex
+    const regex = /\d{4}-\d{2}-\d{2}/g;
+    if (!dateTimeString.match(regex)) { return null; }
+
+    try {
+        // Parse the string as a dayjs to confirm it's a valid date;
+        let date = dayjs(dateTimeString)
+        return dateTimeString;
+    }
+    catch { return null; }
+}
+
 module.exports.formatWinnerString = formatWinnerString;
 module.exports.formatWinnerReason = formatWinnerReason;
 module.exports.getOrdinal = getOrdinal;
-module.exports.modPermissionCheck = modPermissionCheck;
+module.exports.isMemeberModJs = isMemeberModJs;
+module.exports.modjsPermissionChannelCheck = modjsPermissionChannelCheck;
 module.exports.winnerNameList = winnerNameList;
 module.exports.getListSeparator = getListSeparator;
+module.exports.tryParseYYYYMMDD = tryParseYYYYMMDD;
+module.exports.tryParseHammerTime = tryParseHammerTime;

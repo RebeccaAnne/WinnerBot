@@ -1,7 +1,7 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
-const { formatWinnerString, modPermissionCheck } = require('../utils');
+const { formatWinnerString, modjsPermissionChannelCheck } = require('../utils');
 
 
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
 		// Does this user have permission to edit winners?
-		let permissionErrorMessage = await modPermissionCheck(interaction);
+		let permissionErrorMessage = await modjsPermissionChannelCheck(interaction);
 		if (permissionErrorMessage) {
 			await interaction.reply({
 				content: permissionErrorMessage, ephemeral: true

@@ -1,7 +1,7 @@
 var fs = require("fs");
 const { SlashCommandBuilder, UserSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
-const { formatWinnerReason, getListSeparator, modPermissionCheck } = require('../utils');
+const { formatWinnerReason, getListSeparator, modjsPermissionChannelCheck } = require('../utils');
 const { addWinners } = require("../addWinnersHelper");
 
 module.exports = {
@@ -18,7 +18,7 @@ module.exports = {
 				.setRequired(true)),
 	async execute(commandInteraction) {
 
-		let permissionErrorMessage = await modPermissionCheck(commandInteraction);
+		let permissionErrorMessage = await modjsPermissionChannelCheck(commandInteraction);
 		if (permissionErrorMessage) {
 			await interaction.reply({
 				content: permissionErrorMessage, ephemeral: true
