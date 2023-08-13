@@ -18,18 +18,34 @@ module.exports = {
 
 		let serverData = dataFile[guild.id];
 
+		// Sort the events of each series
+		for (let eventSeries of serverData.eventSeries) {
+			eventSeries.events.sort((a, b) => {
+				let aDate = dayjs(a.date);
+				let bDate = dayjs(b.date);
+
+				if (aDate.isBefore(bDate)) { return -1; }
+				else if (bDate.isBefore(aDate)) { return 1; }
+				else { return 0; }
+			});
+		}
+
+		// Sort the series by ealiest event
+		serverData.eventSeries.sort((a, b) => {
+			let aDate = dayjs(a.events[0].date);
+			let bDate = dayjs(b.events[0].date);
+
+			if (aDate.isBefore(bDate)) { return -1; }
+			else if (bDate.isBefore(aDate)) { return 1; }
+			else { return 0; }
+		})
+
 		let eventListString = "";
 		for (let eventSeries of serverData.eventSeries) {
 
 			if (eventSeries.events.length > 0) {
 				eventListString += "**" + eventSeries.name + ":**\n";
 				eventListString += "*(organizer: " + eventSeries.organizers[0].username + ")*\n";
-
-				eventSeries.events.sort((a, b) => {
-					if (a.Date.isBefore(b.Date)) { return -1; }
-					else if (b.Date.isBefore(a.Date)) { return 1; }
-					else { return 0; }
-				});
 
 				// Show the first three upcoming events for this series
 				for (let i = 0; i < 3 && i < eventSeries.events.length; i++) {
@@ -40,7 +56,7 @@ module.exports = {
 
 					if (eventSeries.events[i].allDayEvent) {
 						// For all day events display the fixed calendar date
-						displayDate = eventDayJs.format("MMMM DD, YYYY");
+						displayDate = eventDayJs.format("MMMM D, YYYY");
 					}
 					else {
 						// For non-all day events, format as a hammertime
@@ -48,12 +64,12 @@ module.exports = {
 					}
 
 					// Add the formatted date and event title to the string
-					eventListString += displayDate + ": " + eventSeries.events[i].name + "\n";
+					eventListString += "- " + displayDate + ": " + eventSeries.events[i].name + "\n";
 				}
 
 				// If there are more than 3 events, display the count of non-displayed events
 				if (eventSeries.events.length > 3) {
-					eventListString += "*(" + (eventSeries.events.length - 3) + "more scheduled events)*"
+					eventListString += "*(" + (eventSeries.events.length - 3) + " more scheduled event(s))*\n"
 				}
 			}
 			eventListString += "\n";

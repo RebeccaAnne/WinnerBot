@@ -100,10 +100,28 @@ module.exports = {
 		series.events.push(newEvent);
 		fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
 
-		// reply to the command - BECKYTODO - do better
+		// Build the reply string
+		let replyString = "**" + newEvent.name + "**" + " added to the **" + series.name + "** series.\n**Event time**: ";
+
+		if (newEvent.allDayEvent) {
+			// For all day events display the fixed calendar date
+			replyString += dayjs(newEvent.date).format("MMMM D, YYYY");
+		}
+		else {
+			// For non-all day events, format as a hammertime
+			replyString += "<t:" + dayjs(newEvent.date).unix() + ":f>";
+		}
+
+		// Add the reminder time if present
+		if (reminderDateTime) {
+			replyString += "\n**Reminder time**: " + "<t:" + dayjs(newEvent.reminders[0]).unix() + ":f>"
+		}
+
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
-				.setDescription("Event Added!")]
+				.setDescription(replyString)
+				.setTitle("New Event Added")],
+			ephemeral: true
 		});
 	},
 };

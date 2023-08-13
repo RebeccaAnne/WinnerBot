@@ -62,10 +62,12 @@ module.exports = {
 
 		fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
 
-		// reply to the command - BECKYTODO - do better
+		// reply to the command
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
-				.setDescription("Event Added!")]
+				.setDescription(
+					"**" + newSeries.name + "**" + " organized by " + "**" + newSeries.organizers[0].username + "**")
+				.setTitle("New Event Series Added")]
 		});
 	},
 };
