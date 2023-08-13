@@ -49,7 +49,7 @@ formatWinnerString = (winnerObject) => {
 //     return winnerString;
 // }
 
-function isMemeberModJs(serverConfig, callingMember) {
+function isMemberModJs(serverConfig, callingMember) {
     let hasPermission = false;
     serverConfig.modRoles.forEach(modRole => {
         if (callingMember.roles.cache.some(role => role.id === modRole)) {
@@ -66,8 +66,8 @@ async function modjsPermissionChannelCheck(interaction) {
 
     // Does this user have permission to edit winners?
     let callingMember = await guild.members.fetch(interaction.user.id);
-    if (!isMemeberModJs(serverConfig, callingMember)) {
-        //    if (!isMemeberModJs(serverConfig, callingMember)) {
+    if (!isMemberModJs(serverConfig, callingMember)) {
+        //    if (!isMemberModJs(serverConfig, callingMember)) {
         return "Only " + serverConfig.accessDescription + " have permission to manage discord winners and events";
     }
 
@@ -138,7 +138,7 @@ function tryParseYYYYMMDD(dateTimeString) {
 module.exports.formatWinnerString = formatWinnerString;
 module.exports.formatWinnerReason = formatWinnerReason;
 module.exports.getOrdinal = getOrdinal;
-module.exports.isMemeberModJs = isMemeberModJs;
+module.exports.isMemberModJs = isMemberModJs;
 module.exports.modjsPermissionChannelCheck = modjsPermissionChannelCheck;
 module.exports.winnerNameList = winnerNameList;
 module.exports.getListSeparator = getListSeparator;
