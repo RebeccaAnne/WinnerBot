@@ -19,7 +19,9 @@ module.exports = {
 		let serverData = dataFile[guild.id];
 
 		// Sort the events of each series
+		let eventsExist = false;
 		for (let eventSeries of serverData.eventSeries) {
+			eventsExist |= eventSeries.events.length > 0;
 			eventSeries.events.sort((a, b) => {
 				let aDate = dayjs(a.date);
 				let bDate = dayjs(b.date);
@@ -28,6 +30,16 @@ module.exports = {
 				else if (bDate.isBefore(aDate)) { return 1; }
 				else { return 0; }
 			});
+		}
+
+		if (!eventsExist) {
+			await interaction.reply({
+				embeds: [new EmbedBuilder()
+					.setTitle("No Upcoming Events")
+					.setColor(0xff)]
+
+			})
+			return;
 		}
 
 		// Sort the series by ealiest event
