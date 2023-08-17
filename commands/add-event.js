@@ -115,7 +115,10 @@ module.exports = {
 				return;
 			}
 
-			newEvent.reminders.push({ date: parsedReminderDateTime, channel: reminderChannel.id });
+			reminder = { date: parsedReminderDateTime, channel: reminderChannel.id };
+			await scheduleReminder(serverConfig, guild, series, newEvent, reminder);
+			
+			newEvent.reminders.push(reminder);
 		}
 
 		series.events.push(newEvent);

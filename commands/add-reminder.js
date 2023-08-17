@@ -84,8 +84,9 @@ module.exports = {
 			return;
 		}
 
-		event.reminders.push({ date: parsedReminderDateTime, channel: reminderChannel.id });
-
+		let reminder = { date: parsedReminderDateTime, channel: reminderChannel.id };
+		await scheduleReminder(serverConfig, guild, series, event, reminder);
+		event.reminders.push(reminder);
 		fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
 
 		let replyString =

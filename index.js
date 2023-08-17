@@ -5,7 +5,7 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const dayjs = require('dayjs');
 const { ServerResponse } = require('node:http');
-const { scheduleExpirationCheck, expirationCheck } = require('./expire-schedule');
+const { scheduleExpirationCheck, expirationCheck } = require('./timers');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });

@@ -1,6 +1,7 @@
 const dayjs = require('dayjs');
 const { CronJob } = require('cron');
 const fs = require('node:fs');
+const { EmbedBuilder } = require('discord.js');
 
 expirationCheck = async (guild, serverConfig) => {
 
@@ -13,7 +14,7 @@ expirationCheck = async (guild, serverConfig) => {
         winner.wins = winner.wins.filter(win => {
             let winDate = dayjs(win.date);
             let dateCutoff = dayjs().subtract(serverConfig.winDurationInDays, "day");
-            
+
             // Add an extra hour of buffer time
             dateCutoff = dateCutoff.subtract(1, "hour")
 
@@ -58,7 +59,7 @@ scheduleExpirationCheck = async (winner, guild, serverConfig) => {
 
             let winDate = dayjs(win.date);
             let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
-            
+
             // Add an extra hour of buffer
             expireDate = expireDate.add(1, "hour");
 
@@ -82,6 +83,78 @@ scheduleExpirationCheck = async (winner, guild, serverConfig) => {
         console.log(error);
     }
 }
+
+popReminder = async (sereverConfig, guild, seriesName, eventName, reminder) => {
+    let channel = await guild.channels.fetch(reminder.channel);
+
+    let filename = "winner-and-event-data.json";
+    let dataFile = require("./" + filename);
+    let serverData = dataFile[guild.id];
+
+    let series = serverData.eventSeries.find(series => series.name == seriesName);
+    let event = series.events.find(event => event.name == eventName);
+
+    let displayDate = "";
+    let eventDayJs = dayjs(event.date);
+
+    if (event.allDayEvent) {
+        // For all day events display the fixed calendar date
+        displayDate = eventDayJs.format("MMMM D, YYYY");
+    }
+    else {
+        // For non-all day events, format as a hammertime
+        displayDate = "<t:" + eventDayJs.unix() + ":f>";
+    }
+
+    let reminderString = displayDate + ": " + event.name;
+
+    await channel.send({
+        embeds: [new EmbedBuilder()
+            .setDescription(reminderString)
+            .setTitle("Upcoming Event Reminder for " + series.name)]
+    });
+
+    // Filter out this reminder (and any other reminders that may be obsolete)
+    event.reminders = event.reminders.filter(reminder => {
+        let reminderDate = dayjs(reminder.date);
+        let now = dayjs();
+
+        if (reminderDate.isBefore(now)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    });
+
+    fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+}
+
+scheduleReminder = async (serverConfig, guild, series, event, reminder) => {
+
+    try {
+        let reminderTimeDayJs = dayjs(reminder.date);
+        console.log("Scheduling reminder for " + reminderTimeDayJs.format("YYYY-M-D h:mm:ss a") + " for " + series.name + ": " + event.name);
+
+        let cronTime =
+            reminderTimeDayJs.second() + " " +
+            reminderTimeDayJs.minute() + " " +
+            reminderTimeDayJs.hour() + " " +
+            reminderTimeDayJs.date() + " " +
+            reminderTimeDayJs.month() +
+            " *";  // Day of week
+
+        const job = new CronJob(cronTime, async function () {
+            popReminder(serverConfig, guild, series.name, event.name, reminder);
+            this.stop(); // Run this once and then stop
+        }, null, true);
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+
 
 module.exports.scheduleExpirationCheck = scheduleExpirationCheck;
 module.exports.expirationCheck = expirationCheck;
