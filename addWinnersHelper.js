@@ -112,7 +112,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
         winner.roles.add(winnerRole);
 
         // Schcedule an expiration check for the winner
-        await scheduleExpirationCheck(winnerObject, guild, serverConfig)
+        await scheduleWinnerExpirationCheck(winnerObject, guild, serverConfig)
 
         if (newWinner) {
             winnerList.winners.push(winnerObject);
@@ -156,5 +156,4 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
     return winnerList;
 }
 
-module.exports.addWinners = addWinners;
-module.exports.getWinObject = getWinObject;
+module.exports = { addWinners, getWinObject }

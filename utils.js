@@ -49,7 +49,7 @@ formatWinnerString = (winnerObject) => {
 //     return winnerString;
 // }
 
-function isMemberModJs(serverConfig, callingMember) {
+isMemberModJs = (serverConfig, callingMember) => {
     let hasPermission = false;
     serverConfig.modRoles.forEach(modRole => {
         if (callingMember.roles.cache.some(role => role.id === modRole)) {
@@ -60,7 +60,7 @@ function isMemberModJs(serverConfig, callingMember) {
     return hasPermission;
 }
 
-async function modjsPermissionChannelCheck(interaction) {
+modjsPermissionChannelCheck = async (interaction) => {
     let guild = interaction.guild;
     let serverConfig = require("./data/server-config-" + guild.id + ".json");
 
@@ -79,7 +79,7 @@ async function modjsPermissionChannelCheck(interaction) {
     return null;
 }
 
-function getListSeparator(index, length) {
+getListSeparator = (index, length) => {
     let separator = "";
 
     if (index > 0) {
@@ -98,7 +98,7 @@ function getListSeparator(index, length) {
     return separator;
 }
 
-function winnerNameList(winners) {
+winnerNameList = (winners) => {
     let winnerListString = "";
     for (let i = 0; i < winners.length; i++) {
         winnerListString += getListSeparator(i, winners.length);
@@ -108,7 +108,7 @@ function winnerNameList(winners) {
     return winnerListString;
 }
 
-function tryParseHammerTime(dateTimeString) {
+tryParseHammerTime = (dateTimeString) => {
     // Check if we match the hammer time regex
     const hammerTimeRegex = /<t:\d{10}:[dDtTfFR]>/g;
     if (!dateTimeString.match(hammerTimeRegex)) { return null; }
@@ -121,7 +121,7 @@ function tryParseHammerTime(dateTimeString) {
     catch { return null; }
 }
 
-function tryParseYYYYMMDD(dateTimeString) {
+tryParseYYYYMMDD = (dateTimeString) => {
 
     // Check if we match the regex
     const regex = /\d{4}-\d{2}-\d{2}/g;
@@ -135,12 +135,6 @@ function tryParseYYYYMMDD(dateTimeString) {
     catch { return null; }
 }
 
-module.exports.formatWinnerString = formatWinnerString;
-module.exports.formatWinnerReason = formatWinnerReason;
-module.exports.getOrdinal = getOrdinal;
-module.exports.isMemberModJs = isMemberModJs;
-module.exports.modjsPermissionChannelCheck = modjsPermissionChannelCheck;
-module.exports.winnerNameList = winnerNameList;
-module.exports.getListSeparator = getListSeparator;
-module.exports.tryParseYYYYMMDD = tryParseYYYYMMDD;
-module.exports.tryParseHammerTime = tryParseHammerTime;
+module.exports = {
+    formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
+}

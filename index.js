@@ -5,7 +5,7 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const dayjs = require('dayjs');
 const { ServerResponse } = require('node:http');
-const { scheduleExpirationCheck, expirationCheck } = require('./timers');
+const { scheduleWinnerExpirationCheck, winnerExpirationCheck } = require('./timers');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -90,15 +90,15 @@ client.once(Events.ClientReady, async c => {
 			let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
 
 			if (expireDate.minute() != 0 && expireDate.hour() != 0) {
-				await scheduleExpirationCheck(winner, guild, serverConfig);
+				await scheduleWinnerExpirationCheck(winner, guild, serverConfig);
 			}
 		}
 
 		// Temp code: Schedule checks for midnight to handle winners who don't have their full date/time. 
-		// Those that do schedule with scheduleExpirationCheck above.
+		// Those that do schedule with scheduleWinnerExpirationCheck above.
 		console.log("Scheduling check for midnight for " + serverConfig.guildId);
 		const job = new CronJob("0 0 0 * * *", async function () {
-			await expirationCheck(guild, serverConfig);
+			await winnerExpirationCheck(guild, serverConfig);
 		}, null, true);
 	}
 });

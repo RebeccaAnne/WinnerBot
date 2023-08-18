@@ -3,7 +3,8 @@ const { CronJob } = require('cron');
 const fs = require('node:fs');
 const { EmbedBuilder } = require('discord.js');
 
-expirationCheck = async (guild, serverConfig) => {
+
+winnerExpirationCheck = async (guild, serverConfig) => {
 
     let winnerListFile = require("./winner-and-event-data.json");
     winnerList = winnerListFile[serverConfig.guildId];
@@ -49,10 +50,11 @@ expirationCheck = async (guild, serverConfig) => {
         let winnerMember = await guild.members.fetch(filteredMember);
         await winnerMember.roles.remove(serverConfig.winnerRoleId);
     }
+
     fs.writeFileSync("winner-and-event-data.json", JSON.stringify(winnerListFile), () => { });
 }
 
-scheduleExpirationCheck = async (winner, guild, serverConfig) => {
+scheduleWinnerExpirationCheck = async (winner, guild, serverConfig) => {
 
     try {
         winner.wins.forEach(win => {
@@ -63,7 +65,7 @@ scheduleExpirationCheck = async (winner, guild, serverConfig) => {
             // Add an extra hour of buffer
             expireDate = expireDate.add(1, "hour");
 
-            console.log("Scheduling expire check for " + expireDate.format("YYYY-M-D h:mm:ss a") + " for " + winner.username);
+            console.log("Scheduling expire check at " + expireDate.format("YYYY-M-D h:mm:ss a") + " for " + winner.username);
 
             let cronTime =
                 expireDate.second() + " " +
@@ -74,7 +76,7 @@ scheduleExpirationCheck = async (winner, guild, serverConfig) => {
                 " *";  // Day of week
 
             const job = new CronJob(cronTime, async function () {
-                expirationCheck(guild, serverConfig);
+                winnerExpirationCheck(guild, serverConfig);
                 this.stop(); // Run this once and then stop
             }, null, true);
         })
@@ -154,7 +156,4 @@ scheduleReminder = async (serverConfig, guild, series, event, reminder) => {
     }
 }
 
-
-
-module.exports.scheduleExpirationCheck = scheduleExpirationCheck;
-module.exports.expirationCheck = expirationCheck;
+module.exports = { scheduleWinnerExpirationCheck, winnerExpirationCheck }
