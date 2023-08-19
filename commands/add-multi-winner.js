@@ -20,7 +20,7 @@ module.exports = {
 
 		let permissionErrorMessage = await winnerUpdatePermissionCheck(commandInteraction);
 		if (permissionErrorMessage) {
-			await interaction.reply({
+			await commandInteraction.reply({
 				content: permissionErrorMessage, ephemeral: true
 			});
 			return;
