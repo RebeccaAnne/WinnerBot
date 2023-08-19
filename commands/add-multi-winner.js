@@ -102,20 +102,10 @@ module.exports = {
 			let commandInteractionText = "";
 			if (buttonInteration.customId === 'confirm') {
 
-				await addWinners(guild, serverConfig, winners, reason, link);
+				commandInteractionText = "**Winner(s) added:**\n";
+				commandInteractionText += await addWinners(guild, serverConfig, winners, reason, link);
 
 				buttonInteractionText = "Winners successfully added!";
-				commandInteractionText =
-					"**Winner(s) added:**\n**";
-
-				for (let i = 0; i < winners.length; i++) {
-					commandInteractionText += getListSeparator(i, winners.length);
-					commandInteractionText += winners[i].displayName;
-				}
-				commandInteractionText +=
-					"**: " +
-					formatWinnerReason({ reason: reason, link: link }) + ", "
-					+ "<t:" + dayjs().unix() + ":f>";
 			}
 			else if (buttonInteration.customId == 'cancel') {
 				buttonInteractionText = "add-mulit-win cancelled";

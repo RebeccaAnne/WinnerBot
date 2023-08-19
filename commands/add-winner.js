@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 const { scheduleExpirationCheck } = require('../expire-schedule');
 const { formatWinnerString, formatWinnerReason, getOrdinal } = require('../utils');
-const { addWinners, getWinObject } = require('../addWinnersHelper');
+const { addWinners } = require('../addWinnersHelper');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -42,11 +42,8 @@ module.exports = {
 		// time... Anyway, deferring reply, just in case. 
 		await interaction.deferReply();
 
-		let winnerList = await addWinners(guild, serverConfig, [winner], reason, link);
-
-		winnerObject = getWinObject(winnerList, winner.id);
-
-		let replyString = "**Winner added:**\n" + formatWinnerString(winnerObject);
+		let replyString = "**Winner added:**\n";
+		replyString += await addWinners(guild, serverConfig, [winner], reason, link);
 
 		// reply to the command
 		await interaction.editReply({
