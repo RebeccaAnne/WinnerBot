@@ -37,7 +37,7 @@ module.exports = {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
 					.setTitle("No current winners!")
-					.setFooter({ text: winnerList.currentTerrorThreshold + " needed for Terror of Astandalas" })
+					.setFooter({ text: winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas" })
 					.setColor(0xd81b0e)]
 			});
 		}
@@ -62,7 +62,7 @@ module.exports = {
 					.setTitle("Current Winners of the Discord")
 					.setDescription(winnerString)
 					.setFooter({
-						text: winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " needed for Terror of Astandalas"
+						text: winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas"
 					})
 					.setColor(0xd81b0e)]
 			});

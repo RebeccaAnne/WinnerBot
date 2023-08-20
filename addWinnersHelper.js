@@ -1,7 +1,7 @@
 const dayjs = require('dayjs');
 var fs = require("fs");
 const { EmbedBuilder } = require('discord.js');
-const { winnerNameList } = require('./utils');
+const { winnerNameList, getListSeparator } = require('./utils');
 
 async function declareTerror(guild, serverConfig, winnerList) {
 
@@ -79,7 +79,11 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
         winnerList.winners = [];
     }
 
-    for (const winner of newWinners) {
+    let winResponseString = "";
+
+    for (i = 0; i < newWinners.length; i++) {
+
+        let winner = newWinners[i];
 
         let winnerObject = {};
         let newWinner = true;
@@ -94,6 +98,10 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
         // Fill in the winner object with the user information
         winnerObject.username = winner.displayName;
         winnerObject.id = winner.id;
+
+        // Add the winner name to the string
+        winResponseString += getListSeparator(i, newWinners.length);
+        winResponseString += "**" + winner.displayName + "**";
 
         // Create a win array if one doesn't already exist
         if (winnerObject.wins == null) {
@@ -124,8 +132,12 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
         console.log(logstring);
     }
 
+    winResponseString += ": " +
+        formatWinnerReason({ reason: reason, link: link }) + ", "
+        + "<t:" + dateWon.unix() + ":f>"
+
     // Construct a congratulatory message to post in fanworks
-    congratsMessage = "Congratulations" + winnerNameList(newWinners) + " on winning the discord for " + formatWinnerReason(win);
+    congratsMessage = "Congratulations" + winnerNameList(newWinners) + " on winning the discord for " + formatWinnerReason({ reason: reason, link: link });
 
     // Check for a terror
     let terror = false;
@@ -133,6 +145,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
 
         // Update the congrats message to indicate the terror
         congratsMessage += " and triggering a Terror of Astandalas";
+        winResponseString += "\nTerror of Astandalas!"
         terror = true;
     }
     congratsMessage += "!";
@@ -153,7 +166,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
 
     fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
 
-    return winnerList;
+    return winResponseString;
 }
 
 module.exports = { addWinners, getWinObject }

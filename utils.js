@@ -22,32 +22,55 @@ formatWinnerReason = (winObject) => {
 }
 
 formatWinnerString = (winnerObject) => {
-    let mostRecentWin = winnerObject.wins[winnerObject.wins.length - 1];
+    let winnerString = "**" + winnerObject.username + "**: ";
+    let winsToDisplay = [];
 
-    let winDate = dayjs(mostRecentWin.date);
-    let displayDate = "<t:" + winDate.unix() + ":f>";
+    winnerObject.wins.forEach(win => {
 
-    let winnerString = "**" + winnerObject.username + "**: " + formatWinnerReason(mostRecentWin) + ", " + displayDate;
+        let winToDisplay = winsToDisplay.find(element => element.reason.toUpperCase() == win.reason.toUpperCase())
+        if (winToDisplay) {
+            Object.assign(winToDisplay, win);
+            winToDisplay.count++;
+        }
+        else {
+            winToDisplay = structuredClone(win);
+            winToDisplay.count = 1;
+            winsToDisplay.push(winToDisplay);
+        }
+    })
 
+    winsToDisplay.sort((a, b) => {
+        let aDate = dayjs(a.date);
+        let bDate = dayjs(b.date);
+
+        if (aDate.isBefore(bDate)) { return -1; }
+        else if (bDate.isBefore(aDate)) { return 1; }
+        else { return 0; }
+    });
+
+    for (i = 0; i < winsToDisplay.length; i++) {
+        win = winsToDisplay[i];
+
+        // Bulleted list makes the result very long, so not doing this for now
+        // if (winsToDisplay.length > 1) {
+        //     winnerString += "\n- ";
+        // }
+
+        winnerString += formatWinnerReason(win);
+
+        if (win.count > 1) {
+            winnerString += " (**" + win.count + " chapters**)"
+        }
+
+        winnerString += ", <t:" + dayjs(win.date).unix() + ":d> <t:" + dayjs(win.date).unix() +":t>";
+
+        if (i < winsToDisplay.length - 1) {
+            winnerString += ", "
+        }
+    }
     return winnerString;
+
 }
-
-
-// formatWinnerString = (winnerObject) => {
-
-//     let winnerString = "**" + winnerObject.username + "**: ";
-
-//     winnerObject.wins.forEach(win => {
-//         winnerString += "\n- ";
-//         winnerString += formatWinnerReason(win) + ", "
-
-//         winnerString += "<t:" + dayjs(win.date).unix() + ":f>";
-//     })
-
-//     console.log(winnerString);
-
-//     return winnerString;
-// }
 
 isMemberModJs = (serverConfig, callingMember) => {
     let hasPermission = false;
