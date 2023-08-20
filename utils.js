@@ -62,7 +62,7 @@ formatWinnerString = (winnerObject) => {
             winnerString += " (**" + win.count + " chapters**)"
         }
 
-        winnerString += ", <t:" + dayjs(win.date).unix() + ":d><t:" + dayjs(win.date).unix() +":t>";
+        winnerString += ", <t:" + dayjs(win.date).unix() + ":d> <t:" + dayjs(win.date).unix() +":t>";
 
         if (i < winsToDisplay.length - 1) {
             winnerString += ", "
