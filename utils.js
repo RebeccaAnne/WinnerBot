@@ -91,7 +91,7 @@ modjsPermissionChannelCheck = async (interaction) => {
     let callingMember = await guild.members.fetch(interaction.user.id);
     if (!isMemberModJs(serverConfig, callingMember)) {
         //    if (!isMemberModJs(serverConfig, callingMember)) {
-        return "Only " + serverConfig.accessDescription + " have permission to manage discord winners and events";
+        return "Only " + serverConfig.accessDescription + " can add and remove winners and event series";
     }
 
     // Are we in the correct channel to manage winners?

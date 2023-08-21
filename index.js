@@ -5,7 +5,7 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const dayjs = require('dayjs');
 const { ServerResponse } = require('node:http');
-const { scheduleWinnerExpirationCheck } = require('./timers');
+const { scheduleWinnerExpirationCheck, winnerExpirationCheck } = require('./timers');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -84,13 +84,14 @@ client.once(Events.ClientReady, async c => {
 
 		let guild = await client.guilds.fetch(serverConfig.guildId);
 
-		winnerList = winnerListFile[serverConfig.guildId];
+		await winnerExpirationCheck(guild, serverConfig);
+		// winnerList = winnerListFile[serverConfig.guildId];
 		// for (const winner of winnerList.winners) {
 		// 	await scheduleWinnerExpirationCheck(winner, guild, serverConfig);
 		// }
 
+		await eventExpirationCheck(guild, serverConfig);
 		for (const series of winnerList.eventSeries) {
-			console.log(series.name);
 			await scheduleSeriesTimers(serverConfig, guild, series)
 		}
 	}

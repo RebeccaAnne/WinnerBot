@@ -21,15 +21,22 @@ module.exports = {
 				.setRequired(true))
 		.addChannelOption(option =>
 			option.setName('reminder-channel')
-				.setDescription('What channel the bot should send a reminder to')
-				.setRequired(true)),
+				.setDescription('What channel the bot should send a reminder to (defaults to current channel)')),
 	async execute(interaction) {
 		let seriesName = interaction.options.getString('series');
 		let eventName = interaction.options.getString('event');
 		let reminderDateTime = interaction.options.getString('reminder-date-time');
-		let reminderChannel = interaction.options.getChannel('reminder-channel');
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
+
+		let reminderChannelId;
+		let reminderChannelParameter = interaction.options.getChannel('reminder-channel');
+		if (reminderChannelParameter) {
+			reminderChannelId = reminderChannelParameter.id;
+		}
+		else {
+			reminderChannelId = interaction.channelId;
+		}
 
 		// Load the data from file
 		let filename = "winner-and-event-data.json";
@@ -84,14 +91,14 @@ module.exports = {
 			return;
 		}
 
-		let reminder = { date: parsedReminderDateTime, channel: reminderChannel.id };
+		let reminder = { date: parsedReminderDateTime, channel: reminderChannelId };
 		await scheduleReminder(serverConfig, guild, series, event, reminder);
 		event.reminders.push(reminder);
 		fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
 
 		let replyString =
 			"**Reminder time**: " + "<t:" + dayjs(parsedReminderDateTime).unix() + ":f>" +
-			"\n**Reminder channel**: <#" + reminderChannel.id + ">";
+			"\n**Reminder channel**: <#" + reminderChannelId + ">";
 
 		await interaction.reply({
 			embeds: [new EmbedBuilder()

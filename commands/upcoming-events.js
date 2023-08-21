@@ -44,6 +44,14 @@ module.exports = {
 
 		// Sort the series by ealiest event
 		serverData.eventSeries.sort((a, b) => {
+
+			// If one of the series doesn't have any events, sort it first
+			if (a.events.length == 0 || b.events.length == 0) {
+				if (b.events.length == a.events.length) { return 0; }
+				else if (a.events.length == 0) { return -1; }
+				else { return 1; }
+			}
+
 			let aDate = dayjs(a.events[0].date);
 			let bDate = dayjs(b.events[0].date);
 

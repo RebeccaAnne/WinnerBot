@@ -1,7 +1,7 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
-const { scheduleExpirationCheck } = require('../expire-schedule');
+const { scheduleExpirationCheck } = require('../timers');
 const { formatWinnerString, formatWinnerReason, getOrdinal } = require('../utils');
 const { addWinners } = require('../addWinnersHelper');
 

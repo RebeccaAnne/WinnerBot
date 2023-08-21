@@ -19,9 +19,6 @@ module.exports = {
 			option.setName('event-date-time')
 				.setDescription('When the event takes place (hammertime for date/time, YYYY-MM-DD for calendar day)')
 				.setRequired(true))
-		.addBooleanOption(option =>
-			option.setName('show-event-creation')
-				.setDescription('Whether or not to show the event creation in this channel'))
 		.addStringOption(option =>
 			option.setName('reminder-date-time')
 				.setDescription('When the bot should send a reminder for this event (hammertime)'))
@@ -33,10 +30,17 @@ module.exports = {
 		let eventName = interaction.options.getString('name');
 		let eventDateTime = interaction.options.getString('event-date-time');
 		let reminderDateTime = interaction.options.getString('reminder-date-time');
-		let reminderChannel = interaction.options.getChannel('reminder-channel');
-		let showEventCreation = interaction.options.getBoolean('show-event-creation');
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
+
+		let reminderChannelId;
+		let reminderChannelParameter = interaction.options.getChannel('reminder-channel');
+		if (reminderChannelParameter) {
+			reminderChannelId = reminderChannelParameter.id;
+		}
+		else {
+			reminderChannelId = interaction.channelId;
+		}
 
 		// Load the data from file
 		let filename = "winner-and-event-data.json";
@@ -72,11 +76,11 @@ module.exports = {
 			let organizerString = "";
 			for (let i = 0; i < series.organizers.length; i++) {
 				organizerString += getListSeparator(i, series.organizers.length);
-				organizerString += organizer.username;
+				organizerString += series.organizers[i].username;
 			}
 
 			await interaction.reply({
-				content: "Contact " + organizerString + " to add events to this series", ephemeral: true
+				content: "You don't have permission to add events to this series. Contact " + organizerString + " to add a new event.", ephemeral: true
 			});
 			return;
 		}
@@ -99,27 +103,26 @@ module.exports = {
 		}
 
 		if (reminderDateTime) {
-
-			if (!reminderChannel) {
-				await interaction.reply({
-					content: "To create an event with a reminder you must provide a value for reminder-channel", ephemeral: true
-				});
-				return;
-			}
-
 			let parsedReminderDateTime = tryParseHammerTime(reminderDateTime);
 			if (!parsedReminderDateTime) {
 				await interaction.reply({
-					content: "reminder-date-time must be a valid HammerTime (see https://hammertime.cyou/)", ephemeral: true
+					content: "Event creation failed! reminder-date-time, if present, must be a valid HammerTime (see https://hammertime.cyou/)", ephemeral: true
 				});
 				return;
 			}
 
-			reminder = { date: parsedReminderDateTime, channel: reminderChannel.id };
-			await scheduleReminder(serverConfig, guild, series, newEvent, reminder);
-			
+			reminder = { date: parsedReminderDateTime, channel: reminderChannelId };
 			newEvent.reminders.push(reminder);
 		}
+		else if (reminderChannelParameter) {
+			// If they passed in a reminder channel with no date, throw an error
+			await interaction.reply({
+				content: "Event creation failed! reminder-channel specified with no reminder-date-time.", ephemeral: true
+			});
+			return;
+		}
+
+		await scheduleEventTimers(serverConfig, guild, series, newEvent);
 
 		series.events.push(newEvent);
 		fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
@@ -137,8 +140,7 @@ module.exports = {
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
 				.setDescription(dateString)
-				.setTitle(newEvent.name + " added to " + series.name)],
-			ephemeral: !showEventCreation
+				.setTitle(newEvent.name + " added to " + series.name)]
 		});
 
 		// Send a follow up with the reminder if present

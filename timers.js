@@ -63,7 +63,6 @@ winnerExpirationCheck = async (guild, serverConfig) => {
 scheduleWinExpirationCheck = async (win, guild, serverConfig) => {
     try {
 
-
         let winDate = dayjs(win.date);
         let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
 
@@ -99,7 +98,6 @@ scheduleWinnerExpirationCheck = async (winner, guild, serverConfig) => {
         await scheduleWinExpirationCheck(win, guild, serverConfig);
     }
 }
-
 
 popReminder = async (sereverConfig, guild, seriesName, eventName, reminder) => {
     let channel = await guild.channels.fetch(reminder.channel);
@@ -171,15 +169,7 @@ scheduleReminder = async (serverConfig, guild, series, event, reminder) => {
     }
 }
 
-eventExpirationCheck = async (serverConfig, guild) => {
-    console.log("Running event expiration check");
-}
-
-
-scheduleEventTimers = async (serverConfig, guild, series, event) => {
-
-    console.log("Scheduling timers for " + event.name)
-
+getEventExpireTime = (event) => {
     let eventExpireTime;
     if (!event.allDayEvent) {
         // Expire one hour after the event time
@@ -192,9 +182,43 @@ scheduleEventTimers = async (serverConfig, guild, series, event) => {
         eventExpireTime = dayjs.tz(event.date, "Etc/GMT+12");
         eventExpireTime = eventExpireTime.add(1, "day")
 
-        // Convert to local time for the cron job
+        // Convert to local time for cron jobs
         eventExpireTime = eventExpireTime.tz();
     }
+    return eventExpireTime;
+}
+
+eventExpirationCheck = async (guild, serverConfig) => {
+
+    let dataFile = require("./winner-and-event-data.json");
+    serverData = dataFile[serverConfig.guildId];
+
+    console.log(dayjs().format() + " Checking for expired events in " + serverConfig.guildId)
+
+    for (const series of serverData.eventSeries) {
+        series.events = series.events.filter(event => {
+
+            let eventExpireTime = getEventExpireTime(event);
+            let now = dayjs();
+
+            if (now.isAfter(eventExpireTime)) {
+                console.log(
+                    event.name + " in the " + series.name + " series, scheduled for " + dayjs(event.date).format() + " has expired");
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        );
+    }
+}
+
+scheduleEventTimers = async (serverConfig, guild, series, event) => {
+
+    console.log("Scheduling timers for " + event.name)
+
+    let eventExpireTime = getEventExpireTime(event);
 
     console.log("Scheduling event expiration at " + eventExpireTime.format());
 
@@ -206,16 +230,12 @@ scheduleEventTimers = async (serverConfig, guild, series, event) => {
         eventExpireTime.month() +
         " *";  // Day of week
 
-    console.log("Crontime: " + cronTime);
-
     const job = new CronJob(cronTime, async function () {
-        eventExpirationCheck(serverConfig, guild);
+        eventExpirationCheck(guild, serverConfig);
         this.stop(); // Run this once and then stop
     }, null, true);
 
-
-
-    for (const reminder in event.reminders) {
+    for (const reminder of event.reminders) {
         scheduleReminder(serverConfig, guild, series, event, reminder)
     }
 }
@@ -228,4 +248,4 @@ scheduleSeriesTimers = async (serverConfig, guild, series) => {
     }
 }
 
-module.exports = { scheduleWinnerExpirationCheck, scheduleWinExpirationCheck, scheduleSeriesTimers }
+module.exports = { scheduleWinnerExpirationCheck, scheduleWinExpirationCheck, scheduleSeriesTimers, winnerExpirationCheck }
