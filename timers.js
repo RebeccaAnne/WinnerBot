@@ -212,6 +212,7 @@ eventExpirationCheck = async (guild, serverConfig) => {
         }
         );
     }
+    fs.writeFileSync("winner-and-event-data.json", JSON.stringify(dataFile), () => { });
 }
 
 scheduleEventTimers = async (serverConfig, guild, series, event) => {
