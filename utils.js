@@ -1,4 +1,5 @@
 const dayjs = require('dayjs');
+const { Mutex } = require('async-mutex');
 
 getOrdinal = (n) => {
     let ord = 'th';
@@ -62,7 +63,7 @@ formatWinnerString = (winnerObject) => {
             winnerString += " (**" + win.count + " chapters**)"
         }
 
-        winnerString += ", <t:" + dayjs(win.date).unix() + ":d> <t:" + dayjs(win.date).unix() +":t>";
+        winnerString += ", <t:" + dayjs(win.date).unix() + ":d> <t:" + dayjs(win.date).unix() + ":t>";
 
         if (i < winsToDisplay.length - 1) {
             winnerString += ", "
@@ -158,6 +159,15 @@ tryParseYYYYMMDD = (dateTimeString) => {
     catch { return null; }
 }
 
+let globalMutex;
+
+getMutex = () => {
+    if (!globalMutex) {
+        globalMutex = new Mutex();
+    }
+    return globalMutex;
+}
+
 module.exports = {
-    formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
+    getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
 }

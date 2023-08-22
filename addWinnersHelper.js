@@ -2,6 +2,7 @@ const dayjs = require('dayjs');
 var fs = require("fs");
 const { EmbedBuilder } = require('discord.js');
 const { winnerNameList, getListSeparator } = require('./utils');
+const { Mutex } = require('async-mutex');
 
 async function declareTerror(guild, serverConfig, winnerList) {
 
@@ -64,107 +65,110 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
 
     // Set the date won 
     let dateWon = dayjs(Date.now());
-
-    // Load the winner array from file
-    winnerFilename = "winner-and-event-data.json";
-    let winnerListFile = require("./" + winnerFilename);
-    if (winnerListFile[guild.id] == null) {
-        winnerListFile[guild.id] = {};
-    }
-
-    let winnerList = winnerListFile[guild.id];
-
-    // Create a winner list for this server if one doesn't already exist
-    if (winnerList.winners == null) {
-        winnerList.winners = [];
-    }
-
     let winResponseString = "";
 
-    for (i = 0; i < newWinners.length; i++) {
+    await getMutex().runExclusive(async () => {
 
-        let winner = newWinners[i];
-
-        let winnerObject = {};
-        let newWinner = true;
-
-        // Check if this user is already a winner
-        existingWinner = getWinObject(winnerList, winner.id);
-        if (existingWinner) {
-            winnerObject = existingWinner;
-            newWinner = false;
+        // Load the winner array from file
+        winnerFilename = "winner-and-event-data.json";
+        let winnerListFile = require("./" + winnerFilename);
+        if (winnerListFile[guild.id] == null) {
+            winnerListFile[guild.id] = {};
         }
 
-        // Fill in the winner object with the user information
-        winnerObject.username = winner.displayName;
-        winnerObject.id = winner.id;
+        let winnerList = winnerListFile[guild.id];
 
-        // Add the winner name to the string
-        winResponseString += getListSeparator(i, newWinners.length);
-        winResponseString += "**" + winner.displayName + "**";
-
-        // Create a win array if one doesn't already exist
-        if (winnerObject.wins == null) {
-            winnerObject.wins = [];
+        // Create a winner list for this server if one doesn't already exist
+        if (winnerList.winners == null) {
+            winnerList.winners = [];
         }
 
-        // Create a win object and add it to the winner
-        win = {}
-        win.date = dateWon.format();
-        win.reason = reason;
-        win.link = link;
-        winnerObject.wins.push(win);
+        for (i = 0; i < newWinners.length; i++) {
 
-        // Set the winner role 
-        let winnerRole = await guild.roles.fetch(serverConfig.winnerRoleId);
-        winner.roles.add(winnerRole);
+            let winner = newWinners[i];
 
-        // Schcedule an expiration check for the winner
-        await scheduleWinExpirationCheck(win, guild, serverConfig)
+            let winnerObject = {};
+            let newWinner = true;
 
-        if (newWinner) {
-            winnerList.winners.push(winnerObject);
+            // Check if this user is already a winner
+            existingWinner = getWinObject(winnerList, winner.id);
+            if (existingWinner) {
+                winnerObject = existingWinner;
+                newWinner = false;
+            }
+
+            // Fill in the winner object with the user information
+            winnerObject.username = winner.displayName;
+            winnerObject.id = winner.id;
+
+            // Add the winner name to the string
+            winResponseString += getListSeparator(i, newWinners.length);
+            winResponseString += "**" + winner.displayName + "**";
+
+            // Create a win array if one doesn't already exist
+            if (winnerObject.wins == null) {
+                winnerObject.wins = [];
+            }
+
+            // Create a win object and add it to the winner
+            win = {}
+            win.date = dateWon.format();
+            win.reason = reason;
+            win.link = link;
+            winnerObject.wins.push(win);
+
+            // Set the winner role 
+            let winnerRole = await guild.roles.fetch(serverConfig.winnerRoleId);
+            winner.roles.add(winnerRole);
+
+            // Schcedule an expiration check for the winner
+            await scheduleWinExpirationCheck(win, guild, serverConfig)
+
+            if (newWinner) {
+                winnerList.winners.push(winnerObject);
+            }
+
+            let logstring = dayjs(winnerObject.date).format() + "\t" + winner.displayName + "\t" + reason;
+            let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
+            fileLogStream.write(logstring + "\n");
+            console.log(logstring);
         }
 
-        let logstring = dayjs(winnerObject.date).format() + "\t" + winner.displayName + "\t" + reason;
-        let fileLogStream = fs.createWriteStream("permanentRecord.txt", { flags: 'a' });
-        fileLogStream.write(logstring + "\n");
-        console.log(logstring);
-    }
+        winResponseString += ": " +
+            formatWinnerReason({ reason: reason, link: link }) + ", "
+            + "<t:" + dateWon.unix() + ":f>"
 
-    winResponseString += ": " +
-        formatWinnerReason({ reason: reason, link: link }) + ", "
-        + "<t:" + dateWon.unix() + ":f>"
+        // Construct a congratulatory message to post in fanworks
+        congratsMessage = "Congratulations" + winnerNameList(newWinners) + " on winning the discord for " + formatWinnerReason({ reason: reason, link: link });
 
-    // Construct a congratulatory message to post in fanworks
-    congratsMessage = "Congratulations" + winnerNameList(newWinners) + " on winning the discord for " + formatWinnerReason({ reason: reason, link: link });
+        // Check for a terror
+        let terror = false;
+        if (winnerList.winners.length >= winnerList.currentTerrorThreshold) {
 
-    // Check for a terror
-    let terror = false;
-    if (winnerList.winners.length >= winnerList.currentTerrorThreshold) {
+            // Update the congrats message to indicate the terror
+            congratsMessage += " and triggering a Terror of Astandalas";
+            winResponseString += "\nTerror of Astandalas!"
+            terror = true;
+        }
+        congratsMessage += "!";
 
-        // Update the congrats message to indicate the terror
-        congratsMessage += " and triggering a Terror of Astandalas";
-        winResponseString += "\nTerror of Astandalas!"
-        terror = true;
-    }
-    congratsMessage += "!";
+        // Set the congrats message before declaring the terror, because terror declarations can also cause posts to fanworks
+        let fanworksAnnouncementChannel = await guild.channels.fetch(serverConfig.fanworksAnnouncementChannel);
+        fanworksAnnouncementChannel.send({
+            embeds: [new EmbedBuilder()
+                .setDescription(congratsMessage)
+                .setColor(0xd81b0e)]
+        });
 
-    // Set the congrats message before declaring the terror, because terror declarations can also cause posts to fanworks
-    let fanworksAnnouncementChannel = await guild.channels.fetch(serverConfig.fanworksAnnouncementChannel);
-    fanworksAnnouncementChannel.send({
-        embeds: [new EmbedBuilder()
-            .setDescription(congratsMessage)
-            .setColor(0xd81b0e)]
+        if (terror) {
+            // declareTerror will manage removing the winners from the list, 
+            // removing their roles, and posting the terror message.
+            await declareTerror(guild, serverConfig, winnerList);
+        }
+
+        fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
     });
 
-    if (terror) {
-        // declareTerror will manage removing the winners from the list, 
-        // removing their roles, and posting the terror message.
-        await declareTerror(guild, serverConfig, winnerList);
-    }
-
-    fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
 
     return winResponseString;
 }

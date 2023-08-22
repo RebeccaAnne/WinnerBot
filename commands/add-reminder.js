@@ -39,71 +39,77 @@ module.exports = {
 		}
 
 		// Load the data from file
-		let filename = "winner-and-event-data.json";
-		let dataFile = require("../" + filename);
-		if (dataFile[guild.id] == null) {
-			dataFile[guild.id] = {};
-		}
+		let replyString = ""
+		let succeeded = await getMutex().runExclusive(async () => {
 
-		let serverData = dataFile[guild.id];
-
-		// Find the series 
-		let series = serverData.eventSeries.find(series => series.name == seriesName);
-		if (!series) {
-			await interaction.reply({
-				content: seriesName + " doesn't exist! Contact a mod or junior-secretary to create a new event series.", ephemeral: true
-			});
-			return;
-		}
-
-		// To add events to the series, the caller must either be an organzier or a mod/js
-		let callingMember = await guild.members.fetch(interaction.user.id);
-		if (!series.organizers.find(organizer => (organizer.id == callingMember.id)) &&
-			!isMemberModJs(serverConfig, callingMember)) {
-
-			// Reply with the organizers to contact to update this series
-			let organizerString = "";
-			for (let i = 0; i < series.organizers.length; i++) {
-				organizerString += getListSeparator(i, series.organizers.length);
-				organizerString += organizer.username;
+			let filename = "winner-and-event-data.json";
+			let dataFile = require("../" + filename);
+			if (dataFile[guild.id] == null) {
+				dataFile[guild.id] = {};
 			}
 
-			await interaction.reply({
-				content: "Contact " + organizerString + " to edit this series", ephemeral: true
-			});
-			return;
-		}
+			let serverData = dataFile[guild.id];
 
-		// Find the event
-		let event = series.events.find(event => event.name == eventName);
-		if (!event) {
-			await interaction.reply({
-				content: eventName + " doesn't exist! Use add-event to create an event", ephemeral: true
-			});
-			return;
-		}
+			// Find the series 
+			let series = serverData.eventSeries.find(series => series.name == seriesName);
+			if (!series) {
+				await interaction.reply({
+					content: seriesName + " doesn't exist! Contact a mod or junior-secretary to create a new event series.", ephemeral: true
+				});
+				return false;
+			}
 
-		let parsedReminderDateTime = tryParseHammerTime(reminderDateTime);
-		if (!parsedReminderDateTime) {
-			await interaction.reply({
-				content: "reminder-date-time must be a valid HammerTime (see https://hammertime.cyou/)", ephemeral: true
-			});
-			return;
-		}
+			// To add events to the series, the caller must either be an organzier or a mod/js
+			let callingMember = await guild.members.fetch(interaction.user.id);
+			if (!series.organizers.find(organizer => (organizer.id == callingMember.id)) &&
+				!isMemberModJs(serverConfig, callingMember)) {
 
-		let reminder = { date: parsedReminderDateTime, channel: reminderChannelId };
-		await scheduleReminder(serverConfig, guild, series, event, reminder);
-		event.reminders.push(reminder);
-		fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+				// Reply with the organizers to contact to update this series
+				let organizerString = "";
+				for (let i = 0; i < series.organizers.length; i++) {
+					organizerString += getListSeparator(i, series.organizers.length);
+					organizerString += organizer.username;
+				}
 
-		let replyString =
-			"**Reminder time**: " + "<t:" + dayjs(parsedReminderDateTime).unix() + ":f>" +
-			"\n**Reminder channel**: <#" + reminderChannelId + ">";
+				await interaction.reply({
+					content: "Contact " + organizerString + " to edit this series", ephemeral: true
+				});
+				return false;
+			}
+
+			// Find the event
+			let event = series.events.find(event => event.name == eventName);
+			if (!event) {
+				await interaction.reply({
+					content: eventName + " doesn't exist! Use add-event to create an event", ephemeral: true
+				});
+				return false;
+			}
+
+			let parsedReminderDateTime = tryParseHammerTime(reminderDateTime);
+			if (!parsedReminderDateTime) {
+				await interaction.reply({
+					content: "reminder-date-time must be a valid HammerTime (see https://hammertime.cyou/)", ephemeral: true
+				});
+				return false;
+			}
+
+			replyString =
+				"**Reminder time**: " + "<t:" + dayjs(parsedReminderDateTime).unix() + ":f>" +
+				"\n**Reminder channel**: <#" + reminderChannelId + ">";
+
+			let reminder = { date: parsedReminderDateTime, channel: reminderChannelId };
+			await scheduleReminder(serverConfig, guild, series, event, reminder);
+			event.reminders.push(reminder);
+			fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+			return true;
+		});
+		if (!succeeded) { return; }
 
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
 				.setDescription(replyString)
-				.setTitle("Reminder Added for " + event.name)],
+				.setTitle("Reminder Added for " + eventName)],
 			ephemeral: true
 		});
 	},

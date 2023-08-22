@@ -30,37 +30,43 @@ module.exports = {
 		}
 
 		// Load the data from file
-		let filename = "winner-and-event-data.json";
-		let dataFile = require("../" + filename);
-		if (dataFile[guild.id] == null) {
-			dataFile[guild.id] = {};
-		}
+		let newSeries = {};
+		let succeeded = await getMutex().runExclusive(async () => {
 
-		let serverData = dataFile[guild.id];
-
-		// Check if there's already a series with this title
-		for (let existingSeries of serverData.eventSeries) {
-			if (seriesName == existingSeries.name) {
-				await interaction.reply({
-					content: seriesName + " already exists!", ephemeral: true
-				});
-				return;
+			let filename = "winner-and-event-data.json";
+			let dataFile = require("../" + filename);
+			if (dataFile[guild.id] == null) {
+				dataFile[guild.id] = {};
 			}
-		};
 
-		let newSeries = {
-			name: seriesName,
-			organizers: [
-				{
-					username: organizer.displayName,
-					id: organizer.id
-				}],
-			events: []
-		}
+			let serverData = dataFile[guild.id];
 
-		serverData.eventSeries.push(newSeries);
+			// Check if there's already a series with this title
+			for (let existingSeries of serverData.eventSeries) {
+				if (seriesName == existingSeries.name) {
+					await interaction.reply({
+						content: seriesName + " already exists!", ephemeral: true
+					});
+					return false;
+				}
+			};
 
-		fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+			newSeries = {
+				name: seriesName,
+				organizers: [
+					{
+						username: organizer.displayName,
+						id: organizer.id
+					}],
+				events: []
+			}
+
+			serverData.eventSeries.push(newSeries);
+
+			fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+			return true;
+		});
+		if (!succeeded) { return; }
 
 		// reply to the command
 		await interaction.reply({

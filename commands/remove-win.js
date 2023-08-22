@@ -27,48 +27,53 @@ module.exports = {
 			return;
 		}
 
-		// Load the winner array from file
-		winnerFilename = "winner-and-event-data.json";
-		let winnerListFile = require("../" + winnerFilename);
-		if (winnerListFile[guild.id] == null) {
-			winnerListFile[guild.id] = {};
-		}
-
-		let winnerList = winnerListFile[guild.id];
-
-		// Get the win object for this user
-		let winnerObject = {};
-		let winnerExists = false;
-		let winnerIndex = 0;
-		for (existingWinner of winnerList.winners) {
-			if (winner.id == existingWinner.id) {
-				winnerObject = existingWinner;
-				winnerExists = true;
-				break;
-			}
-			winnerIndex++;
-		};
-
-		if (!winnerExists) {
-			await interaction.reply({
-				content: "This user is not currently a winner of the discord", ephemeral: true
-			});
-			return;
-		}
-
-		winnerObject.wins.pop();
-
 		let replyString = "";
-		if (winnerObject.wins.length == 0) {
-			await winner.roles.remove(serverConfig.winnerRoleId);
-			winnerList.winners.splice(winnerIndex, 1);
-			replyString = winner.displayName + " is no longer a winner of the discord";
-		}
-		else {
-			replyString = "Win removed. Current win status for " + winner.displayName + ":\n" + formatWinnerString(winnerObject);
-		}
+		let succeeded = await getMutex().runExclusive(async () => {
 
-		fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
+			// Load the winner array from file
+			winnerFilename = "winner-and-event-data.json";
+			let winnerListFile = require("../" + winnerFilename);
+			if (winnerListFile[guild.id] == null) {
+				winnerListFile[guild.id] = {};
+			}
+
+			let winnerList = winnerListFile[guild.id];
+
+			// Get the win object for this user
+			let winnerObject = {};
+			let winnerExists = false;
+			let winnerIndex = 0;
+			for (existingWinner of winnerList.winners) {
+				if (winner.id == existingWinner.id) {
+					winnerObject = existingWinner;
+					winnerExists = true;
+					break;
+				}
+				winnerIndex++;
+			};
+
+			if (!winnerExists) {
+				await interaction.reply({
+					content: "This user is not currently a winner of the discord", ephemeral: true
+				});
+				return false;
+			}
+
+			winnerObject.wins.pop();
+
+			if (winnerObject.wins.length == 0) {
+				await winner.roles.remove(serverConfig.winnerRoleId);
+				winnerList.winners.splice(winnerIndex, 1);
+				replyString = winner.displayName + " is no longer a winner of the discord";
+			}
+			else {
+				replyString = "Win removed. Current win status for " + winner.displayName + ":\n" + formatWinnerString(winnerObject);
+			}
+
+			fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
+			return true;
+		});
+		if (!succeeded) { return; }
 
 		// reply to the command
 		await interaction.reply({
