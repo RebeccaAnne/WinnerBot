@@ -88,7 +88,13 @@ module.exports = {
 				return false;
 			}
 
-			newEvent = { name: eventName, reminders: [] }
+			let id = await getNewId(guild.id);
+
+			newEvent = {
+				name: eventName,
+				id: id,
+				reminders: []
+			}
 
 			// Get the event date
 			newEvent.date = tryParseHammerTime(eventDateTime);

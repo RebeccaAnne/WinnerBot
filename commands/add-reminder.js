@@ -98,7 +98,14 @@ module.exports = {
 				"**Reminder time**: " + "<t:" + dayjs(parsedReminderDateTime).unix() + ":f>" +
 				"\n**Reminder channel**: <#" + reminderChannelId + ">";
 
-			let reminder = { date: parsedReminderDateTime, channel: reminderChannelId };
+			let id = await getNewId(guild.id);
+
+			let reminder = {
+				id: id,
+				date: parsedReminderDateTime,
+				channel: reminderChannelId
+			};
+
 			await scheduleReminder(serverConfig, guild, series, event, reminder);
 			event.reminders.push(reminder);
 			fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });

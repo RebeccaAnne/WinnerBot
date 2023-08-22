@@ -31,6 +31,7 @@ module.exports = {
 
 		// Load the data from file
 		let newSeries = {};
+		let id;
 		let succeeded = await getMutex().runExclusive(async () => {
 
 			let filename = "winner-and-event-data.json";
@@ -40,6 +41,7 @@ module.exports = {
 			}
 
 			let serverData = dataFile[guild.id];
+
 
 			// Check if there's already a series with this title
 			for (let existingSeries of serverData.eventSeries) {
@@ -51,8 +53,11 @@ module.exports = {
 				}
 			};
 
+			id = await getNewId(guild.id);
+
 			newSeries = {
 				name: seriesName,
+				id: id,
 				organizers: [
 					{
 						username: organizer.displayName,
@@ -72,7 +77,8 @@ module.exports = {
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
 				.setDescription(
-					"**" + newSeries.name + "**" + " organized by " + "**" + newSeries.organizers[0].username + "**")
+					"**" + newSeries.name + "**" + " organized by " + "**" + newSeries.organizers[0].username + "**" + 
+					"\nId: " + id)
 				.setTitle("New Event Series Added")]
 		});
 	},

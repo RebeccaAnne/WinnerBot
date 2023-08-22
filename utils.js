@@ -1,5 +1,6 @@
 const dayjs = require('dayjs');
 const { Mutex } = require('async-mutex');
+var fs = require("fs");
 
 getOrdinal = (n) => {
     let ord = 'th';
@@ -168,6 +169,22 @@ getMutex = () => {
     return globalMutex;
 }
 
+getNewId = async (guildId) => {
+
+    let filename = "winner-and-event-data.json";
+    let dataFile = require("./" + filename);
+    let guildData = dataFile[guildId];
+
+    if (!guildData.lastId) {
+        guildData.lastId = 0;
+    }
+
+    guildData.lastId++;
+
+    fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+    return guildData.lastId;
+}
+
 module.exports = {
-    getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
+    getNewId, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
 }
