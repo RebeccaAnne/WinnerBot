@@ -6,6 +6,7 @@ const { CronJob } = require('cron');
 const dayjs = require('dayjs');
 const { ServerResponse } = require('node:http');
 const { scheduleWinnerExpirationCheck, winnerExpirationCheck } = require('./timers');
+const { Mutex } = require('async-mutex');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -34,6 +35,7 @@ for (const file of commandFiles) {
 let winnerListFile = require("./winner-and-event-data.json");
 const dataPath = path.join(__dirname, 'data');
 const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
+
 
 for (const serverConfigFile of serverConfigFiles) {
 	const filePath = path.join(dataPath, serverConfigFile);

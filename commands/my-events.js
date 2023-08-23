@@ -3,8 +3,8 @@ const { getEventsDisplyString } = require('../showEventsHelper');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('upcoming-events')
-		.setDescription('Show upcoming server events'),
+		.setName('my-events')
+		.setDescription('Show series and events organized by you'),
 	async execute(interaction) {
 
 		let guild = interaction.guild;
@@ -17,29 +17,32 @@ module.exports = {
 		}
 
 		let serverData = dataFile[guild.id];
-		let seriesWithEvents = serverData.eventSeries.filter(series => {
+
+		let myEventSeries = serverData.eventSeries.filter(series => {
 			for (const organizer of series.organizers) {
-				if (series.events.length != 0) { return true; }
+				if (interaction.user.id == organizer.id) { return true; }
 			}
 			return false;
 		})
 
-		if (seriesWithEvents.length == 0) {
+		if (myEventSeries.length == 0) {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setTitle("No Upcoming Events")
-					.setColor(0xff)]
+					.setTitle("You are not the organizer of any events")
+					.setColor(0xff)],
+				ephemeral: true
 			})
 		}
 		else {
-			let description = getEventsDisplyString(seriesWithEvents, false);
+			let description = getEventsDisplyString(myEventSeries, true);
 
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setTitle("Upcoming Events: ")
+					.setTitle("Your event series:")
 					.setDescription(description)
-					.setColor(0xff)]
+					.setColor(0xff)],
+				ephemeral: true
 			});
 		}
 	}
-}
+};

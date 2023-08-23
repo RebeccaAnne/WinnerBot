@@ -19,6 +19,9 @@ module.exports = {
 			option.setName('event-date-time')
 				.setDescription('When the event takes place (hammertime for date/time, YYYY-MM-DD for calendar day)')
 				.setRequired(true))
+		.addBooleanOption(option =>
+			option.setName('announce-event')
+				.setDescription('Set to true to show an event creation announcement in this channel'))
 		.addStringOption(option =>
 			option.setName('reminder-date-time')
 				.setDescription('When the bot should send a reminder for this event (hammertime)'))
@@ -30,6 +33,8 @@ module.exports = {
 		let eventName = interaction.options.getString('name');
 		let eventDateTime = interaction.options.getString('event-date-time');
 		let reminderDateTime = interaction.options.getString('reminder-date-time');
+		let announceEvent = interaction.options.getBoolean("announce-event");
+
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
 
@@ -150,24 +155,47 @@ module.exports = {
 			dateString += "<t:" + dayjs(newEvent.date).unix() + ":f>";
 		}
 
-		await interaction.reply({
-			embeds: [new EmbedBuilder()
-				.setDescription(dateString)
-				.setTitle(newEvent.name + " added to " + seriesName)]
-		});
-
-		// Send a follow up with the reminder if present
+		let replyString = dateString;
+		let reminderString = "";
 		if (reminderDateTime) {
-			let reminderString =
-				"**Reminder time**: " + "<t:" + dayjs(newEvent.reminders[0].date).unix() + ":f>" +
-				"\n**Reminder channel**: <#" + newEvent.reminders[0].channel + ">";
 
-			await interaction.followUp({
+			reminderString =
+				"**Reminder**: " + "<t:" + dayjs(newEvent.reminders[0].date).unix() + ":f>" +
+				"\n**Reminder channel**: <#" + newEvent.reminders[0].channel + ">";
+		}
+
+		if (!announceEvent) {
+
+			// If we're not announcing the event, put all in information in a single ephemeral reply 
+			//F for the creator
+			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setDescription(reminderString)
-					.setTitle("Reminder Added for " + newEvent.name)],
+					.setDescription(dateString + "\n\n" + reminderString)
+					.setTitle(newEvent.name + " added to " + seriesName)],
 				ephemeral: true
 			});
 		}
+		else {
+
+			// If we are announcing the event, send a reply that goes to everyone with just the date,
+			// and then an ephemeral follow up with reminder information as needed
+			await interaction.reply({
+				embeds: [new EmbedBuilder()
+					.setDescription(dateString)
+					.setTitle(newEvent.name + " added to " + seriesName)]
+			});
+
+			if (reminderDateTime) {
+				await interaction.followUp({
+					embeds: [new EmbedBuilder()
+						.setDescription(reminderString)
+						.setTitle("Reminder Added for " + newEvent.name)],
+					ephemeral: true
+				});
+			}
+		}
+
+
+
 	},
 };

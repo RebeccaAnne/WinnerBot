@@ -195,6 +195,8 @@ eventExpirationCheck = async (guild, serverConfig) => {
 
     console.log(dayjs().format() + " Checking for expired events in " + serverConfig.guildId)
 
+    if (!serverData.eventSeries) { serverData.eventSeries = [] }
+
     for (const series of serverData.eventSeries) {
         series.events = series.events.filter(event => {
 

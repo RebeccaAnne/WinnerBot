@@ -92,7 +92,6 @@ modjsPermissionChannelCheck = async (interaction) => {
     // Does this user have permission to edit winners?
     let callingMember = await guild.members.fetch(interaction.user.id);
     if (!isMemberModJs(serverConfig, callingMember)) {
-        //    if (!isMemberModJs(serverConfig, callingMember)) {
         return "Only " + serverConfig.accessDescription + " can add and remove winners and event series";
     }
 

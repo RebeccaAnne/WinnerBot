@@ -2,7 +2,6 @@ const dayjs = require('dayjs');
 var fs = require("fs");
 const { EmbedBuilder } = require('discord.js');
 const { winnerNameList, getListSeparator } = require('./utils');
-const { Mutex } = require('async-mutex');
 
 async function declareTerror(guild, serverConfig, winnerList) {
 

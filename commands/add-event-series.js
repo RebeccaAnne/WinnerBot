@@ -41,7 +41,7 @@ module.exports = {
 			}
 
 			let serverData = dataFile[guild.id];
-
+			if (!serverData.eventSeries) { serverData.eventSeries = [] }
 
 			// Check if there's already a series with this title
 			for (let existingSeries of serverData.eventSeries) {
@@ -77,8 +77,7 @@ module.exports = {
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
 				.setDescription(
-					"**" + newSeries.name + "**" + " organized by " + "**" + newSeries.organizers[0].username + "**" + 
-					"\nId: " + id)
+					"**" + newSeries.name + "**" + " organized by " + "**" + newSeries.organizers[0].username + "**")
 				.setTitle("New Event Series Added")]
 		});
 	},
