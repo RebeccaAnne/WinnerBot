@@ -8,7 +8,8 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('series')
 				.setDescription('Name of the series')
-				.setRequired(true))
+				.setRequired(true)
+				.setAutocomplete(true))
 		.addStringOption(option =>
 			option.setName('event')
 				.setDescription('Name of the event')
@@ -63,5 +64,28 @@ module.exports = {
 				.setDescription(replyString)
 				.setColor(0xff)]
 		});
+	},
+
+	async autocomplete(interaction) {
+
+		let filename = "winner-and-event-data.json";
+		let dataFile = require("../" + filename);
+		let serverData = dataFile[interaction.guild.id];
+
+		let seriesNames = [];
+
+		for (series of serverData.eventSeries) {
+			seriesNames.push(series.name)
+		}
+
+		const focusedValue = interaction.options.getFocused();
+		console.log(focusedValue);
+
+		const filtered = seriesNames.filter(choice => {
+			return choice.toUpperCase().startsWith(focusedValue.toUpperCase());
+		});
+		await interaction.respond(
+			filtered.map(choice => ({ name: choice, value: choice })),
+		);
 	}
 }
