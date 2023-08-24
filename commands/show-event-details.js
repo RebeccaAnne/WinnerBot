@@ -25,7 +25,7 @@ module.exports = {
 		let serverData = dataFile[guild.id];
 
 		// Find the series
-		let series = serverData.eventSeries.find(series => series.name == seriesName);
+		let series = serverData.eventSeries.find(series => series.name.toUpperCase() == seriesName.toUpperCase());
 		if (!series) {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
@@ -37,7 +37,7 @@ module.exports = {
 		}
 
 		// Find the event
-		let event = series.events.find(event => event.name == eventName);
+		let event = series.events.find(event => event.name.toUpperCase() == eventName.toUpperCase());
 		if (!event) {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()

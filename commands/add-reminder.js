@@ -51,7 +51,7 @@ module.exports = {
 			let serverData = dataFile[guild.id];
 
 			// Find the series 
-			let series = serverData.eventSeries.find(series => series.name == seriesName);
+			let series = serverData.eventSeries.find(series => series.nametoUpperCase() == seriesName.toUpperCase());
 			if (!series) {
 				await interaction.reply({
 					content: seriesName + " doesn't exist! Contact a mod or junior-secretary to create a new event series.", ephemeral: true
@@ -78,7 +78,7 @@ module.exports = {
 			}
 
 			// Find the event
-			let event = series.events.find(event => event.name == eventName);
+			let event = series.events.find(event => event.nametoUpperCase() == eventName.toUpperCase());
 			if (!event) {
 				await interaction.reply({
 					content: eventName + " doesn't exist! Use add-event to create an event", ephemeral: true

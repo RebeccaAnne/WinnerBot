@@ -65,7 +65,7 @@ module.exports = {
 			let serverData = dataFile[guild.id];
 
 			// Find the series to add the event to
-			let series = serverData.eventSeries.find(series => series.name == seriesName);
+			let series = serverData.eventSeries.find(series => series.nametoUpperCase() == seriesNametoUpperCase());
 			if (!series) {
 				await interaction.reply({
 					content: seriesName + " doesn't exist! Contact a mod or junior-secretary to create a new event series.", ephemeral: true
