@@ -85,16 +85,8 @@ client.once(Events.ClientReady, async c => {
 		let guild = await client.guilds.fetch(serverConfig.guildId);
 
 		winnerList = winnerListFile[serverConfig.guildId];
-		console.log("Number of winners: " + winnerList.winners.length);
 		for (const winner of winnerList.winners) {
-			console.log("Scheduling for " + winner.name);
-
-			let winDate = dayjs(winner.date);
-			let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
-
-			if (expireDate.minute() != 0 && expireDate.hour() != 0) {
-				await scheduleExpirationCheck(winner, guild, serverConfig);
-			}
+			await scheduleExpirationCheck(winner, guild, serverConfig);
 		}
 
 		// Temp code: Schedule checks for midnight to handle winners who don't have their full date/time. 
