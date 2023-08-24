@@ -15,7 +15,8 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('event')
 				.setDescription('Name of the event')
-				.setRequired(true))
+				.setRequired(true)
+				.setAutocomplete(true))
 		.addStringOption(option =>
 			option.setName('reminder-date-time')
 				.setDescription('When the bot should send a reminder for this event (hammertime)')

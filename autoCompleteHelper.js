@@ -46,11 +46,25 @@ getEventNames = (guildId, seriesName) => {
 handleSeriesAutoComplete = async (interaction) => {
     let seriesNames = getSeriesNames(interaction.guild.id);
 
-    const focusedValue = interaction.options.getFocused();
+    const focusedOption = interaction.options.getFocused(true);
+    let filtered = [];
 
-    const filtered = seriesNames.filter(choice => {
-        return choice.toUpperCase().startsWith(focusedValue.toUpperCase());
-    });
+    if (focusedOption.name === 'series') {
+        filtered = seriesNames.filter(choice => {
+            return choice.toUpperCase().startsWith(focusedOption.value.toUpperCase());
+        });
+    }
+
+    else if (focusedOption.name === 'event') {
+        const seriesName = interaction.options.getString('series');
+        if (seriesName) {
+            let eventNames = getEventNames(interaction.guild.id, seriesName);
+
+            filtered = eventNames.filter(choice => {
+                return choice.toUpperCase().startsWith(focusedOption.value.toUpperCase());
+            });
+        }
+    }
 
     await interaction.respond(
         filtered.map(choice => ({ name: choice, value: choice })),

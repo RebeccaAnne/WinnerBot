@@ -151,6 +151,7 @@ module.exports = {
 
 			series.events.push(newEvent);
 			fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+			addEventNameToCache(guild.id, series.name, newEvent.name);
 			return true;
 		});
 

@@ -14,7 +14,8 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('event')
 				.setDescription('Name of the event')
-				.setRequired(true)),
+				.setRequired(true)
+				.setAutocomplete(true)),
 	async execute(interaction) {
 
 		let seriesName = interaction.options.getString('series');
