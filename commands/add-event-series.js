@@ -14,11 +14,20 @@ module.exports = {
 		.addUserOption(option =>
 			option.setName('organizer')
 				.setDescription('The user in charge of organizing the event series.')
-				.setRequired(true)),
+				.setRequired(true))
+		.addChannelOption(option =>
+			option.setName('event-thread')
+				.setDescription('Thread being used to organize the event.')),
 	async execute(interaction) {
 		let seriesName = interaction.options.getString('name');
 		let organizer = interaction.options.getMember('organizer');
+		let eventThread = interaction.options.getChannel('event-thread');
 		let guild = interaction.guild;
+
+		let eventThreadId;
+		if (eventThread) {
+			eventThreadId = eventThread.id;
+		}
 
 		// Does this user have permission to add an event series?
 		let permissionErrorMessage = await modjsPermissionChannelCheck(interaction);
@@ -66,6 +75,10 @@ module.exports = {
 				events: []
 			}
 
+			if (eventThreadId) {
+				newSeries.eventThread = eventThreadId;
+			}
+
 			serverData.eventSeries.push(newSeries);
 
 			fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
@@ -73,11 +86,15 @@ module.exports = {
 		});
 		if (!succeeded) { return; }
 
+		let seriesString = "**" + newSeries.name + "**" + " organized by " + "**" + newSeries.organizers[0].username + "**";
+		if (eventThreadId) {
+			seriesString += " in <#" + eventThreadId + ">";
+		}
+
 		// reply to the command
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
-				.setDescription(
-					"**" + newSeries.name + "**" + " organized by " + "**" + newSeries.organizers[0].username + "**")
+				.setDescription(seriesString)
 				.setTitle("New Event Series Added")]
 		});
 	},

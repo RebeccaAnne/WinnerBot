@@ -44,7 +44,11 @@ function getEventsDisplyString(eventSeriesArray, showAll) {
 
             dataToShow = true;
             eventListString += "**" + eventSeries.name + ":**\n";
-            eventListString += "*(organizer: " + eventSeries.organizers[0].username + ")*\n";
+            eventListString += "*(organized by " + eventSeries.organizers[0].username + "";
+            if (eventSeries.eventThread) {
+                eventListString += " in <#" + eventSeries.eventThread + ">"
+            }
+            eventListString += ")*\n"
 
             // Only show the first three upcoming events for this series unless the caller passed showAll 
             let maxEventsToShow = showAll ? eventSeries.events.length : 3;
