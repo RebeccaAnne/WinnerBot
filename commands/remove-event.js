@@ -19,6 +19,8 @@ module.exports = {
 		let eventName = interaction.options.getString('event');
 		let guild = interaction.guild;
 
+		let event = {};
+		let series = {};
 		let succeeded = await getMutex().runExclusive(async () => {
 
 			// Load the data from file
@@ -27,7 +29,7 @@ module.exports = {
 			let serverData = dataFile[guild.id];
 
 			// Find the series
-			let series = serverData.eventSeries.find(series => series.name == seriesName);
+			series = serverData.eventSeries.find(series => series.name.toUpperCase() == seriesName.toUpperCase());
 			if (!series) {
 				await interaction.reply({
 					embeds: [new EmbedBuilder()
@@ -57,11 +59,11 @@ module.exports = {
 			}
 
 			// Find the event
-			let eventIndex = series.events.findIndex(event => event.name == eventName);
+			eventIndex = series.events.findIndex(event => event.name.toUpperCase() == eventName.toUpperCase());
 			if (eventIndex == -1) {
 				await interaction.reply({
 					embeds: [new EmbedBuilder()
-						.setTitle(eventName + " does not exist in " + seriesName)
+						.setTitle(eventName + " does not exist in " + series.name)
 					],
 					ephemeral: true
 				});
@@ -76,7 +78,7 @@ module.exports = {
 
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
-				.setTitle(eventName + " successfully removed from " + seriesName)],
+				.setTitle(eventName + " successfully removed from " + series.name)],
 			ephemeral: true
 		});
 	}

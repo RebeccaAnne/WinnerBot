@@ -38,10 +38,11 @@ module.exports = {
 			reminderChannelId = interaction.channelId;
 		}
 
-		// Load the data from file
 		let replyString = ""
+		let event = {};
 		let succeeded = await getMutex().runExclusive(async () => {
 
+			// Load the data from file
 			let filename = "winner-and-event-data.json";
 			let dataFile = require("../" + filename);
 			if (dataFile[guild.id] == null) {
@@ -51,7 +52,7 @@ module.exports = {
 			let serverData = dataFile[guild.id];
 
 			// Find the series 
-			let series = serverData.eventSeries.find(series => series.nametoUpperCase() == seriesName.toUpperCase());
+			let series = serverData.eventSeries.find(series => series.name.toUpperCase() == seriesName.toUpperCase());
 			if (!series) {
 				await interaction.reply({
 					content: seriesName + " doesn't exist! Contact a mod or junior-secretary to create a new event series.", ephemeral: true
@@ -78,7 +79,7 @@ module.exports = {
 			}
 
 			// Find the event
-			let event = series.events.find(event => event.nametoUpperCase() == eventName.toUpperCase());
+			event = series.events.find(event => event.name.toUpperCase() == eventName.toUpperCase());
 			if (!event) {
 				await interaction.reply({
 					content: eventName + " doesn't exist! Use add-event to create an event", ephemeral: true
@@ -113,7 +114,7 @@ module.exports = {
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
 				.setDescription(replyString)
-				.setTitle("Reminder Added for " + eventName)],
+				.setTitle("Reminder Added for " + event.name)],
 			ephemeral: true
 		});
 	},

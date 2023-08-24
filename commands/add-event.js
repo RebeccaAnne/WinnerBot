@@ -54,6 +54,7 @@ module.exports = {
 
 		// Load the data from file
 		let newEvent = {};
+		let series = {};
 		let succeeded = await getMutex().runExclusive(async () => {
 
 			let filename = "winner-and-event-data.json";
@@ -65,7 +66,7 @@ module.exports = {
 			let serverData = dataFile[guild.id];
 
 			// Find the series to add the event to
-			let series = serverData.eventSeries.find(series => series.nametoUpperCase() == seriesNametoUpperCase());
+			series = serverData.eventSeries.find(series => series.name.toUpperCase() == seriesName.toUpperCase());
 			if (!series) {
 				await interaction.reply({
 					content: seriesName + " doesn't exist! Contact a mod or junior-secretary to create a new event series.", ephemeral: true
@@ -75,7 +76,7 @@ module.exports = {
 
 			if (series.events.find(event => event.name == eventName)) {
 				await interaction.reply({
-					content: eventName + " already exists in the " + seriesName + " series!", ephemeral: true
+					content: eventName + " already exists in the " + series.name + " series!", ephemeral: true
 				});
 				return false;
 			}
@@ -174,7 +175,7 @@ module.exports = {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
 					.setDescription(replyString + "\n\n" + reminderString)
-					.setTitle(newEvent.name + " added to " + seriesName)],
+					.setTitle(newEvent.name + " added to " + series.name)],
 				ephemeral: true
 			});
 		}
@@ -185,7 +186,7 @@ module.exports = {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
 					.setDescription(replyString)
-					.setTitle(newEvent.name + " added to " + seriesName)]
+					.setTitle(newEvent.name + " added to " + series.name)]
 			});
 
 			if (reminderDateTime) {

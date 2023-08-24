@@ -41,7 +41,7 @@ module.exports = {
 		if (!event) {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setTitle(eventName + " does not exist in " + seriesName)
+					.setTitle(eventName + " does not exist in " + series.name)
 				],
 				ephemeral: true
 			});
