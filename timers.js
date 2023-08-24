@@ -110,7 +110,7 @@ popReminder = async (sereverConfig, guild, seriesName, eventName, reminder) => {
     let series = serverData.eventSeries.find(series => series.name == seriesName);
     let event = series.events.find(event => event.name == eventName);
 
-    let reminderString = "### " + event.name + "\n" + formatEventDate(displayDate);;
+    let reminderString = "### " + event.name + "\n" + formatEventDate(event);;
 
     if (event.description) {
         reminderString += "\n\n" + event.description;

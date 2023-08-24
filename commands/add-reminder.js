@@ -98,10 +98,7 @@ module.exports = {
 				"**Reminder time**: " + "<t:" + dayjs(parsedReminderDateTime).unix() + ":f>" +
 				"\n**Reminder channel**: <#" + reminderChannelId + ">";
 
-			let id = await getNewId(guild.id);
-
 			let reminder = {
-				id: id,
 				date: parsedReminderDateTime,
 				channel: reminderChannelId
 			};
