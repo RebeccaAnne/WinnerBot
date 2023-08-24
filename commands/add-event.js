@@ -159,7 +159,6 @@ module.exports = {
 			replyString += "\n\n" + description;
 		}
 
-
 		let reminderString = "";
 		if (reminderDateTime) {
 
@@ -170,7 +169,7 @@ module.exports = {
 
 		if (!announceEvent) {
 
-			// If we're not announcing the event, put all in information in a single ephemeral reply 
+			// If we're not announcing the event, put all information in a single ephemeral reply 
 			// for the creator
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
@@ -181,7 +180,7 @@ module.exports = {
 		}
 		else {
 
-			// If we are announcing the event, send a reply that goes to everyone with just the date,
+			// If we are announcing the event, send a reply that goes to everyone with just the reply string,
 			// and then an ephemeral follow up with reminder information as needed
 			await interaction.reply({
 				embeds: [new EmbedBuilder()

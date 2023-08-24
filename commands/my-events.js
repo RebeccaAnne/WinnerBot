@@ -18,6 +18,7 @@ module.exports = {
 
 		let serverData = dataFile[guild.id];
 
+		// Filter the events to only those organized by this caller
 		let myEventSeries = serverData.eventSeries.filter(series => {
 			for (const organizer of series.organizers) {
 				if (interaction.user.id == organizer.id) { return true; }

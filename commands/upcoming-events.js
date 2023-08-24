@@ -16,6 +16,7 @@ module.exports = {
 			dataFile[guild.id] = {};
 		}
 
+		// Filter to only those series that have scheduled events
 		let serverData = dataFile[guild.id];
 		let seriesWithEvents = serverData.eventSeries.filter(series => {
 			for (const organizer of series.organizers) {

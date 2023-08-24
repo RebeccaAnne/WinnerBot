@@ -26,7 +26,7 @@ module.exports = {
 			let dataFile = require("../" + filename);
 			let serverData = dataFile[guild.id];
 
-			// Find the event
+			// Find the series
 			let series = serverData.eventSeries.find(series => series.name == seriesName);
 			if (!series) {
 				await interaction.reply({
@@ -56,6 +56,7 @@ module.exports = {
 				return false;
 			}
 
+			// Find the event
 			let eventIndex = series.events.findIndex(event => event.name == eventName);
 			if (eventIndex == -1) {
 				await interaction.reply({

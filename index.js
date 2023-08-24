@@ -87,15 +87,21 @@ client.once(Events.ClientReady, async c => {
 		let guild = await client.guilds.fetch(serverConfig.guildId);
 
 		await winnerExpirationCheck(guild, serverConfig);
-		// winnerList = winnerListFile[serverConfig.guildId];
-		// for (const winner of winnerList.winners) {
-		// 	await scheduleWinnerExpirationCheck(winner, guild, serverConfig);
-		// }
+		for (const winner of winnerList.winners) {
+			await scheduleWinnerExpirationCheck(winner, guild, serverConfig);
+		}
 
 		await eventExpirationCheck(guild, serverConfig);
 		for (const series of winnerList.eventSeries) {
 			await scheduleSeriesTimers(serverConfig, guild, series)
 		}
+
+		// Run a just-in-case expiration for winners and events at midnight
+		console.log("Scheduling check for midnight for " + serverConfig.guildId);
+		const job = new CronJob("0 0 0 * * *", async function () {
+			await expirationCheck(guild, serverConfig);
+			await eventExpirationCheck(guild, serverConfig);
+		}, null, true);
 	}
 });
 

@@ -71,10 +71,10 @@ function getEventsDisplyString(eventSeriesArray, showAll) {
             for (let i = 0; i < maxEventsToShow && i < eventSeries.events.length; i++) {
                 let event = eventSeries.events[i];
 
-                // Add the formatted date and event title to the string
+                // Add event title to the string
                 eventListString += "- **" + event.name + "**: ";
 
-                // Format the date
+                // Add formatted date to the string
                 eventListString += formatEventDate(event);
     
                 if (showAll && event.reminders.length != 0) {
