@@ -2,6 +2,7 @@ var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 const { modjsPermissionChannelCheck } = require('../utils');
+const { addSeriesNameToCache } = require('../autoCompleteHelper');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -82,6 +83,7 @@ module.exports = {
 			serverData.eventSeries.push(newSeries);
 
 			fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+			addSeriesNameToCache(guild.id, newSeries.name)
 			return true;
 		});
 		if (!succeeded) { return; }

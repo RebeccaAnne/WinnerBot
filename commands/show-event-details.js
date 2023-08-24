@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { formatEventDate } = require('../showEventsHelper');
+const { getSeriesNames } = require('../autoCompleteHelper');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -67,25 +68,6 @@ module.exports = {
 	},
 
 	async autocomplete(interaction) {
-
-		let filename = "winner-and-event-data.json";
-		let dataFile = require("../" + filename);
-		let serverData = dataFile[interaction.guild.id];
-
-		let seriesNames = [];
-
-		for (series of serverData.eventSeries) {
-			seriesNames.push(series.name)
-		}
-
-		const focusedValue = interaction.options.getFocused();
-		console.log(focusedValue);
-
-		const filtered = seriesNames.filter(choice => {
-			return choice.toUpperCase().startsWith(focusedValue.toUpperCase());
-		});
-		await interaction.respond(
-			filtered.map(choice => ({ name: choice, value: choice })),
-		);
+		handleSeriesAutoComplete(interaction);
 	}
 }

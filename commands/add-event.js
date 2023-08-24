@@ -11,7 +11,8 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('series')
 				.setDescription('Name of the series to add the event to')
-				.setRequired(true))
+				.setRequired(true)
+				.setAutocomplete(true))
 		.addStringOption(option =>
 			option.setName('name')
 				.setDescription('Name of the event')
@@ -199,4 +200,9 @@ module.exports = {
 			}
 		}
 	},
+	
+	async autocomplete(interaction) {
+		handleSeriesAutoComplete(interaction);
+	}
+
 };

@@ -7,6 +7,7 @@ const dayjs = require('dayjs');
 const { ServerResponse } = require('node:http');
 const { scheduleWinnerExpirationCheck, winnerExpirationCheck } = require('./timers');
 const { Mutex } = require('async-mutex');
+const { populateEventNameCache } = require('./autoCompleteHelper')
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -117,6 +118,8 @@ client.once(Events.ClientReady, async c => {
 			await expirationCheck(guild, serverConfig);
 			await eventExpirationCheck(guild, serverConfig);
 		}, null, true);
+
+		populateEventNameCache(serverConfig.guildId);
 	}
 });
 

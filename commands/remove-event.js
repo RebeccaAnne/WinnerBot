@@ -8,7 +8,8 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('series')
 				.setDescription('Name of the series')
-				.setRequired(true))
+				.setRequired(true)
+				.setAutocomplete(true))
 		.addStringOption(option =>
 			option.setName('event')
 				.setDescription('Name of the event')
@@ -81,5 +82,9 @@ module.exports = {
 				.setTitle(eventName + " successfully removed from " + series.name)],
 			ephemeral: true
 		});
+	},
+
+	async autocomplete(interaction) {
+		handleSeriesAutoComplete(interaction);
 	}
 }
