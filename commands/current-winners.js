@@ -29,7 +29,7 @@ module.exports = {
 		}
 
 		// Load the winner array from file
-		winnerFilename = "winner-arrays.json";
+		winnerFilename = "winner-and-event-data.json";
 		let winnerListFile = require("../" + winnerFilename);
 		let winnerList = winnerListFile[guild.id];
 

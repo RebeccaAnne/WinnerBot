@@ -1,4 +1,6 @@
 const dayjs = require('dayjs');
+const { Mutex } = require('async-mutex');
+var fs = require("fs");
 
 getOrdinal = (n) => {
     let ord = 'th';
@@ -62,7 +64,7 @@ formatWinnerString = (winnerObject) => {
             winnerString += " (**" + win.count + " chapters**)"
         }
 
-        winnerString += ", <t:" + dayjs(win.date).unix() + ":d> <t:" + dayjs(win.date).unix() +":t>";
+        winnerString += ", <t:" + dayjs(win.date).unix() + ":d> <t:" + dayjs(win.date).unix() + ":t>";
 
         if (i < winsToDisplay.length - 1) {
             winnerString += ", "
@@ -72,12 +74,7 @@ formatWinnerString = (winnerObject) => {
 
 }
 
-winnerUpdatePermissionCheck = async (interaction) => {
-    let guild = interaction.guild;
-    let serverConfig = require("./data/server-config-" + guild.id + ".json");
-
-    // Does this user have permission to edit winners?
-    let callingMember = await guild.members.fetch(interaction.user.id);
+isMemberModJs = (serverConfig, callingMember) => {
     let hasPermission = false;
     serverConfig.modRoles.forEach(modRole => {
         if (callingMember.roles.cache.some(role => role.id === modRole)) {
@@ -85,19 +82,28 @@ winnerUpdatePermissionCheck = async (interaction) => {
         }
     });
 
-    if (!hasPermission) {
-        return "Only " + serverConfig.accessDescription + " have permission to manage discord winners";
+    return hasPermission;
+}
+
+modjsPermissionChannelCheck = async (interaction) => {
+    let guild = interaction.guild;
+    let serverConfig = require("./data/server-config-" + guild.id + ".json");
+
+    // Does this user have permission to edit winners?
+    let callingMember = await guild.members.fetch(interaction.user.id);
+    if (!isMemberModJs(serverConfig, callingMember)) {
+        return "Only " + serverConfig.accessDescription + " can add and remove winners and event series";
     }
 
     // Are we in the correct channel to manage winners?
     if (interaction.channelId != serverConfig.modChannel) {
-        return "Please manage discord winners in the " + serverConfig.modChannelDescription + " channel";
+        return "Please manage discord winners and events in the " + serverConfig.modChannelDescription;
     }
 
     return null;
 }
 
-function getListSeparator(index, length) {
+getListSeparator = (index, length) => {
     let separator = "";
 
     if (index > 0) {
@@ -116,7 +122,7 @@ function getListSeparator(index, length) {
     return separator;
 }
 
-function winnerNameList(winners) {
+winnerNameList = (winners) => {
     let winnerListString = "";
     for (let i = 0; i < winners.length; i++) {
         winnerListString += getListSeparator(i, winners.length);
@@ -126,9 +132,58 @@ function winnerNameList(winners) {
     return winnerListString;
 }
 
-module.exports.formatWinnerString = formatWinnerString;
-module.exports.formatWinnerReason = formatWinnerReason;
-module.exports.getOrdinal = getOrdinal;
-module.exports.winnerUpdatePermissionCheck = winnerUpdatePermissionCheck;
-module.exports.winnerNameList = winnerNameList;
-module.exports.getListSeparator = getListSeparator;
+tryParseHammerTime = (dateTimeString) => {
+    // Check if we match the hammer time regex
+    const hammerTimeRegex = /<t:\d{10}:[dDtTfFR]>/g;
+    if (!dateTimeString.match(hammerTimeRegex)) { return null; }
+
+    try {
+        // Parse the timestamp as a dayjs
+        let date = dayjs(Number(dateTimeString.slice(3, 13)) * 1000).format();
+        return date;
+    }
+    catch { return null; }
+}
+
+tryParseYYYYMMDD = (dateTimeString) => {
+
+    // Check if we match the regex
+    const regex = /\d{4}-\d{2}-\d{2}/g;
+    if (!dateTimeString.match(regex)) { return null; }
+
+    try {
+        // Parse the string as a dayjs to confirm it's a valid date;
+        let date = dayjs(dateTimeString)
+        return dateTimeString;
+    }
+    catch { return null; }
+}
+
+let globalMutex;
+
+getMutex = () => {
+    if (!globalMutex) {
+        globalMutex = new Mutex();
+    }
+    return globalMutex;
+}
+
+getNewId = async (guildId) => {
+
+    let filename = "winner-and-event-data.json";
+    let dataFile = require("./" + filename);
+    let guildData = dataFile[guildId];
+
+    if (!guildData.lastId) {
+        guildData.lastId = 0;
+    }
+
+    guildData.lastId++;
+
+    fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
+    return guildData.lastId;
+}
+
+module.exports = {
+    getNewId, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
+}

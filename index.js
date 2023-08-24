@@ -5,7 +5,8 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const dayjs = require('dayjs');
 const { ServerResponse } = require('node:http');
-const { scheduleExpirationCheck, expirationCheck } = require('./expire-schedule');
+const { scheduleWinnerExpirationCheck, winnerExpirationCheck } = require('./timers');
+const { Mutex } = require('async-mutex');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -31,9 +32,10 @@ for (const file of commandFiles) {
 }
 
 
-let winnerListFile = require("./winner-arrays.json");
+let winnerListFile = require("./winner-and-event-data.json");
 const dataPath = path.join(__dirname, 'data');
 const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
+
 
 for (const serverConfigFile of serverConfigFiles) {
 	const filePath = path.join(dataPath, serverConfigFile);
@@ -46,7 +48,7 @@ for (const serverConfigFile of serverConfigFiles) {
 	}
 }
 
-fs.writeFileSync("winner-arrays.json", JSON.stringify(winnerListFile), () => { });
+fs.writeFileSync("winner-and-event-data.json", JSON.stringify(winnerListFile), () => { });
 
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -84,16 +86,21 @@ client.once(Events.ClientReady, async c => {
 
 		let guild = await client.guilds.fetch(serverConfig.guildId);
 
-		winnerList = winnerListFile[serverConfig.guildId];
+		await winnerExpirationCheck(guild, serverConfig);
 		for (const winner of winnerList.winners) {
-			await scheduleExpirationCheck(winner, guild, serverConfig);
+			await scheduleWinnerExpirationCheck(winner, guild, serverConfig);
 		}
 
-		// Temp code: Schedule checks for midnight to handle winners who don't have their full date/time. 
-		// Those that do schedule with scheduleExpirationCheck above.
+		await eventExpirationCheck(guild, serverConfig);
+		for (const series of winnerList.eventSeries) {
+			await scheduleSeriesTimers(serverConfig, guild, series)
+		}
+
+		// Run a just-in-case expiration for winners and events at midnight
 		console.log("Scheduling check for midnight for " + serverConfig.guildId);
 		const job = new CronJob("0 0 0 * * *", async function () {
 			await expirationCheck(guild, serverConfig);
+			await eventExpirationCheck(guild, serverConfig);
 		}, null, true);
 	}
 });
