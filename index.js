@@ -87,6 +87,8 @@ client.once(Events.ClientReady, async c => {
 		winnerList = winnerListFile[serverConfig.guildId];
 		console.log("Number of winners: " + winnerList.winners.length);
 		for (const winner of winnerList.winners) {
+			console.log("Scheduling for " + winner.name);
+
 			let winDate = dayjs(winner.date);
 			let expireDate = winDate.add(serverConfig.winDurationInDays, "day");
 
