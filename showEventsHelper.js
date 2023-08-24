@@ -4,6 +4,22 @@ const { EmbedBuilder } = require('discord.js');
 const { winnerNameList, getListSeparator } = require('./utils');
 
 
+function formatEventDate(event) {
+    let displayDate = "";
+    let eventDayJs = dayjs(event.date);
+
+    if (event.allDayEvent) {
+        // For all day events display the fixed calendar date
+        displayDate = eventDayJs.format("MMMM D, YYYY");
+    }
+    else {
+        // For non-all day events, format as a hammertime
+        displayDate = "<t:" + eventDayJs.unix() + ":f>";
+    }
+
+    return displayDate;
+}
+
 function getEventsDisplyString(eventSeriesArray, showAll) {
 
     // Sort the events of each series
@@ -55,22 +71,12 @@ function getEventsDisplyString(eventSeriesArray, showAll) {
             for (let i = 0; i < maxEventsToShow && i < eventSeries.events.length; i++) {
                 let event = eventSeries.events[i];
 
-                // Format the date
-                let displayDate = "";
-                let eventDayJs = dayjs(event.date);
-
                 // Add the formatted date and event title to the string
                 eventListString += "- **" + event.name + "**: ";
 
-                if (event.allDayEvent) {
-                    // For all day events display the fixed calendar date
-                    eventListString += eventDayJs.format("MMMM D, YYYY");
-                }
-                else {
-                    // For non-all day events, format as a hammertime
-                    eventListString += "<t:" + eventDayJs.unix() + ":f>";
-                }
-
+                // Format the date
+                eventListString += formatEventDate(event);
+    
                 if (showAll && event.reminders.length != 0) {
                     // If showAll is set, also show the reminders for each event
                     eventListString += ", Reminders:\n";
@@ -94,4 +100,4 @@ function getEventsDisplyString(eventSeriesArray, showAll) {
     return eventListString;
 }
 
-module.exports = { getEventsDisplyString }
+module.exports = { getEventsDisplyString, formatEventDate }

@@ -1,6 +1,7 @@
 const { CronJob } = require('cron');
 const fs = require('node:fs');
 const { EmbedBuilder } = require('discord.js');
+const { formatEventDate } = require('./showEventsHelper')
 
 const dayjs = require('dayjs');
 var utc = require('dayjs/plugin/utc')
@@ -109,19 +110,11 @@ popReminder = async (sereverConfig, guild, seriesName, eventName, reminder) => {
     let series = serverData.eventSeries.find(series => series.name == seriesName);
     let event = series.events.find(event => event.name == eventName);
 
-    let displayDate = "";
-    let eventDayJs = dayjs(event.date);
+    let reminderString = "### " + event.name + "\n" + formatEventDate(displayDate);;
 
-    if (event.allDayEvent) {
-        // For all day events display the fixed calendar date
-        displayDate = eventDayJs.format("MMMM D, YYYY");
+    if (event.description) {
+        reminderString += "\n\n" + event.description;
     }
-    else {
-        // For non-all day events, format as a hammertime
-        displayDate = "<t:" + eventDayJs.unix() + ":f>";
-    }
-
-    let reminderString = displayDate + ": " + event.name;
 
     await channel.send({
         embeds: [new EmbedBuilder()

@@ -2,6 +2,7 @@ var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 const { isMemberModJs, tryParseHammerTime, tryParseYYYYMMDD } = require('../utils');
+const { formatEventDate } = require("../showEventsHelper");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,6 +20,9 @@ module.exports = {
 			option.setName('event-date-time')
 				.setDescription('When the event takes place (hammertime for date/time, YYYY-MM-DD for calendar day)')
 				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('description')
+				.setDescription('Description of the event'))
 		.addBooleanOption(option =>
 			option.setName('announce-event')
 				.setDescription('Set to true to show an event creation announcement in this channel'))
@@ -31,6 +35,7 @@ module.exports = {
 	async execute(interaction) {
 		let seriesName = interaction.options.getString('series');
 		let eventName = interaction.options.getString('name');
+		let description = interaction.options.getString('description');
 		let eventDateTime = interaction.options.getString('event-date-time');
 		let reminderDateTime = interaction.options.getString('reminder-date-time');
 		let announceEvent = interaction.options.getBoolean("announce-event");
@@ -101,6 +106,10 @@ module.exports = {
 				reminders: []
 			}
 
+			if (description) {
+				newEvent.description = description;
+			}
+
 			// Get the event date
 			newEvent.date = tryParseHammerTime(eventDateTime);
 			if (!newEvent.date) {
@@ -145,17 +154,12 @@ module.exports = {
 
 		if (!succeeded) { return; }
 
-		let dateString = "";
-		if (newEvent.allDayEvent) {
-			// For all day events display the fixed calendar date
-			dateString += dayjs(newEvent.date).format("MMMM D, YYYY");
-		}
-		else {
-			// For non-all day events, format as a hammertime
-			dateString += "<t:" + dayjs(newEvent.date).unix() + ":f>";
+		let replyString = formatEventDate(newEvent);
+		if (description) {
+			replyString += "\n\n" + description;
 		}
 
-		let replyString = dateString;
+
 		let reminderString = "";
 		if (reminderDateTime) {
 
@@ -167,10 +171,10 @@ module.exports = {
 		if (!announceEvent) {
 
 			// If we're not announcing the event, put all in information in a single ephemeral reply 
-			//F for the creator
+			// for the creator
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setDescription(dateString + "\n\n" + reminderString)
+					.setDescription(replyString + "\n\n" + reminderString)
 					.setTitle(newEvent.name + " added to " + seriesName)],
 				ephemeral: true
 			});
@@ -181,7 +185,7 @@ module.exports = {
 			// and then an ephemeral follow up with reminder information as needed
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setDescription(dateString)
+					.setDescription(replyString)
 					.setTitle(newEvent.name + " added to " + seriesName)]
 			});
 
@@ -194,8 +198,5 @@ module.exports = {
 				});
 			}
 		}
-
-
-
 	},
 };

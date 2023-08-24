@@ -38,7 +38,8 @@ module.exports = {
 				embeds: [new EmbedBuilder()
 					.setTitle("Upcoming Events: ")
 					.setDescription(description)
-					.setColor(0xff)]
+					.setColor(0xff)
+					.setFooter({ text: "(Use /show-event-details for more information on an event)" })]
 			});
 		}
 	}
