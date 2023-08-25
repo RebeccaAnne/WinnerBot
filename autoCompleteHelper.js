@@ -39,16 +39,17 @@ addEventNameToCache = (guildId, seriesName, eventName) => {
     eventNameCache[guildId][seriesName].push(eventName)
 }
 
-getSeriesNames = (guildId) => {
-    return seriesNameCache[guildId];
-}
-
-getEventNames = (guildId, seriesName) => {
-    return eventNameCache[guildId][seriesName];
+removeEventFromToCache = (guildId, seriesName, eventName) => {
+    let eventIndex = eventNameCache[guildId][seriesName].findIndex(name => {
+        return name.toUpperCase() == eventName.toUpperCase();
+    });
+    if (eventIndex != -1) {
+        eventNameCache[guildId][seriesName].splice(eventIndex, 1);
+    }
 }
 
 handleSeriesAutoComplete = async (interaction) => {
-    let seriesNames = getSeriesNames(interaction.guild.id);
+    let seriesNames = seriesNameCache[interaction.guild.id];
 
     const focusedOption = interaction.options.getFocused(true);
 
@@ -79,7 +80,7 @@ handleSeriesAutoComplete = async (interaction) => {
                 );
             }
             else {
-                let eventNames = getEventNames(interaction.guild.id, seriesName);
+                let eventNames = eventNameCache[interaction.guild.id][seriesName];
 
                 let filtered = eventNames.filter(choice => {
                     return choice.toUpperCase().startsWith(focusedOption.value.toUpperCase());

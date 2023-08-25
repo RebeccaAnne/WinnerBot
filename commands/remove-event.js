@@ -78,7 +78,8 @@ module.exports = {
 		});
 		if (!succeeded) { return; }
 
-		console.log(eventName + " removed from " + series.name);
+		console.log(eventName + " removed from " + seriesName);
+		removeEventFromToCache (guild.id, seriesName, eventName);
 
 		await interaction.reply({
 			embeds: [new EmbedBuilder()

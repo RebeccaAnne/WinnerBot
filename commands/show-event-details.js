@@ -22,9 +22,6 @@ module.exports = {
 		let eventName = interaction.options.getString('event');
 		let guild = interaction.guild;
 
-		console.log("eventName " + eventName)
-
-
 		let seriesExists;
 		let eventExists;
 		let dateString;

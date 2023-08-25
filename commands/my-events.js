@@ -7,6 +7,8 @@ module.exports = {
 		.setDescription('Show series and events organized by you'),
 	async execute(interaction) {
 
+		console.log("my-events");
+
 		let guild = interaction.guild;
 
 		// Load the data from file
