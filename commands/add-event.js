@@ -188,7 +188,8 @@ module.exports = {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
 					.setDescription(replyString)
-					.setTitle(newEvent.name + " added to " + series.name)]
+					.setTitle(newEvent.name + " added to " + series.name)
+					.setColor(oxff)]
 			});
 
 			if (reminderDateTime) {

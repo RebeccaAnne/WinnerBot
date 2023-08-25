@@ -119,7 +119,8 @@ popReminder = async (sereverConfig, guild, seriesName, eventName, reminder) => {
     await channel.send({
         embeds: [new EmbedBuilder()
             .setDescription(reminderString)
-            .setTitle("Upcoming Event Reminder for " + series.name)]
+            .setTitle("Upcoming Event Reminder for " + series.name)
+            .setColor(0xff)]
     });
 
     // Filter out this reminder (and any other reminders that may be obsolete)

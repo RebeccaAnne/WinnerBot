@@ -29,8 +29,7 @@ module.exports = {
 		if (myEventSeries.length == 0) {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setTitle("You are not the organizer of any events")
-					.setColor(0xff)],
+					.setTitle("You are not the organizer of any events")],
 				ephemeral: true
 			})
 		}
@@ -40,8 +39,7 @@ module.exports = {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
 					.setTitle("Your event series:")
-					.setDescription(description)
-					.setColor(0xff)],
+					.setDescription(description)],
 				ephemeral: true
 			});
 		}
