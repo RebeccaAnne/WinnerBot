@@ -170,6 +170,8 @@ module.exports = {
 				"\n**Reminder channel**: <#" + newEvent.reminders[0].channel + ">";
 		}
 
+		console.log("Event " + newEvent.name + " added to " + series.name);
+
 		if (!announceEvent) {
 
 			// If we're not announcing the event, put all information in a single ephemeral reply 
@@ -202,7 +204,7 @@ module.exports = {
 			}
 		}
 	},
-	
+
 	async autocomplete(interaction) {
 		handleSeriesAutoComplete(interaction);
 	}

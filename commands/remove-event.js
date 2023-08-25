@@ -78,6 +78,8 @@ module.exports = {
 		});
 		if (!succeeded) { return; }
 
+		console.log(eventName + " removed from " + series.name);
+
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
 				.setTitle(eventName + " successfully removed from " + series.name)],

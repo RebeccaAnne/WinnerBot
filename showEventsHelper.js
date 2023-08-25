@@ -1,6 +1,6 @@
 const dayjs = require('dayjs');
 var fs = require("fs");
-const { EmbedBuilder } = require('discord.js');
+const { GuildScheduledEventManager } = require('discord.js');
 const { winnerNameList, getListSeparator } = require('./utils');
 
 
@@ -20,7 +20,7 @@ function formatEventDate(event) {
     return displayDate;
 }
 
-function getEventsDisplyString(eventSeriesArray, showAll) {
+async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVoiceEvents) {
 
     // Sort the events of each series
     for (let eventSeries of eventSeriesArray) {
@@ -59,7 +59,7 @@ function getEventsDisplyString(eventSeriesArray, showAll) {
         if (eventSeries.events.length > 0 || showAll) {
 
             dataToShow = true;
-            eventListString += "**" + eventSeries.name + ":**\n";
+            eventListString += "**" + eventSeries.name + "**\n";
             eventListString += "*(organized by " + eventSeries.organizers[0].username + "";
             if (eventSeries.eventThread) {
                 eventListString += " in <#" + eventSeries.eventThread + ">"
@@ -76,7 +76,7 @@ function getEventsDisplyString(eventSeriesArray, showAll) {
 
                 // Add formatted date to the string
                 eventListString += formatEventDate(event);
-    
+
                 if (showAll && event.reminders.length != 0) {
                     // If showAll is set, also show the reminders for each event
                     eventListString += ", Reminders:\n";
@@ -97,6 +97,22 @@ function getEventsDisplyString(eventSeriesArray, showAll) {
         }
         eventListString += "\n";
     }
+
+    if (includeVoiceEvents) {
+        const eventManager = new GuildScheduledEventManager(guild);
+
+        let scheduledEvents = await eventManager.fetch();
+        if (scheduledEvents.size > 0) {
+            eventListString += "**Voice Events**\n";
+
+            for (let scheduledEvent of scheduledEvents.values()) {
+                eventListString += "- **" + scheduledEvent.name + "**: ";
+
+                eventListString += "<t:" + dayjs(scheduledEvent.scheduledStartAt).unix() + ":f>\n";
+            }
+        }
+    }
+
     return eventListString;
 }
 

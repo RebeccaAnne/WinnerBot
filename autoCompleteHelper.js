@@ -1,3 +1,4 @@
+const { GuildScheduledEventManager } = require('discord.js');
 
 let seriesNameCache = {};
 let eventNameCache = {};
@@ -25,6 +26,9 @@ populateEventNameCache = (guildId) => {
             eventNameCache[guildId][eventSeries.name].push(event.name);
         }
     }
+
+    // Add voice events to the auto-complete cache
+    seriesNameCache[guildId].push("Voice Events");
 }
 
 addSeriesNameToCache = (guildId, seriesName) => {
@@ -47,28 +51,46 @@ handleSeriesAutoComplete = async (interaction) => {
     let seriesNames = getSeriesNames(interaction.guild.id);
 
     const focusedOption = interaction.options.getFocused(true);
-    let filtered = [];
 
     if (focusedOption.name === 'series') {
         filtered = seriesNames.filter(choice => {
             return choice.toUpperCase().startsWith(focusedOption.value.toUpperCase());
         });
+
+        await interaction.respond(
+            filtered.map(choice => ({ name: choice, value: choice }))
+        );
     }
 
     else if (focusedOption.name === 'event') {
         const seriesName = interaction.options.getString('series');
         if (seriesName) {
-            let eventNames = getEventNames(interaction.guild.id, seriesName);
 
-            filtered = eventNames.filter(choice => {
-                return choice.toUpperCase().startsWith(focusedOption.value.toUpperCase());
-            });
+            if (seriesName === "Voice Events") {
+                const eventManager = new GuildScheduledEventManager(interaction.guild);
+                let scheduledEvents = await eventManager.fetch();
+
+                let filtered = scheduledEvents.filter(choice => {
+                    return choice.name.toUpperCase().startsWith(focusedOption.value.toUpperCase());
+                });
+
+                await interaction.respond(
+                    filtered.map(choice => ({ name: choice.name, value: choice.id })),
+                );
+            }
+            else {
+                let eventNames = getEventNames(interaction.guild.id, seriesName);
+
+                let filtered = eventNames.filter(choice => {
+                    return choice.toUpperCase().startsWith(focusedOption.value.toUpperCase());
+                });
+
+                await interaction.respond(
+                    filtered.map(choice => ({ name: choice, value: choice }))
+                );
+            }
         }
     }
-
-    await interaction.respond(
-        filtered.map(choice => ({ name: choice, value: choice })),
-    );
 }
 
 module.exports = {

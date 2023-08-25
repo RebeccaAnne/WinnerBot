@@ -33,11 +33,11 @@ module.exports = {
 			})
 		}
 		else {
-			let description = getEventsDisplyString(seriesWithEvents, false);
+			let description = await getEventsDisplyString(guild, seriesWithEvents, false, true);
 
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setTitle("Upcoming Events: ")
+					.setTitle("Upcoming Events ")
 					.setDescription(description)
 					.setColor(0xff)
 					.setFooter({ text: "(Use /show-event-details for more information on an event)" })]

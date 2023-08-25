@@ -113,6 +113,8 @@ module.exports = {
 		});
 		if (!succeeded) { return; }
 
+		console.log("Reminder added to " + event.name + " in " + seriesName);
+
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
 				.setDescription(replyString)

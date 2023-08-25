@@ -34,11 +34,11 @@ module.exports = {
 			})
 		}
 		else {
-			let description = getEventsDisplyString(myEventSeries, true);
+			let description = await getEventsDisplyString(guild, myEventSeries, true);
 
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
-					.setTitle("Your event series:")
+					.setTitle("Your event series")
 					.setDescription(description)],
 				ephemeral: true
 			});
