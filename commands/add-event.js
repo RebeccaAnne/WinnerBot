@@ -189,7 +189,7 @@ module.exports = {
 				embeds: [new EmbedBuilder()
 					.setDescription(replyString)
 					.setTitle(newEvent.name + " added to " + series.name)
-					.setColor(oxff)]
+					.setColor(0xff)]
 			});
 
 			if (reminderDateTime) {
