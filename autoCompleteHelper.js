@@ -46,11 +46,16 @@ addEventNameToCache = (guildId, seriesName, eventName) => {
 }
 
 removeEventFromToCache = (guildId, seriesName, eventName) => {
-    let eventIndex = eventNameCache[guildId][seriesName].findIndex(name => {
-        return name.toUpperCase() == eventName.toUpperCase();
-    });
-    if (eventIndex != -1) {
-        eventNameCache[guildId][seriesName].splice(eventIndex, 1);
+    if (eventNameCache[guildId]) {
+        if (eventNameCache[guildId][seriesName]) {
+
+            let eventIndex = eventNameCache[guildId][seriesName].findIndex(name => {
+                return name.toUpperCase() == eventName.toUpperCase();
+            });
+            if (eventIndex != -1) {
+                eventNameCache[guildId][seriesName].splice(eventIndex, 1);
+            }
+        }
     }
 }
 

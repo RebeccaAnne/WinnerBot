@@ -198,7 +198,7 @@ eventExpirationCheck = async (guild, serverConfig) => {
             let now = dayjs();
 
             if (now.isAfter(eventExpireTime)) {
-                removeEventFromToCache(guild.id, seriesName, eventName);
+                removeEventFromToCache(guild.id, series.name, event.name);
                 console.log(
                     event.name + " in the " + series.name + " series, scheduled for " + dayjs(event.date).format() + " has expired");
                 return false;
