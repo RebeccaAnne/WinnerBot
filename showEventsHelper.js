@@ -105,7 +105,18 @@ async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVo
         if (scheduledEvents.size > 0) {
             eventListString += "**Voice Events**\n";
 
-            for (let scheduledEvent of scheduledEvents.values()) {
+            let eventArrray = Array.from(scheduledEvents.values());
+
+            eventArrray.sort((a, b) => {
+                let aDate = dayjs(a.scheduledStartAt);
+                let bDate = dayjs(b.scheduledStartAt);
+
+                if (aDate.isBefore(bDate)) { return -1; }
+                else if (bDate.isBefore(aDate)) { return 1; }
+                else { return 0; }
+            })
+
+            for (let scheduledEvent of eventArrray) {
                 eventListString += "- **" + scheduledEvent.name + "**: ";
 
                 eventListString += "<t:" + dayjs(scheduledEvent.scheduledStartAt).unix() + ":f>\n";

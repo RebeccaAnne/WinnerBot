@@ -20,23 +20,29 @@ populateEventNameCache = (guildId) => {
     for (let eventSeries of serverData.eventSeries) {
 
         seriesNameCache[guildId].push(eventSeries.name);
+
         eventNameCache[guildId][eventSeries.name] = []
 
         for (let event of eventSeries.events) {
             eventNameCache[guildId][eventSeries.name].push(event.name);
         }
+        eventNameCache[guildId][eventSeries.name].sort();
     }
+    seriesNameCache[guildId].sort();
+
 
     // Add voice events to the auto-complete cache
     seriesNameCache[guildId].push("Voice Events");
 }
 
 addSeriesNameToCache = (guildId, seriesName) => {
-    seriesNameCache[guildId].push(seriesName)
+    seriesNameCache[guildId].push(seriesName);
+    seriesNameCache[guildId].sort();
 }
 
 addEventNameToCache = (guildId, seriesName, eventName) => {
     eventNameCache[guildId][seriesName].push(eventName)
+    eventNameCache[guildId][seriesName].sort();
 }
 
 removeEventFromToCache = (guildId, seriesName, eventName) => {
