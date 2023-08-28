@@ -1,6 +1,7 @@
 const dayjs = require('dayjs');
 const { Mutex } = require('async-mutex');
 var fs = require("fs");
+const { normalize } = require('path');
 
 getOrdinal = (n) => {
     let ord = 'th';
@@ -23,13 +24,17 @@ formatWinnerReason = (winObject) => {
     return "[" + winObject.reason + "](" + winObject.link + ")";
 }
 
+normalizeString = (string) => {
+    return string.toUpperCase().replace('`', '\'').replace('’', '\'').replace('‘', '\'').replace('“', '\"').replace('”', '\"');
+}
+
 formatWinnerString = (winnerObject) => {
     let winnerString = "**" + winnerObject.username + "**: ";
     let winsToDisplay = [];
 
     winnerObject.wins.forEach(win => {
 
-        let winToDisplay = winsToDisplay.find(element => element.reason.toUpperCase() == win.reason.toUpperCase())
+        let winToDisplay = winsToDisplay.find(element => normalizeString(element.reason) == normalizeString(win.reason));
         if (winToDisplay) {
             Object.assign(winToDisplay, win);
             winToDisplay.count++;
