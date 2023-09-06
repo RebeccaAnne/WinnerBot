@@ -15,25 +15,10 @@ module.exports = {
 		if (dataFile[guild.id] == null) {
 			dataFile[guild.id] = {};
 		}
-
-		// Filter to only those series that have scheduled events
 		let serverData = dataFile[guild.id];
-		let seriesWithEvents = serverData.eventSeries.filter(series => {
-			for (const organizer of series.organizers) {
-				if (series.events.length != 0) { return true; }
-			}
-			return false;
-		})
 
-		if (seriesWithEvents.length == 0) {
-			await interaction.reply({
-				embeds: [new EmbedBuilder()
-					.setTitle("No Upcoming Events")
-					.setColor(0xff)]
-			})
-		}
-		else {
-			let description = await getEventsDisplyString(guild, seriesWithEvents, false, true);
+		let description = await getEventsDisplyString(guild, serverData.eventSeries, false, true);
+		if (description) {
 
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
@@ -42,6 +27,13 @@ module.exports = {
 					.setColor(0xff)
 					.setFooter({ text: "(Use /show-event-details for more information on an event)" })]
 			});
+		}
+		else {
+			await interaction.reply({
+				embeds: [new EmbedBuilder()
+					.setTitle("No Upcoming Events")
+					.setColor(0xff)]
+			})
 		}
 	}
 }

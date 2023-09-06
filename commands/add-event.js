@@ -53,6 +53,14 @@ module.exports = {
 			reminderChannelId = interaction.channelId;
 		}
 
+		if (seriesName == "Voice Events") {
+			await interaction.reply({
+				content: "add-event not supported for voice events",
+				ephemeral: true
+			});
+			return false;
+		}
+
 		// Load the data from file
 		let newEvent = {};
 		let series = {};
@@ -100,11 +108,8 @@ module.exports = {
 				return false;
 			}
 
-			let id = await getNewId(guild.id);
-
 			newEvent = {
 				name: eventName,
-				id: id,
 				reminders: []
 			}
 

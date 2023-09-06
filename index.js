@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const dayjs = require('dayjs');
@@ -8,6 +8,7 @@ const { ServerResponse } = require('node:http');
 const { scheduleWinnerExpirationCheck, winnerExpirationCheck } = require('./timers');
 const { Mutex } = require('async-mutex');
 const { populateEventNameCache } = require('./autoCompleteHelper')
+const { getEventsDisplyString } = require('./showEventsHelper')
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -34,6 +35,7 @@ for (const file of commandFiles) {
 
 
 let winnerListFile = require("./winner-and-event-data.json");
+const { channel } = require('node:diagnostics_channel');
 const dataPath = path.join(__dirname, 'data');
 const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
 
@@ -111,6 +113,30 @@ client.once(Events.ClientReady, async c => {
 		for (const series of winnerList.eventSeries) {
 			await scheduleSeriesTimers(serverConfig, guild, series)
 		}
+
+		console.log("Scheduling event updates for " + serverConfig.guildId);
+		const upcomingEventsJob = new CronJob(serverConfig.eventUpdateSchedule, async function () {
+
+			let filename = "winner-and-event-data.json";
+			let dataFile = require("./" + filename);
+			if (dataFile[guild.id] == null) {
+				dataFile[guild.id] = {};
+			}
+			let serverData = dataFile[guild.id];
+
+			let description = await getEventsDisplyString(guild, serverData.eventSeries, false, true);
+			if (description) {
+				let channel = await client.channels.fetch(serverConfig.eventUpdateChannel, { force: true });
+
+				await channel.send({
+					embeds: [new EmbedBuilder()
+						.setTitle("Upcoming Events ")
+						.setDescription(description)
+						.setColor(0xff)
+						.setFooter({ text: "(Use /show-event-details for more information on an event)" })]
+				});
+			}
+		}, null, true, "America/Los_Angeles");
 
 		// Run a just-in-case expiration for winners and events at midnight
 		console.log("Scheduling check for midnight for " + serverConfig.guildId);

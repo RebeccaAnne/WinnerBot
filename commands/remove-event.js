@@ -79,7 +79,7 @@ module.exports = {
 		if (!succeeded) { return; }
 
 		console.log(eventName + " removed from " + seriesName);
-		removeEventFromToCache (guild.id, seriesName, eventName);
+		removeEventFromToCache(guild.id, seriesName, eventName);
 
 		await interaction.reply({
 			embeds: [new EmbedBuilder()

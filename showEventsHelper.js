@@ -35,7 +35,7 @@ async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVo
     }
 
     // Sort the series by ealiest event
-    serverData.eventSeries.sort((a, b) => {
+    eventSeriesArray.sort((a, b) => {
 
         // If one of the series doesn't have any events, sort it first
         if (a.events.length == 0 || b.events.length == 0) {
@@ -53,12 +53,10 @@ async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVo
     })
 
     let eventListString = "";
-    let dataToShow = false;
     for (let eventSeries of eventSeriesArray) {
 
         if (eventSeries.events.length > 0 || showAll) {
 
-            dataToShow = true;
             eventListString += "**" + eventSeries.name + "**\n";
             eventListString += "*(organized by " + eventSeries.organizers[0].username + "";
             if (eventSeries.eventThread) {

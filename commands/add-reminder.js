@@ -40,6 +40,14 @@ module.exports = {
 			reminderChannelId = interaction.channelId;
 		}
 
+		if (seriesName == "Voice Events") {
+			await interaction.reply({
+				content: "add-reminder not supported for voice events",
+				ephemeral: true
+			});
+			return false;
+		}
+
 		let replyString = ""
 		let event = {};
 		let succeeded = await getMutex().runExclusive(async () => {

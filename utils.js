@@ -25,7 +25,7 @@ formatWinnerReason = (winObject) => {
 }
 
 normalizeString = (string) => {
-    return string.toUpperCase().replace('`', '\'').replace('’', '\'').replace('‘', '\'').replace('“', '\"').replace('”', '\"');
+    return string.toUpperCase().trim().replace('`', '\'').replace('’', '\'').replace('‘', '\'').replace('“', '\"').replace('”', '\"');
 }
 
 formatWinnerString = (winnerObject) => {
@@ -173,22 +173,8 @@ getMutex = () => {
     return globalMutex;
 }
 
-getNewId = async (guildId) => {
 
-    let filename = "winner-and-event-data.json";
-    let dataFile = require("./" + filename);
-    let guildData = dataFile[guildId];
-
-    if (!guildData.lastId) {
-        guildData.lastId = 0;
-    }
-
-    guildData.lastId++;
-
-    fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
-    return guildData.lastId;
-}
 
 module.exports = {
-    getNewId, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
+    getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
 }

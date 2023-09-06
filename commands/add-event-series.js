@@ -63,11 +63,8 @@ module.exports = {
 				}
 			};
 
-			id = await getNewId(guild.id);
-
 			newSeries = {
 				name: seriesName,
-				id: id,
 				organizers: [
 					{
 						username: organizer.displayName,
@@ -83,7 +80,7 @@ module.exports = {
 			serverData.eventSeries.push(newSeries);
 
 			fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
-			addSeriesNameToCache(guild.id, newSeries.name)
+			addSeriesNameToCache(guild.id, newSeries.name);
 			return true;
 		});
 		if (!succeeded) { return; }
