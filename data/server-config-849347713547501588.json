@@ -18,6 +18,6 @@
     ],
     "accessDescription": "mods and junior secretaries",
     "winDurationInDays": 7,
-    "eventUpdateSchedule": "0 0 * * 4",
+    "eventUpdateSchedule": "5 5 * * 4",
     "eventUpdateChannel":"849347713547501591"
 }
