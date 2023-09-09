@@ -47,7 +47,13 @@ module.exports = {
 
 				// Get the string for this series (max 5 events)
 				await interaction.deferReply();
-				description = getEventsDisplyStringForSeries(series, false, 5);
+				description += "*(organized by " + series.organizers[0].username + "";
+				if (series.eventThread) {
+					description += " in <#" + series.eventThread + ">"
+				}
+				description += ")*\n"
+				description += getEventsDisplyStringForSeries(series, false, 5);
+	
 				title += "in " + seriesName;
 			}
 		}
