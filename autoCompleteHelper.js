@@ -36,7 +36,6 @@ populateEventNameCache = (guildId) => {
 }
 
 addSeriesNameToCache = (guildId, seriesName) => {
-    console.log("Adding " + seriesName + " to the cache")
     seriesNameCache[guildId].push(seriesName);
     seriesNameCache[guildId].sort();
 
@@ -44,11 +43,6 @@ addSeriesNameToCache = (guildId, seriesName) => {
 }
 
 addEventNameToCache = (guildId, seriesName, eventName) => {
-    console.log("Adding " + seriesName + " " + eventName + " to the cache")
-    console.log(eventNameCache)
-    console.log(eventNameCache[guildId])
-    console.log(eventNameCache[guildId][seriesName])
-
     eventNameCache[guildId][seriesName].push(eventName)
     eventNameCache[guildId][seriesName].sort();
 }

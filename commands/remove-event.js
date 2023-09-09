@@ -42,7 +42,9 @@ module.exports = {
 				return false;
 			}
 
-			// To add events to the series, the caller must either be an organzier or a mod/js
+			let serverConfig = require("../data/server-config-" + guild.id + ".json");
+
+			// To remove events from the series, the caller must either be an organzier or a mod/js
 			let callingMember = await guild.members.fetch(interaction.user.id);
 			if (!series.organizers.find(organizer => (organizer.id == callingMember.id)) &&
 				!isMemberModJs(serverConfig, callingMember)) {

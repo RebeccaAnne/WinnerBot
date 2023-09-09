@@ -20,6 +20,79 @@ function formatEventDate(event) {
     return displayDate;
 }
 
+function getEventsDisplyStringForSeries(eventSeries, showAll, maxEvents) {
+
+    let eventListString = "";
+
+    // Sort the events by date
+    eventSeries.events.sort((a, b) => {
+        let aDate = dayjs(a.date);
+        let bDate = dayjs(b.date);
+
+        if (aDate.isBefore(bDate)) { return -1; }
+        else if (bDate.isBefore(aDate)) { return 1; }
+        else { return 0; }
+    });
+
+    // Don't show more than maxEvents upcoming events for this series unless the caller passed showAll 
+    let maxEventsToShow = showAll ? eventSeries.events.length : maxEvents;
+    for (let i = 0; i < maxEventsToShow && i < eventSeries.events.length; i++) {
+        let event = eventSeries.events[i];
+
+        // Add event title to the string
+        eventListString += "- **" + event.name + "**: ";
+
+        // Add formatted date to the string
+        eventListString += formatEventDate(event);
+
+        if (showAll && event.reminders.length != 0) {
+            // If showAll is set, also show the reminders for each event
+            eventListString += ", Reminders:\n";
+
+            for (const reminder of event.reminders) {
+                eventListString += " - <t:" + dayjs(reminder.date).unix() + ":f> : <#" + reminder.channel + ">" + "\n";
+            }
+        }
+        else {
+            eventListString += "\n";
+        }
+    }
+
+    // If there are more events than we showed, display the count of non-displayed events
+    if (eventSeries.events.length > maxEventsToShow) {
+        eventListString += "*(" + (eventSeries.events.length - maxEvents) + " more scheduled event(s))*\n"
+    }
+
+    return eventListString;
+}
+
+async function getEventsDisplyStringForVoice(guild, scheduledEvents) {
+
+    if (!scheduledEvents) {
+        const eventManager = new GuildScheduledEventManager(guild);
+        scheduledEvents = await eventManager.fetch();
+    }
+
+    let eventArrray = Array.from(scheduledEvents.values());
+    eventArrray.sort((a, b) => {
+        let aDate = dayjs(a.scheduledStartAt);
+        let bDate = dayjs(b.scheduledStartAt);
+
+        if (aDate.isBefore(bDate)) { return -1; }
+        else if (bDate.isBefore(aDate)) { return 1; }
+        else { return 0; }
+    })
+
+    let eventListString = "";
+    for (let scheduledEvent of eventArrray) {
+        eventListString += "- **" + scheduledEvent.name + "**: ";
+
+        eventListString += "<t:" + dayjs(scheduledEvent.scheduledStartAt).unix() + ":f>\n";
+    }
+
+    return eventListString;
+}
+
 async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVoiceEvents) {
 
     // Sort the events of each series
@@ -64,34 +137,8 @@ async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVo
             }
             eventListString += ")*\n"
 
-            // Only show the first three upcoming events for this series unless the caller passed showAll 
-            let maxEventsToShow = showAll ? eventSeries.events.length : 3;
-            for (let i = 0; i < maxEventsToShow && i < eventSeries.events.length; i++) {
-                let event = eventSeries.events[i];
-
-                // Add event title to the string
-                eventListString += "- **" + event.name + "**: ";
-
-                // Add formatted date to the string
-                eventListString += formatEventDate(event);
-
-                if (showAll && event.reminders.length != 0) {
-                    // If showAll is set, also show the reminders for each event
-                    eventListString += ", Reminders:\n";
-
-                    for (const reminder of event.reminders) {
-                        eventListString += " - <t:" + dayjs(reminder.date).unix() + ":f> : <#" + reminder.channel + ">" + "\n";
-                    }
-                }
-                else {
-                    eventListString += "\n";
-                }
-            }
-
-            // If there are more events than we showed, display the count of non-displayed events
-            if (eventSeries.events.length > maxEventsToShow) {
-                eventListString += "*(" + (eventSeries.events.length - 3) + " more scheduled event(s))*\n"
-            }
+            // Get the list of events. Show a max of three per series unless the caller passed showAll.
+            eventListString += getEventsDisplyStringForSeries(eventSeries, showAll, 3);
         }
         eventListString += "\n";
     }
@@ -102,27 +149,11 @@ async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVo
         let scheduledEvents = await eventManager.fetch();
         if (scheduledEvents.size > 0) {
             eventListString += "**Voice Events**\n";
-
-            let eventArrray = Array.from(scheduledEvents.values());
-
-            eventArrray.sort((a, b) => {
-                let aDate = dayjs(a.scheduledStartAt);
-                let bDate = dayjs(b.scheduledStartAt);
-
-                if (aDate.isBefore(bDate)) { return -1; }
-                else if (bDate.isBefore(aDate)) { return 1; }
-                else { return 0; }
-            })
-
-            for (let scheduledEvent of eventArrray) {
-                eventListString += "- **" + scheduledEvent.name + "**: ";
-
-                eventListString += "<t:" + dayjs(scheduledEvent.scheduledStartAt).unix() + ":f>\n";
-            }
+            eventListString += await getEventsDisplyStringForVoice(guild, scheduledEvents);
         }
     }
 
     return eventListString;
 }
 
-module.exports = { getEventsDisplyString, formatEventDate }
+module.exports = { getEventsDisplyStringForVoice, getEventsDisplyStringForSeries, getEventsDisplyString, formatEventDate }
