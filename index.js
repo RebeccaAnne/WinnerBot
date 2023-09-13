@@ -141,7 +141,7 @@ client.once(Events.ClientReady, async c => {
 		// Run a just-in-case expiration for winners and events at midnight
 		console.log("Scheduling check for midnight for " + serverConfig.guildId);
 		const job = new CronJob("0 0 0 * * *", async function () {
-			await winnersExpirationCheck(guild, serverConfig);
+			await winnerExpirationCheck(guild, serverConfig);
 			await eventExpirationCheck(guild, serverConfig);
 		}, null, true);
 
