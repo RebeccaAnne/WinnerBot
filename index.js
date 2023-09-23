@@ -114,6 +114,9 @@ client.once(Events.ClientReady, async c => {
 			await scheduleSeriesTimers(serverConfig, guild, series)
 		}
 
+		await nMinusOneCheck(guild, serverConfig);
+		await scheduleNMinusOneCheck(guild, serverConfig);
+
 		console.log("Scheduling event updates for " + serverConfig.guildId);
 		const upcomingEventsJob = new CronJob(serverConfig.eventUpdateSchedule, async function () {
 
@@ -138,11 +141,12 @@ client.once(Events.ClientReady, async c => {
 			}
 		}, null, true, "America/Los_Angeles");
 
-		// Run a just-in-case expiration for winners and events at midnight
+		// Run a just-in-case expiration for everything at midnight
 		console.log("Scheduling check for midnight for " + serverConfig.guildId);
 		const job = new CronJob("0 0 0 * * *", async function () {
 			await winnerExpirationCheck(guild, serverConfig);
 			await eventExpirationCheck(guild, serverConfig);
+			await nMinusOneCheck(guild, serverConfig);
 		}, null, true);
 
 		populateEventNameCache(serverConfig.guildId);

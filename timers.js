@@ -2,6 +2,7 @@ const { CronJob } = require('cron');
 const fs = require('node:fs');
 const { EmbedBuilder } = require('discord.js');
 const { formatEventDate } = require('./showEventsHelper')
+const { declareTerror } = require('./addWinnersHelper')
 
 const dayjs = require('dayjs');
 var utc = require('dayjs/plugin/utc')
@@ -14,7 +15,7 @@ dayjs.extend(timezone)
 winnerExpirationCheck = async (guild, serverConfig) => {
 
     let winnerListFile = require("./winner-and-event-data.json");
-    winnerList = winnerListFile[serverConfig.guildId];
+    let winnerList = winnerListFile[serverConfig.guildId];
 
     console.log(dayjs().format() + " Checking for expired winners in " + serverConfig.guildId)
 
@@ -246,4 +247,136 @@ scheduleSeriesTimers = async (serverConfig, guild, series) => {
     }
 }
 
-module.exports = { scheduleWinnerExpirationCheck, scheduleWinExpirationCheck, scheduleSeriesTimers, winnerExpirationCheck }
+triggerNMinusOne = async (guild, serverConfig) => {
+    let channel = await guild.channels.fetch(serverConfig.fanworksAnnouncementChannel);
+
+    console.log("N-1 triggered for " + serverConfig.guildId + " at " + dayjs().format());
+
+    let serverData = {}
+    await getMutex().runExclusive(async () => {
+
+        // Load the winner array from file
+        let dataFile = require("./winner-and-event-data.json");
+        serverData = dataFile[serverConfig.guildId];
+
+        // Decrease the terror threshold and update the last n-1 date
+        serverData.currentTerrorThreshold--;
+        serverData.lastNMinusOne = dayjs().format();
+
+        // Check if decreasing the terror threshold has triggered a terror
+        let terrorTriggered = serverData.winners.length >= serverData.currentTerrorThreshold;
+
+        if (!terrorTriggered) {
+
+            // Send an announcement to the channel regarding n-1
+            await channel.send({
+                embeds: [new EmbedBuilder()
+                    .setDescription("The so called “Terrors of Astandalas” have not been heard from since <t:"
+                        + dayjs(serverData.lastTerrorDate).unix()
+                        + ":D>. Sources in the palace say that the imperial guard has become complacent, and it would now take only "
+                        + serverData.currentTerrorThreshold
+                        + " members to create a Terror.")
+                    .setTitle("All Quiet in Astandalas")
+                    .setFooter({
+                        text: "There are currently " + serverData.winners.length + " out of the " + serverData.currentTerrorThreshold + " winners needed for Terror of Astandalas"
+                    })
+                    .setColor(0xd81b0e)]
+            });
+        }
+        else {
+
+            console.log("N-1 has triggered a terror");
+
+            // Send an announcement to the channel indicating that n-1 has triggered a terror
+            await channel.send({
+                embeds: [new EmbedBuilder()
+                    .setDescription("The so called “Terrors of Astandalas” had not been heard from since <t:"
+                        + dayjs(serverData.lastTerrorDate).unix()
+                        + ":D>. Sources in the palace say that the imperial guard became complacent, allowing "
+                        + serverData.currentTerrorThreshold
+                        + " members to terrorize the Empire.")
+                    .setTitle("Terror of Astandalas!")
+                    .setColor(0xd81b0e)]
+            });
+
+            // Trigger the terror
+            await declareTerror(guild, serverConfig, serverData);
+        }
+
+        // Write the updated data back to file
+        fs.writeFileSync("winner-and-event-data.json", JSON.stringify(dataFile), () => { });
+    });
+
+    // Schedule the next n-1 check
+    await scheduleNMinusOneCheck(guild, serverConfig);
+}
+
+getNMinusOneTime = (serverConfig) => {
+
+    let dataFile = require("./winner-and-event-data.json");
+    serverData = dataFile[serverConfig.guildId];
+
+    let nextNMinusOneTime;
+    if (serverConfig.nMinusOneThresholdInMonths) {
+        if (serverData.lastNMinusOne) {
+            // If we've already had an n-1, the next one should be one month later
+            nextNMinusOneTime = dayjs(serverData.lastNMinusOne);
+            nextNMinusOneTime = nextNMinusOneTime.add(1, "month")
+        }
+        else {
+            // If we haven't had an n-1, the next one should be nMinusOneThresholdInMonths months after the most recent terror
+            nextNMinusOneTime = dayjs(serverData.lastTerrorDate);
+            nextNMinusOneTime = nextNMinusOneTime.add(serverConfig.nMinusOneThresholdInMonths, "month")
+        }
+    }
+    return nextNMinusOneTime;
+}
+
+nMinusOneCheck = (guild, serverConfig) => {
+    let dataFile = require("./winner-and-event-data.json");
+    serverData = dataFile[serverConfig.guildId];
+
+    console.log("Checking n-1 for " + serverConfig.guildId);
+    nMinusOneTime = getNMinusOneTime(serverConfig);
+
+    if (nMinusOneTime) {
+        now = dayjs();
+
+        // If we're past the nMinusOneTime and our current terror threshold is higher than the base, trigger n-1
+        if (now.isAfter(nMinusOneTime) &&
+            serverData.currentTerrorThreshold > serverConfig.baseTerrorThreshold) {
+            triggerNMinusOne(guild, serverConfig);
+        }
+    }
+}
+
+scheduleNMinusOneCheck = (guild, serverConfig) => {
+
+    let dataFile = require("./winner-and-event-data.json");
+    let serverData = dataFile[serverConfig.guildId];
+
+    // We only need to schedule an n-1 check if we're above the baseTerrorThreshold
+    if (serverConfig.nMinusOneThresholdInMonths &&
+        serverData.currentTerrorThreshold > serverConfig.baseTerrorThreshold) {
+
+        // Get the time and schedule a cron job
+        let nMinusOneTime = getNMinusOneTime(serverConfig);
+
+        console.log("Scheduling n-1 check for " + serverConfig.guildId + " at " + nMinusOneTime.format());
+
+        let cronTime =
+            nMinusOneTime.second() + " " +
+            nMinusOneTime.minute() + " " +
+            nMinusOneTime.hour() + " " +
+            nMinusOneTime.date() + " " +
+            nMinusOneTime.month() +
+            " *";  // Day of week
+
+        const job = new CronJob(cronTime, async function () {
+            nMinusOneCheck(guild, serverConfig);
+            this.stop(); // Run this once and then stop
+        }, null, true);
+    }
+}
+
+module.exports = { scheduleNMinusOneCheck, scheduleWinnerExpirationCheck, scheduleWinExpirationCheck, scheduleSeriesTimers, winnerExpirationCheck, nMinusOneCheck }

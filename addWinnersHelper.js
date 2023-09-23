@@ -5,6 +5,8 @@ const { winnerNameList, getListSeparator } = require('./utils');
 
 async function declareTerror(guild, serverConfig, winnerList) {
 
+    console.log("Declaring Terror")
+
     terrorCount = 1;
     if (winnerList.terrorCount) {
         terrorCount = winnerList.terrorCount + 1;
@@ -48,6 +50,7 @@ async function declareTerror(guild, serverConfig, winnerList) {
     winnerList.winners = [];
     winnerList.terrorCount = terrorCount;
     winnerList.lastTerrorDate = dayjs(Date.now()).format();
+    winnerList.lastNMinusOne = null;
 }
 
 function getWinObject(winnerList, winnerId) {
@@ -66,6 +69,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
     let dateWon = dayjs(Date.now());
     let winResponseString = "";
 
+    let terror = false;
     await getMutex().runExclusive(async () => {
 
         // Load the winner array from file
@@ -141,7 +145,6 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
         congratsMessage = "Congratulations" + winnerNameList(newWinners) + " on winning the discord for " + formatWinnerReason({ reason: reason, link: link });
 
         // Check for a terror
-        let terror = false;
         if (winnerList.winners.length >= winnerList.currentTerrorThreshold) {
 
             // Update the congrats message to indicate the terror
@@ -168,8 +171,12 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
         fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
     });
 
+    if (terror) {
+        // Schedule an n-1 check if this winner caused us to hit a terror
+        scheduleNMinusOneCheck(guild, serverConfig);
+    }
 
     return winResponseString;
 }
 
-module.exports = { addWinners, getWinObject }
+module.exports = { addWinners, getWinObject, declareTerror }
