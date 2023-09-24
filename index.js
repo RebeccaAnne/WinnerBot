@@ -34,7 +34,7 @@ for (const file of commandFiles) {
 }
 
 
-let winnerListFile = require("./winner-and-event-data.json");
+let dataFile = require("./winner-and-event-data.json");
 const { channel } = require('node:diagnostics_channel');
 const dataPath = path.join(__dirname, 'data');
 const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
@@ -44,14 +44,14 @@ for (const serverConfigFile of serverConfigFiles) {
 	const filePath = path.join(dataPath, serverConfigFile);
 	const serverConfig = require(filePath);
 
-	winnerList = winnerListFile[serverConfig.guildId];
+	let serverData = dataFile[serverConfig.guildId];
 
-	if (!winnerList.currentTerrorThreshold) {
-		winnerList.currentTerrorThreshold = serverConfig.terrorThreshold;
+	if (!serverData.currentTerrorThreshold) {
+		serverData.currentTerrorThreshold = serverConfig.terrorThreshold;
 	}
 }
 
-fs.writeFileSync("winner-and-event-data.json", JSON.stringify(winnerListFile), () => { });
+fs.writeFileSync("winner-and-event-data.json", JSON.stringify(dataFile), () => { });
 
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -101,21 +101,26 @@ client.once(Events.ClientReady, async c => {
 
 		const filePath = path.join(dataPath, serverConfigFile);
 		const serverConfig = require(filePath);
+		let serverData = dataFile[serverConfig.guildId];
 
 		let guild = await client.guilds.fetch(serverConfig.guildId);
 
 		await winnerExpirationCheck(guild, serverConfig);
-		for (const winner of winnerList.winners) {
+		for (const winner of serverData.winners) {
 			await scheduleWinnerExpirationCheck(winner, guild, serverConfig);
 		}
 
 		await eventExpirationCheck(guild, serverConfig);
-		for (const series of winnerList.eventSeries) {
+		for (const series of serverData.eventSeries) {
 			await scheduleSeriesTimers(serverConfig, guild, series)
 		}
 
-		await nMinusOneCheck(guild, serverConfig);
-		await scheduleNMinusOneCheck(guild, serverConfig);
+		let nMinusOneHit = await nMinusOneCheck(guild, serverConfig);
+		if (!nMinusOneHit) {
+			// If we trigger n-1 that will schedule the next check. If we don't, schedule on here
+			// (This seems hacky, not sure how to do it better)
+			await scheduleNMinusOneCheck(guild, serverConfig);
+		}
 
 		console.log("Scheduling event updates for " + serverConfig.guildId);
 		const upcomingEventsJob = new CronJob(serverConfig.eventUpdateSchedule, async function () {

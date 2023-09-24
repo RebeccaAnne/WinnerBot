@@ -41,7 +41,7 @@ async function declareTerror(guild, serverConfig, winnerList) {
                     .setTitle("The Terrors of Astandalas have Leveled Up!")
                     .setDescription("Due to Terrors successfully striking the glorious Empire of Astandalas twice in one week, the empire has increased its guard. It will now take "
                         + winnerList.currentTerrorThreshold +
-                        " members to create a Terror!")
+                        " Winners of the Discord to create a Terror!")
                     .setColor(0xd81b0e)]
             })
         }
@@ -173,7 +173,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
 
     if (terror) {
         // Schedule an n-1 check if this winner caused us to hit a terror
-        scheduleNMinusOneCheck(guild, serverConfig);
+        await scheduleNMinusOneCheck(guild, serverConfig);
     }
 
     return winResponseString;

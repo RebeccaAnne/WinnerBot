@@ -8,7 +8,7 @@
     "winnerListAllowedDescription": "#nine-worlds-fanworks or #nine-worlds",
     "fanworksAnnouncementChannel": "1090053691840659556",
     "terrorAnnouncementChannel": "1115166046874239077",
-    "baseTerrorThreshold": 2,
+    "baseTerrorThreshold": 1,
     "winnerRoleId": "1115079835912507433",
     "modChannel": "1116125287021805702",
     "modChannelDescription": "thread off junior-secretaries",
@@ -16,8 +16,9 @@
         "1115384280504340623"
     ],
     "accessDescription": "mods and junior secretaries",
-    "winDurationInDays": 1,
+    "winDurationInDays": 2,
     "eventUpdateSchedule": "0 0 * * *",
     "eventUpdateChannel": "1148828954023710781",
-    "nMinusOneThresholdInMonths": 2
+    "nMinusOneThreshold": 5,
+    "nMinusOneThresholdUnits": "day"
 }

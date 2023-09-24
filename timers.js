@@ -94,7 +94,7 @@ scheduleWinExpirationCheck = async (win, guild, serverConfig) => {
 
 scheduleWinnerExpirationCheck = async (winner, guild, serverConfig) => {
 
-    console.log("Scheduling expire checks for " + winner.username);
+    console.log("Scheduling expire checks for " + winner.username + " in " + serverConfig.guildId);
 
     for (const win of winner.wins) {
         await scheduleWinExpirationCheck(win, guild, serverConfig);
@@ -271,11 +271,11 @@ triggerNMinusOne = async (guild, serverConfig) => {
             // Send an announcement to the channel regarding n-1
             await channel.send({
                 embeds: [new EmbedBuilder()
-                    .setDescription("The so called “Terrors of Astandalas” have not been heard from since <t:"
+                    .setDescription("The so called “Terrors of Astandalas” have not been seen since <t:"
                         + dayjs(serverData.lastTerrorDate).unix()
                         + ":D>. Sources in the palace say that the imperial guard has become complacent, and it would now take only "
                         + serverData.currentTerrorThreshold
-                        + " members to create a Terror.")
+                        + " Winners of the Discord to terrorize the empire.")
                     .setTitle("All Quiet in Astandalas")
                     .setFooter({
                         text: "There are currently " + serverData.winners.length + " out of the " + serverData.currentTerrorThreshold + " winners needed for Terror of Astandalas"
@@ -290,12 +290,12 @@ triggerNMinusOne = async (guild, serverConfig) => {
             // Send an announcement to the channel indicating that n-1 has triggered a terror
             await channel.send({
                 embeds: [new EmbedBuilder()
-                    .setDescription("The so called “Terrors of Astandalas” had not been heard from since <t:"
+                    .setDescription("The so called “Terrors of Astandalas” had not previously been seen since <t:"
                         + dayjs(serverData.lastTerrorDate).unix()
                         + ":D>. Sources in the palace say that the imperial guard became complacent, allowing "
                         + serverData.currentTerrorThreshold
-                        + " members to terrorize the Empire.")
-                    .setTitle("Terror of Astandalas!")
+                        + " Winners of the Discord to terrorize the empire.")
+                    .setTitle("The Terrors of Astandalas Have Returned!")
                     .setColor(0xd81b0e)]
             });
 
@@ -317,22 +317,22 @@ getNMinusOneTime = (serverConfig) => {
     serverData = dataFile[serverConfig.guildId];
 
     let nextNMinusOneTime;
-    if (serverConfig.nMinusOneThresholdInMonths) {
+    if (serverConfig.nMinusOneThreshold) {
         if (serverData.lastNMinusOne) {
-            // If we've already had an n-1, the next one should be one month later
+            // If we've already had an n-1, the next one should be one unit (month) later
             nextNMinusOneTime = dayjs(serverData.lastNMinusOne);
-            nextNMinusOneTime = nextNMinusOneTime.add(1, "month")
+            nextNMinusOneTime = nextNMinusOneTime.add(1, serverConfig.nMinusOneThresholdUnits)
         }
         else {
-            // If we haven't had an n-1, the next one should be nMinusOneThresholdInMonths months after the most recent terror
+            // If we haven't had an n-1, the next one should be nMinusOneThreshold units (months) after the most recent terror
             nextNMinusOneTime = dayjs(serverData.lastTerrorDate);
-            nextNMinusOneTime = nextNMinusOneTime.add(serverConfig.nMinusOneThresholdInMonths, "month")
+            nextNMinusOneTime = nextNMinusOneTime.add(serverConfig.nMinusOneThreshold, serverConfig.nMinusOneThresholdUnits)
         }
     }
     return nextNMinusOneTime;
 }
 
-nMinusOneCheck = (guild, serverConfig) => {
+nMinusOneCheck = async (guild, serverConfig) => {
     let dataFile = require("./winner-and-event-data.json");
     serverData = dataFile[serverConfig.guildId];
 
@@ -345,18 +345,21 @@ nMinusOneCheck = (guild, serverConfig) => {
         // If we're past the nMinusOneTime and our current terror threshold is higher than the base, trigger n-1
         if (now.isAfter(nMinusOneTime) &&
             serverData.currentTerrorThreshold > serverConfig.baseTerrorThreshold) {
-            triggerNMinusOne(guild, serverConfig);
+            await triggerNMinusOne(guild, serverConfig);
+            return true;
         }
     }
+
+    return false;
 }
 
 scheduleNMinusOneCheck = (guild, serverConfig) => {
 
     let dataFile = require("./winner-and-event-data.json");
     let serverData = dataFile[serverConfig.guildId];
-
+ 
     // We only need to schedule an n-1 check if we're above the baseTerrorThreshold
-    if (serverConfig.nMinusOneThresholdInMonths &&
+    if (serverConfig.nMinusOneThreshold && 
         serverData.currentTerrorThreshold > serverConfig.baseTerrorThreshold) {
 
         // Get the time and schedule a cron job

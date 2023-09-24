@@ -20,5 +20,6 @@
     "winDurationInDays": 7,
     "eventUpdateSchedule": "5 5 * * 4",
     "eventUpdateChannel": "849347713547501591",
-    "nMinusOneThresholdInMonths": 2
+    "nMinusOneThreshold": 2,
+    "nMinusOneThresholdUnits": "month"
 }
