@@ -19,6 +19,6 @@
     "winDurationInDays": 2,
     "eventUpdateSchedule": "0 0 * * *",
     "eventUpdateChannel": "1148828954023710781",
-    "nMinusOneThreshold": 5,
+    "nMinusOneThreshold": 3,
     "nMinusOneThresholdUnits": "day"
 }
