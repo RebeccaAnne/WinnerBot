@@ -327,10 +327,10 @@ getNMinusOneTime = (serverConfig) => {
             // If we haven't had an n-1, the next one should be nMinusOneThreshold units (months) after the most recent terror
             nextNMinusOneTime = dayjs(serverData.lastTerrorDate);
             nextNMinusOneTime = nextNMinusOneTime.add(serverConfig.nMinusOneThreshold, serverConfig.nMinusOneThresholdUnits)
-        }
 
-        // Add an extra hour of buffer
-        nextNMinusOneTime = nextNMinusOneTime.add(1, "hour");
+            // Add an extra hour of buffer
+            nextNMinusOneTime = nextNMinusOneTime.add(1, "hour");
+        }
     }
     return nextNMinusOneTime;
 }
@@ -360,9 +360,9 @@ scheduleNMinusOneCheck = (guild, serverConfig) => {
 
     let dataFile = require("./winner-and-event-data.json");
     let serverData = dataFile[serverConfig.guildId];
- 
+
     // We only need to schedule an n-1 check if we're above the baseTerrorThreshold
-    if (serverConfig.nMinusOneThreshold && 
+    if (serverConfig.nMinusOneThreshold &&
         serverData.currentTerrorThreshold > serverConfig.baseTerrorThreshold) {
 
         // Get the time and schedule a cron job
