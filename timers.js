@@ -328,6 +328,9 @@ getNMinusOneTime = (serverConfig) => {
             nextNMinusOneTime = dayjs(serverData.lastTerrorDate);
             nextNMinusOneTime = nextNMinusOneTime.add(serverConfig.nMinusOneThreshold, serverConfig.nMinusOneThresholdUnits)
         }
+
+        // Add an extra hour of buffer
+        nextNMinusOneTime = nextNMinusOneTime.add(1, "hour");
     }
     return nextNMinusOneTime;
 }
