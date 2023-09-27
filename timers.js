@@ -292,7 +292,7 @@ triggerNMinusOne = async (guild, serverConfig) => {
                 embeds: [new EmbedBuilder()
                     .setDescription("The so called “Terrors of Astandalas” had not previously been seen since <t:"
                         + dayjs(serverData.lastTerrorDate).unix()
-                        + ":D>. Sources in the palace say that the imperial guard became complacent, allowing "
+                        + ":D>. Sources in the palace say that the imperial guard became complacent, allowing only "
                         + serverData.currentTerrorThreshold
                         + " Winners of the Discord to terrorize the empire.")
                     .setTitle("The Terrors of Astandalas Have Returned!")
