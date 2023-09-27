@@ -8,7 +8,7 @@
     "winnerListAllowedDescription": "#nine-worlds-fanworks or #nine-worlds",
     "fanworksAnnouncementChannel": "1090053691840659556",
     "terrorAnnouncementChannel": "1115166046874239077",
-    "baseTerrorThreshold": 1,
+    "baseTerrorThreshold": 2,
     "winnerRoleId": "1115079835912507433",
     "modChannel": "1116125287021805702",
     "modChannelDescription": "thread off junior-secretaries",
