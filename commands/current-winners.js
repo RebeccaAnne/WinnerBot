@@ -2,6 +2,7 @@ var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 const { } = require("../utils");
+const { format } = require("path");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -52,20 +53,69 @@ module.exports = {
 			});
 
 			let winnerString = "";
-			winnerList.winners.forEach(winner => {
-				winnerString += formatWinnerString(winner) + "\n";
-			});
+			let stringLength = 0;
+			let haveReplied = false;
+			for (let winner of winnerList.winners) {
+				let newWinner = formatWinnerString(winner) + "\n";
+				let newWinnerLength = newWinner.length;
 
-			// reply to the command
-			await interaction.reply({
-				embeds: [new EmbedBuilder()
-					.setTitle("Current Winners of the Discord")
-					.setDescription(winnerString)
-					.setFooter({
-						text: winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas"
-					})
-					.setColor(0xd81b0e)]
-			});
+				if ((stringLength + newWinnerLength) <= 4096) {
+					winnerString += formatWinnerString(winner) + "\n";
+					stringLength += newWinnerLength;
+				}
+				else {
+					// The string has gotten too big for a single message. Send a reply now, and 
+					// include the rest of the winners in follow up message(s). Don't include the footer here, 
+					// that will go on the last follow up message.
+					if (!haveReplied) {
+						await interaction.reply({
+							embeds: [new EmbedBuilder()
+								.setTitle("Current Winners of the Discord")
+								.setDescription(winnerString)
+								.setColor(0xd81b0e)]
+						});
+						haveReplied = true;
+					}
+					else {
+						// If we've already replied at least once, send this set of winners as a followup
+						await interaction.followUp({
+							embeds: [new EmbedBuilder()
+								.setTitle("Current Winners of the Discord (continued)")
+								.setDescription(winnerString)
+								.setColor(0xd81b0e)]
+						});
+					}
+
+					// Reset the winnerString to the winner who was too long
+					winnerString = newWinner;
+					stringLength = newWinnerLength;
+				}
+			};
+
+			if (!haveReplied) {
+				// reply to the command
+				await interaction.reply({
+					embeds: [new EmbedBuilder()
+						.setTitle("Current Winners of the Discord")
+						.setDescription(winnerString)
+						.setFooter({
+							text: winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas"
+						})
+						.setColor(0xd81b0e)]
+				});
+			}
+			else {
+				// If we've already replied at least once, send this message as a followup
+				await interaction.followUp({
+					embeds: [new EmbedBuilder()
+						.setTitle("Current Winners of the Discord (continued)")
+						.setDescription(winnerString)
+						.setFooter({
+							text: winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas"
+						})
+						.setColor(0xd81b0e)]
+				});
+			}
 		}
 	},
 };
