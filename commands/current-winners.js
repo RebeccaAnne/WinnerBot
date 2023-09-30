@@ -75,6 +75,7 @@ module.exports = {
 								.setColor(0xd81b0e)]
 						});
 						haveReplied = true;
+						console.log("Batching Winner List, first batch length " + stringLength);
 					}
 					else {
 						// If we've already replied at least once, send this set of winners as a followup
@@ -84,7 +85,9 @@ module.exports = {
 								.setDescription(winnerString)
 								.setColor(0xd81b0e)]
 						});
+						console.log("Additional batched message, length: " + stringLength);
 					}
+
 
 					// Reset the winnerString to the winner who was too long
 					winnerString = newWinner;
@@ -103,6 +106,7 @@ module.exports = {
 						})
 						.setColor(0xd81b0e)]
 				});
+				console.log("Current Winner String Length: " + stringLength);
 			}
 			else {
 				// If we've already replied at least once, send this message as a followup
@@ -115,6 +119,7 @@ module.exports = {
 						})
 						.setColor(0xd81b0e)]
 				});
+				console.log("Final batched message, length: " + stringLength);
 			}
 		}
 	},
