@@ -88,7 +88,6 @@ module.exports = {
 						console.log("Additional batched message, length: " + stringLength);
 					}
 
-
 					// Reset the winnerString to the winner who was too long
 					winnerString = newWinner;
 					stringLength = newWinnerLength;
@@ -96,7 +95,7 @@ module.exports = {
 			};
 
 			if (!haveReplied) {
-				// reply to the command
+				// Reply to the command if we haven't already
 				await interaction.reply({
 					embeds: [new EmbedBuilder()
 						.setTitle("Current Winners of the Discord")
@@ -109,7 +108,7 @@ module.exports = {
 				console.log("Current Winner String Length: " + stringLength);
 			}
 			else {
-				// If we've already replied at least once, send this message as a followup
+				// If we have already replied at least once, send this message as a followup
 				await interaction.followUp({
 					embeds: [new EmbedBuilder()
 						.setTitle("Current Winners of the Discord (continued)")

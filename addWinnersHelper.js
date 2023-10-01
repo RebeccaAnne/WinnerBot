@@ -142,7 +142,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
             + "<t:" + dateWon.unix() + ":f>"
 
         // Construct a congratulatory message to post in fanworks
-        congratsMessage = "Congratulations" + winnerNameList(newWinners) + " on winning the discord for " + formatWinnerReason({ reason: reason, link: link });
+        congratsMessage = "Congratulations " + winnerNameList(newWinners) + " on winning the discord for " + formatWinnerReason({ reason: reason, link: link });
 
         // Check for a terror
         if (winnerList.winners.length >= winnerList.currentTerrorThreshold) {
