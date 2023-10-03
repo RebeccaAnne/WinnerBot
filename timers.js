@@ -168,8 +168,9 @@ getEventExpireTime = (event) => {
     let eventExpireTime;
     if (!event.allDayEvent) {
         // Expire one hour after the event time
+        hoursToExpiration = (event.durationInHours) ? event.durationInHours : 1;
         eventExpireTime = dayjs(event.date);
-        eventExpireTime = eventExpireTime.add(1, "hour")
+        eventExpireTime = eventExpireTime.add(hoursToExpiration, "hour")
     }
     else {
         // If this is an all day event, expire it after the day has finished in UTC-12 (which for
@@ -199,7 +200,6 @@ eventExpirationCheck = async (guild, serverConfig) => {
             let now = dayjs();
 
             if (now.isAfter(eventExpireTime)) {
-                removeEventFromToCache(guild.id, series.name, event.name);
                 console.log(
                     event.name + " in the " + series.name + " series, scheduled for " + dayjs(event.date).format() + " has expired");
                 return false;

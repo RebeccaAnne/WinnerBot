@@ -1,72 +1,29 @@
 const { GuildScheduledEventManager } = require('discord.js');
+const dayjs = require('dayjs');
 
-let seriesNameCache = {};
-let eventNameCache = {};
-
-populateEventNameCache = (guildId) => {
+handleSeriesAutoComplete = async (interaction) => {
 
     // Load the data from file
     let filename = "winner-and-event-data.json";
     let dataFile = require("./" + filename);
-    if (dataFile[guildId] == null) {
-        dataFile[guildId] = {};
+    if (dataFile[interaction.guild] == null) {
+        dataFile[interaction.guild] = {};
     }
 
-    let serverData = dataFile[guildId];
-    seriesNameCache[guildId] = [];
-
-    eventNameCache[guildId] = {}
-
-    for (let eventSeries of serverData.eventSeries) {
-
-        seriesNameCache[guildId].push(eventSeries.name);
-
-        eventNameCache[guildId][eventSeries.name] = []
-
-        for (let event of eventSeries.events) {
-            eventNameCache[guildId][eventSeries.name].push(event.name);
-        }
-        eventNameCache[guildId][eventSeries.name].sort();
-    }
-    seriesNameCache[guildId].sort();
-
-
-    // Add voice events to the auto-complete cache
-    seriesNameCache[guildId].push("Voice Events");
-}
-
-addSeriesNameToCache = (guildId, seriesName) => {
-    seriesNameCache[guildId].push(seriesName);
-    seriesNameCache[guildId].sort();
-
-    eventNameCache[guildId][seriesName] = [];
-}
-
-addEventNameToCache = (guildId, seriesName, eventName) => {
-    eventNameCache[guildId][seriesName].push(eventName)
-    eventNameCache[guildId][seriesName].sort();
-}
-
-removeEventFromToCache = (guildId, seriesName, eventName) => {
-    if (eventNameCache[guildId]) {
-        if (eventNameCache[guildId][seriesName]) {
-
-            let eventIndex = eventNameCache[guildId][seriesName].findIndex(name => {
-                return name.toUpperCase() == eventName.toUpperCase();
-            });
-            if (eventIndex != -1) {
-                eventNameCache[guildId][seriesName].splice(eventIndex, 1);
-            }
-        }
-    }
-}
-
-handleSeriesAutoComplete = async (interaction) => {
-    let seriesNames = seriesNameCache[interaction.guild.id];
+    let serverData = dataFile[interaction.guild.id];
 
     const focusedOption = interaction.options.getFocused(true);
-
     if (focusedOption.name === 'series') {
+
+        let seriesNames = [];
+        for (let eventSeries of serverData.eventSeries) {
+            seriesNames.push(eventSeries.name);
+        }
+        seriesNames.sort();
+
+        // Add voice events to the series autocomplete
+        seriesNames.push("Voice Events");
+
         filtered = seriesNames.filter(choice => {
             return choice.toUpperCase().startsWith(focusedOption.value.toUpperCase());
         });
@@ -93,7 +50,32 @@ handleSeriesAutoComplete = async (interaction) => {
                 );
             }
             else {
-                let eventNames = eventNameCache[interaction.guild.id][seriesName];
+                let eventNames = [];
+
+                // Find the series we want
+                let eventSeries = serverData.eventSeries.find(series => series.name.toUpperCase() == seriesName.toUpperCase());
+
+                let showFutureEvents = true;
+                if (eventSeries.hideFutureEvents) {
+                    let callingMember = await interaction.guild.members.fetch(interaction.user.id);
+                    showFutureEvents = !!eventSeries.organizers.find(organizer => (organizer.id == callingMember.id));
+                }
+
+                for (let event of eventSeries.events) {
+
+                    if (!showFutureEvents) {
+                        // If we're not showing future events, check if this is one
+                        let now = dayjs();
+                        let eventTime = dayjs(event.date);
+                        if (!now.isBefore(eventTime)) {
+                            eventNames.push(event.name);
+                        }
+                    }
+                    else {
+                        eventNames.push(event.name);
+                    }
+                }
+                eventNames.sort();
 
                 let filtered = eventNames.filter(choice => {
                     return choice.toUpperCase().startsWith(focusedOption.value.toUpperCase());
@@ -108,5 +90,5 @@ handleSeriesAutoComplete = async (interaction) => {
 }
 
 module.exports = {
-    populateEventNameCache, addSeriesNameToCache, addEventNameToCache, handleSeriesAutoComplete
+    handleSeriesAutoComplete
 }

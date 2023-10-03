@@ -15,6 +15,11 @@ function formatEventDate(event) {
     else {
         // For non-all day events, format as a hammertime
         displayDate = "<t:" + eventDayJs.unix() + ":f>";
+
+        if (event.durationInHours) {
+            let eventEndTime = eventDayJs.add(event.durationInHours, "hour")
+            displayDate += " *(ends <t:" + eventEndTime.unix() + ":f>)*";
+        }
     }
 
     return displayDate;
@@ -26,18 +31,47 @@ function getEventsDisplyStringForSeries(eventSeries, showAll, maxEvents) {
 
     // Sort the events by date
     eventSeries.events.sort((a, b) => {
-        let aDate = dayjs(a.date);
-        let bDate = dayjs(b.date);
+
+        // For all day events, sort by the earliest time this event starts anywhere (UTC+14)
+        // If it's not alldat, the date will already be the full date time
+        let aDate = a.allDayEvent ? dayjs.tz(a.date, "Pacific/Kiritimati") : dayjs(a.date);
+        let bDate = b.allDayEvent ? dayjs.tz(b.date, "Pacific/Kiritimati") : dayjs(b.date);
 
         if (aDate.isBefore(bDate)) { return -1; }
         else if (bDate.isBefore(aDate)) { return 1; }
         else { return 0; }
     });
 
+    let now = dayjs();
+
     // Don't show more than maxEvents upcoming events for this series unless the caller passed showAll 
     let maxEventsToShow = showAll ? eventSeries.events.length : maxEvents;
-    for (let i = 0; i < maxEventsToShow && i < eventSeries.events.length; i++) {
-        let event = eventSeries.events[i];
+    let displayedEventCount = 0;
+    while (displayedEventCount < maxEventsToShow &&
+        displayedEventCount < eventSeries.events.length) {
+
+        let event = eventSeries.events[displayedEventCount];
+
+        if (eventSeries.hideFutureEvents && !showAll) {
+
+            // If we're hiding future events, check if this one has started yet
+            let eventStartTime;
+            if (event.allDayEvent) {
+
+                // We need to figure out if this day has started *anywhere*.
+                // Use Pacific/Kiritimati (UTC+14) for our ealiest timezone
+                eventStartTime = dayjs.tz(event.date, "Pacific/Kiritimati");
+            }
+            else {
+                eventStartTime = dayjs(event.date);
+            }
+
+            if (eventStartTime.isAfter(now)) {
+                // If we've hit an event that starts after now we can break out of the loop. 
+                // The events are sorted and all subsequent events will be later.
+                break;
+            }
+        }
 
         // Add event title to the string
         eventListString += "- **" + event.name + "**: ";
@@ -56,11 +90,22 @@ function getEventsDisplyStringForSeries(eventSeries, showAll, maxEvents) {
         else {
             eventListString += "\n";
         }
+        displayedEventCount++;
     }
 
     // If there are more events than we showed, display the count of non-displayed events
-    if (eventSeries.events.length > maxEventsToShow) {
-        eventListString += "*(" + (eventSeries.events.length - maxEvents) + " more scheduled event(s))*\n"
+    if (displayedEventCount < eventSeries.events.length) {
+        if (displayedEventCount == 0) {
+            eventListString += " - **" + eventSeries.events.length + " hidden future event";
+            eventListString += eventSeries.events.length > 1 ? "s" : "";
+            eventListString += "**\n";
+        }
+        else {
+            let addtionalEventCount = eventSeries.events.length - displayedEventCount
+            eventListString += "*(" + addtionalEventCount + " more scheduled event"
+            eventListString += addtionalEventCount > 1 ? "s" : "";
+            eventListString += ")*\n"
+        }
     }
 
     return eventListString;
@@ -130,17 +175,21 @@ async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVo
 
         if (eventSeries.events.length > 0 || showAll) {
 
-            eventListString += "**" + eventSeries.name + "**\n";
-            eventListString += "*(organized by " + eventSeries.organizers[0].username + "";
-            if (eventSeries.eventThread) {
-                eventListString += " in <#" + eventSeries.eventThread + ">"
-            }
-            eventListString += ")*\n"
+            seriesEventString = getEventsDisplyStringForSeries(eventSeries, showAll, 3);
 
-            // Get the list of events. Show a max of three per series unless the caller passed showAll.
-            eventListString += getEventsDisplyStringForSeries(eventSeries, showAll, 3);
+            if (seriesEventString) {
+                eventListString += "**" + eventSeries.name + "**\n";
+                eventListString += "*(organized by " + eventSeries.organizers[0].username + "";
+                if (eventSeries.eventThread) {
+                    eventListString += " in <#" + eventSeries.eventThread + ">"
+                }
+                eventListString += ")*\n"
+
+                // Get the list of events. Show a max of three per series unless the caller passed showAll.
+                eventListString += seriesEventString;
+                eventListString += "\n";
+            }
         }
-        eventListString += "\n";
     }
 
     if (includeVoiceEvents) {

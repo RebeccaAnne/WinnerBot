@@ -23,7 +23,7 @@ module.exports = {
 		}
 		let serverData = dataFile[guild.id];
 
-		let title = "Upcoming Events ";
+		let title = "Upcoming Events";
 		let description = "";
 		if (seriesName) {
 
@@ -47,14 +47,17 @@ module.exports = {
 
 				// Get the string for this series (max 5 events)
 				await interaction.deferReply();
-				description += "*(organized by " + series.organizers[0].username + "";
-				if (series.eventThread) {
-					description += " in <#" + series.eventThread + ">"
+				let seriesEventString = getEventsDisplyStringForSeries(series, false, 5);
+
+				if (seriesEventString) {
+					description += "*(organized by " + series.organizers[0].username + "";
+					if (series.eventThread) {
+						description += " in <#" + series.eventThread + ">"
+					}
+					description += ")*\n"
+					description += seriesEventString;
 				}
-				description += ")*\n"
-				description += getEventsDisplyStringForSeries(series, false, 5);
-	
-				title += "in " + seriesName;
+				title += " in " + seriesName;
 			}
 		}
 		else {
@@ -64,7 +67,6 @@ module.exports = {
 		}
 
 		if (description) {
-
 			await interaction.editReply({
 				embeds: [new EmbedBuilder()
 					.setTitle(title)

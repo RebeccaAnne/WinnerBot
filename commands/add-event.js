@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const dayjs = require('dayjs');
 const { isMemberModJs, tryParseHammerTime, tryParseYYYYMMDD } = require('../utils');
 const { formatEventDate } = require("../showEventsHelper");
+const { handleSeriesAutoComplete } = require("../autoCompleteHelper");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -24,6 +25,9 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('description')
 				.setDescription('Description of the event'))
+		.addNumberOption(option =>
+			option.setName('duration-in-hours')
+				.setDescription('How long the event lasts. Events with a time but no duration will stay on /upcoming-events for 1 hr.'))
 		.addBooleanOption(option =>
 			option.setName('announce-event')
 				.setDescription('Set to true to show an event creation announcement in this channel'))
@@ -40,6 +44,7 @@ module.exports = {
 		let eventDateTime = interaction.options.getString('event-date-time');
 		let reminderDateTime = interaction.options.getString('reminder-date-time');
 		let announceEvent = interaction.options.getBoolean("announce-event");
+		let durationInHours = interaction.options.getNumber("duration-in-hours");
 
 		let guild = interaction.guild;
 		let serverConfig = require("../data/server-config-" + guild.id + ".json");
@@ -128,8 +133,19 @@ module.exports = {
 					return false;
 				}
 
+				if (durationInHours) {
+					await interaction.reply({
+						content: "durationInHours is not valid for a YYYY-MM-DD. To control event duration please pass a  HammerTime (see https://hammertime.cyou/)", ephemeral: true
+					});
+					return false;
+
+				}
 				// if this is a YYYY-MM-DD date mark it as all day
 				newEvent.allDayEvent = true;
+			}
+
+			if (durationInHours) {
+				newEvent.durationInHours = durationInHours;
 			}
 
 			if (reminderDateTime) {
@@ -156,7 +172,6 @@ module.exports = {
 
 			series.events.push(newEvent);
 			fs.writeFileSync(filename, JSON.stringify(dataFile), () => { });
-			addEventNameToCache(guild.id, series.name, newEvent.name);
 			return true;
 		});
 
