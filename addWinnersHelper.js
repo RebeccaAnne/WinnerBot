@@ -63,10 +63,10 @@ function getWinObject(winnerList, winnerId) {
     return null;
 }
 
-async function addWinners(guild, serverConfig, newWinners, reason, link) {
+async function addWinners(guild, serverConfig, newWinners, reason, link, dateTime) {
 
-    // Set the date won 
-    let dateWon = dayjs(Date.now());
+    // Set the date won
+    let dateWon = dateTime ?? dayjs();
     let winResponseString = "";
 
     let terror = false;
@@ -142,17 +142,26 @@ async function addWinners(guild, serverConfig, newWinners, reason, link) {
             + "<t:" + dateWon.unix() + ":f>"
 
         // Construct a congratulatory message to post in fanworks
-        congratsMessage = "Congratulations " + winnerNameList(newWinners) + " on winning the discord for " + formatWinnerReason({ reason: reason, link: link });
+        congratsMessage =
+            "Congratulations " + winnerNameList(newWinners) +
+            " on winning the discord for " +
+            formatWinnerReason({ reason: reason, link: link });
+
 
         // Check for a terror
         if (winnerList.winners.length >= winnerList.currentTerrorThreshold) {
 
-            // Update the congrats message to indicate the terror
+            // Update the congrats and response messages to indicate the terror
             congratsMessage += " and triggering a Terror of Astandalas";
             winResponseString += "\nTerror of Astandalas!"
             terror = true;
         }
         congratsMessage += "!";
+
+        // If there was an explicit date/time, include it in the congrats string 
+        if (dateTime) {
+            congratsMessage += "\n(*" + "<t:" + dateWon.unix() + ":f>*)";
+        }
 
         // Set the congrats message before declaring the terror, because terror declarations can also cause posts to fanworks
         let fanworksAnnouncementChannel = await guild.channels.fetch(serverConfig.fanworksAnnouncementChannel);

@@ -15,7 +15,10 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('link')
 				.setDescription('Link to the winning work. (ao3, message link, etc.)')
-				.setRequired(true)),
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('win-date-time')
+				.setDescription('Optional date/time (hammertime) for this win. Defaults to now.')),
 	async execute(commandInteraction) {
 
 		let permissionErrorMessage = await modjsPermissionChannelCheck(commandInteraction);
@@ -31,7 +34,29 @@ module.exports = {
 
 		let reason = commandInteraction.options.getString('reason');
 		let link = commandInteraction.options.getString('link');
+		let dateTimeString = commandInteraction.options.getString('win-date-time');
 
+		let dateTime = null;
+		if (dateTimeString) {
+			dateTime = tryParseHammerTime(dateTimeString);
+			if (!dateTime) {
+				await interaction.reply({
+					content: "Winner not added!\nwin-date-time, if present, must be a valid HammerTime (see https://hammertime.cyou/)",
+					ephemeral: true
+				});
+				return;
+			}
+			else {
+				let dateCutoff = dayjs().subtract(7, 'day');
+				if (dayjs(dateTime).isBefore(dateCutoff)) {
+					await interaction.reply({
+						content: "Winner not added!\nThis win has already expired",
+						ephemeral: true
+					});
+					return;
+				}
+			}
+		}
 		// This reply will be seen by everyone in the thread while the caller is interacting with the UI
 		await commandInteraction.reply({
 			embeds: [new EmbedBuilder()
@@ -103,13 +128,13 @@ module.exports = {
 			if (buttonInteration.customId === 'confirm') {
 
 				commandInteractionText = "**Winner(s) added:**\n";
-				commandInteractionText += await addWinners(guild, serverConfig, winners, reason, link);
+				commandInteractionText += await addWinners(guild, serverConfig, winners, reason, link, dateTime ? dayjs(dateTime) : null);
 
 				buttonInteractionText = "Winners successfully added!";
 			}
 			else if (buttonInteration.customId == 'cancel') {
-				buttonInteractionText = "add-mulit-win cancelled";
-				commandInteractionText = "add-mulit-win cancelled";
+				buttonInteractionText = "add-multi-win cancelled";
+				commandInteractionText = "add-multi-win cancelled";
 			}
 
 			await buttonInteration.update({ content: buttonInteractionText, components: [] })
