@@ -197,6 +197,7 @@ getFanWorkTypes = () => {
         { typeString: "Ceramics", icon: ":amphora:", colapseMultiple: "pieces" },
         { typeString: "Fiber Art", icon: ":yarn:", colapseMultiple: "pieces" },
         { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces" },
+        { typeString: "Game", icon: ":chess_pawn:", colapseMultiple: "updates" },
         { typeString: "Bot Work", icon: ":robot:", colapseMultiple: "updates" },
         { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts" },
     ]
