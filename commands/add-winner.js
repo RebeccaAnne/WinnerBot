@@ -22,12 +22,18 @@ module.exports = {
 				.setDescription('Link to the winning work. (ao3, message link, etc.)')
 				.setRequired(true))
 		.addStringOption(option =>
+			option.setName('work-type')
+				.setDescription('What type of fanwork this is. Choose from auto-complete options or type a custom work type.')
+				.setAutocomplete(true)
+				.setRequired(true))
+		.addStringOption(option =>
 			option.setName('win-date-time')
 				.setDescription('Optional date/time (hammertime) for this win. Defaults to now.')),
 	async execute(interaction) {
 		let winner = interaction.options.getMember('winner');
 		let reason = interaction.options.getString('reason');
 		let link = interaction.options.getString('link');
+		let workType = interaction.options.getString('work-type');
 		let dateTimeString = interaction.options.getString('win-date-time');
 
 		let guild = interaction.guild;
@@ -69,7 +75,7 @@ module.exports = {
 		await interaction.deferReply();
 
 		let replyString = "**Winner added:**\n";
-		replyString += await addWinners(guild, serverConfig, [winner], reason, link, dateTime ? dayjs(dateTime) : null);
+		replyString += await addWinners(guild, serverConfig, [winner], reason, link, workType, dateTime ? dayjs(dateTime) : null);
 
 		// reply to the command
 		await interaction.editReply({
@@ -77,4 +83,8 @@ module.exports = {
 				.setDescription(replyString)]
 		});
 	},
+
+	async autocomplete(interaction) {
+		handleWorkTypeAutoComplete(interaction);
+	}
 };

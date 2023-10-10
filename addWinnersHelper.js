@@ -63,10 +63,10 @@ function getWinObject(winnerList, winnerId) {
     return null;
 }
 
-async function addWinners(guild, serverConfig, newWinners, reason, link, dateTime) {
+async function addWinners(guild, serverConfig, newWinners, reason, link, workType, dateTimeParameter) {
 
     // Set the date won
-    let dateWon = dateTime ?? dayjs();
+    let dateWon = dateTimeParameter ?? dayjs();
     let winResponseString = "";
 
     let terror = false;
@@ -114,11 +114,22 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, dateTim
             }
 
             // Create a win object and add it to the winner
-            win = {}
+            let win = {};
             win.date = dateWon.format();
             win.reason = reason;
             win.link = link;
+            win.workType = workType;
             winnerObject.wins.push(win);
+
+            // If we were passed a dateTimeParameter, re-sort the wins in case this was added as an older win
+            winnerObject.wins.sort((a, b) => {
+                let aDate = dayjs(a.date);
+                let bDate = dayjs(b.date);
+
+                if (aDate.isBefore(bDate)) { return -1; }
+                else if (bDate.isBefore(aDate)) { return 1; }
+                else { return 0; }
+            });
 
             // Set the winner role 
             let winnerRole = await guild.roles.fetch(serverConfig.winnerRoleId);
@@ -138,14 +149,14 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, dateTim
         }
 
         winResponseString += ": " +
-            formatWinnerReason({ reason: reason, link: link }) + ", "
+            formatWinnerReason({ reason: reason, link: link, workType: workType }) + ", "
             + "<t:" + dateWon.unix() + ":f>"
 
         // Construct a congratulatory message to post in fanworks
         congratsMessage =
             "Congratulations " + winnerNameList(newWinners) +
             " on winning the discord for " +
-            formatWinnerReason({ reason: reason, link: link });
+            formatWinnerReason({ reason: reason, link: link, workType: workType });
 
 
         // Check for a terror
@@ -159,7 +170,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, dateTim
         congratsMessage += "!";
 
         // If there was an explicit date/time, include it in the congrats string 
-        if (dateTime) {
+        if (dateTimeParameter) {
             congratsMessage += "\n(*" + "<t:" + dateWon.unix() + ":f>*)";
         }
 

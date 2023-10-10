@@ -21,7 +21,22 @@ getOrdinal = (n) => {
 
 formatWinnerReason = (winObject) => {
 
-    return "[" + winObject.reason + "](" + winObject.link + ")";
+    let reasonString = "[" + winObject.reason;
+
+    if (winObject.workType) {
+        let type = getFanWorkTypes().find(element => element.typeString.toUpperCase() == winObject.workType.toUpperCase());
+        if (type) {
+            reasonString += " " + type.icon;
+        }
+        else {
+            reasonString += " :sparkles:";
+        }
+    }
+
+    reasonString += "](" + winObject.link + ")";
+
+
+    return reasonString;
 }
 
 normalizeString = (string) => {
@@ -34,7 +49,10 @@ formatWinnerString = (winnerObject) => {
 
     winnerObject.wins.forEach(win => {
 
-        let winToDisplay = winsToDisplay.find(element => normalizeString(element.reason) == normalizeString(win.reason));
+        let winToDisplay = winsToDisplay.find(element =>
+            normalizeString(element.reason) == normalizeString(win.reason) &&
+            normalizeString(element.workType) == normalizeString(win.workType));
+
         if (winToDisplay) {
             Object.assign(winToDisplay, win);
             winToDisplay.count++;
@@ -45,15 +63,6 @@ formatWinnerString = (winnerObject) => {
             winsToDisplay.push(winToDisplay);
         }
     })
-
-    winsToDisplay.sort((a, b) => {
-        let aDate = dayjs(a.date);
-        let bDate = dayjs(b.date);
-
-        if (aDate.isBefore(bDate)) { return -1; }
-        else if (bDate.isBefore(aDate)) { return 1; }
-        else { return 0; }
-    });
 
     for (i = 0; i < winsToDisplay.length; i++) {
         win = winsToDisplay[i];
@@ -66,7 +75,12 @@ formatWinnerString = (winnerObject) => {
         winnerString += formatWinnerReason(win);
 
         if (win.count > 1) {
-            winnerString += " (**" + win.count + " chapters**)"
+            winnerString += " (**" + win.count;
+
+            let collapseMultiple = getFanWorkTypes().find(
+                element => element.typeString.toUpperCase() == win.workType.toUpperCase()).colapseMultiple;
+
+            winnerString += " " + collapseMultiple + "**)";
         }
 
         winnerString += ", <t:" + dayjs(win.date).unix() + ":d> <t:" + dayjs(win.date).unix() + ":t>";
@@ -173,8 +187,21 @@ getMutex = () => {
     return globalMutex;
 }
 
-
+getFanWorkTypes = () => {
+    return [
+        { typeString: "Fan Fiction", icon: ":pencil:", colapseMultiple: "chapters" },
+        { typeString: "Art", icon: ":art:", colapseMultiple: "pieces" },
+        { typeString: "Poetry", icon: ":scroll:", colapseMultiple: "poems" },
+        { typeString: "Event", icon: ":calendar:", colapseMultiple: "events" },
+        { typeString: "Emoji", icon: ":sparkles:", colapseMultiple: "emojis" },
+        { typeString: "Ceramics", icon: ":amphora:", colapseMultiple: "pieces" },
+        { typeString: "Fiber Art", icon: ":yarn:", colapseMultiple: "pieces" },
+        { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces" },
+        { typeString: "Bot Work", icon: ":robot:", colapseMultiple: "updates" },
+        { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts" },
+    ]
+}
 
 module.exports = {
-    normalizeString, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
+    getFanWorkTypes, normalizeString, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
 }

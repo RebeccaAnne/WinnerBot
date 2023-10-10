@@ -1,5 +1,19 @@
 const { GuildScheduledEventManager } = require('discord.js');
+const { getFanWorkTypes } = require('./utils')
 const dayjs = require('dayjs');
+
+handleWorkTypeAutoComplete = async (interaction) => {
+    let workTypes = getFanWorkTypes();
+    const focusedOption = interaction.options.getFocused(true);
+
+    filtered = workTypes.filter(type => {
+        return type.typeString.toUpperCase().includes(focusedOption.value.toUpperCase());
+    });
+
+    await interaction.respond(
+        filtered.map(type => ({ name: type.typeString, value: type.typeString }))
+    );
+}
 
 handleSeriesAutoComplete = async (interaction) => {
 

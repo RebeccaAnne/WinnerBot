@@ -17,6 +17,11 @@ module.exports = {
 				.setDescription('Link to the winning work. (ao3, message link, etc.)')
 				.setRequired(true))
 		.addStringOption(option =>
+			option.setName('work-type')
+				.setDescription('What type of fanwork this is. Choose from auto-complete options or type a custom work type.')
+				.setAutocomplete(true)
+				.setRequired(true))
+		.addStringOption(option =>
 			option.setName('win-date-time')
 				.setDescription('Optional date/time (hammertime) for this win. Defaults to now.')),
 	async execute(commandInteraction) {
@@ -34,6 +39,7 @@ module.exports = {
 
 		let reason = commandInteraction.options.getString('reason');
 		let link = commandInteraction.options.getString('link');
+		let workType = interaction.options.getString('work-type');
 		let dateTimeString = commandInteraction.options.getString('win-date-time');
 
 		let dateTime = null;
@@ -60,7 +66,8 @@ module.exports = {
 		// This reply will be seen by everyone in the thread while the caller is interacting with the UI
 		await commandInteraction.reply({
 			embeds: [new EmbedBuilder()
-				.setDescription("Multiple Winners are being added for " + formatWinnerReason({ reason: reason, link: link }) + "...")]
+				.setDescription("Multiple Winners are being added for " +
+					formatWinnerReason({ reason: reason, link: link, workType: workType }) + "...")]
 		});
 
 		const userSelect = new UserSelectMenuBuilder()
@@ -128,7 +135,7 @@ module.exports = {
 			if (buttonInteration.customId === 'confirm') {
 
 				commandInteractionText = "**Winner(s) added:**\n";
-				commandInteractionText += await addWinners(guild, serverConfig, winners, reason, link, dateTime ? dayjs(dateTime) : null);
+				commandInteractionText += await addWinners(guild, serverConfig, winners, reason, link, workType, dateTime ? dayjs(dateTime) : null);
 
 				buttonInteractionText = "Winners successfully added!";
 			}
@@ -146,5 +153,9 @@ module.exports = {
 					.setDescription(commandInteractionText)]
 			});
 		});
+	},
+
+	async autocomplete(interaction) {
+		handleWorkTypeAutoComplete(interaction);
 	}
 };
