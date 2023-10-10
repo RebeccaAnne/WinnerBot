@@ -189,17 +189,20 @@ getMutex = () => {
 
 getFanWorkTypes = () => {
     return [
-        { typeString: "Fan Fiction", icon: ":pencil:", colapseMultiple: "chapters" },
-        { typeString: "Art", icon: ":art:", colapseMultiple: "pieces" },
-        { typeString: "Poetry", icon: ":scroll:", colapseMultiple: "poems" },
-        { typeString: "Event", icon: ":calendar:", colapseMultiple: "events" },
-        { typeString: "Emoji", icon: ":sparkles:", colapseMultiple: "emojis" },
-        { typeString: "Ceramics", icon: ":amphora:", colapseMultiple: "pieces" },
-        { typeString: "Fiber Art", icon: ":yarn:", colapseMultiple: "pieces" },
-        { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces" },
-        { typeString: "Game", icon: ":chess_pawn:", colapseMultiple: "updates" },
-        { typeString: "Bot Work", icon: ":robot:", colapseMultiple: "updates" },
-        { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts" },
+        { typeString: "Fan Fiction", icon: "📝", colapseMultiple: "chapters" },
+        { typeString: "Art", icon: "🎨", colapseMultiple: "pieces" },
+        { typeString: "Poetry", icon: "📜", colapseMultiple: "poems" },
+        { typeString: "Event", icon: "📆", colapseMultiple: "events" },
+        { typeString: "Emoji", icon: "", colapseMultiple: "emojis" },
+        { typeString: "Ceramics", icon: "🏺", colapseMultiple: "pieces" },
+        { typeString: "Fiber Art (yarn)", icon: "🧶", colapseMultiple: "pieces" },
+        { typeString: "Fiber Art (thread)", icon: "🧵", colapseMultiple: "pieces" },
+        { typeString: "Carving", icon: "🪚", colapseMultiple: "pieces" },
+        { typeString: "Game", icon: "♟️", colapseMultiple: "updates" },
+        { typeString: "Bot Work", icon: "🤖", colapseMultiple: "updates" },
+        { typeString: "Server Boost", icon: "🚀", colapseMultiple: "boosts" },
+        { typeString: "Sticker", icon: "🖼️", colapseMultiple: "stickers" },
+        { typeString: "Origami", icon: ":origamiInGlory:", colapseMultiple: "pieces" },
     ]
 }
 

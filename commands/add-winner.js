@@ -69,6 +69,19 @@ module.exports = {
 			}
 		}
 
+		if (workType.toUpperCase() == "EMOJI") {
+			// If the type is emoji, we won't be adding a workType emoji to the display. Confirm that the caller has 
+			// included the new emoji (or at least *an* emoji) in the reason. 
+			const regex = /:\w+:/g;
+			if (!reason.match(regex)) {
+				await interaction.reply({
+					content: "For Emoji win types please include the emoji in the win reason.",
+					ephemeral: true
+				});
+				return;
+			}
+		}
+
 		// There was an unknown interaction crash in this code after a large terror. I think possibly the issue is
 		// that with so many things to do we actually reach the timeout? Although 3 seconds should be plenty of 
 		// time... Anyway, deferring reply, just in case. 
