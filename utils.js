@@ -193,7 +193,7 @@ getFanWorkTypes = () => {
         { typeString: "Art", icon: ":art:", colapseMultiple: "pieces" },
         { typeString: "Poetry", icon: ":scroll:", colapseMultiple: "poems" },
         { typeString: "Event", icon: ":calendar:", colapseMultiple: "events" },
-        { typeString: "Emoji", icon: ":sparkles:", colapseMultiple: "emojis" },
+        { typeString: "Emoji", icon: ":sunineyes:", colapseMultiple: "emojis" },
         { typeString: "Ceramics", icon: ":amphora:", colapseMultiple: "pieces" },
         { typeString: "Fiber Art", icon: ":yarn:", colapseMultiple: "pieces" },
         { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces" },
