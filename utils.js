@@ -196,10 +196,10 @@ getFanWorkTypes = () => {
         { typeString: "Bot Work", icon: ":robot:", colapseMultiple: "updates" },
         { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts" },
         { typeString: "Sticker", icon: ":frame_photo:", colapseMultiple: "stickers" },
-        { typeString: "Origami", icon: ":origamiInGlory:", colapseMultiple: "pieces" },
+        { typeString: "Origami", icon: "<:origamiInGlory:1161416674021486652>", colapseMultiple: "pieces" },
         { typeString: "Animation", icon: ":cinema:", colapseMultiple: "animations" },
         { typeString: "Video", icon: ":cinema:", colapseMultiple: "pieces" },
-        { typeString: "Music", icon: ":harp:", colapseMultiple: "pieces" },
+        { typeString: "Music", icon: "<:harp:851693676711378946>", colapseMultiple: "pieces" },
     ]
 }
 
