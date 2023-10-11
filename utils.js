@@ -21,20 +21,15 @@ getOrdinal = (n) => {
 
 formatWinnerReason = (winObject) => {
 
-    let reasonString = "[" + winObject.reason;
-
-    if (winObject.workType) {
-        let type = getFanWorkTypes().find(element => element.typeString.toUpperCase() == winObject.workType.toUpperCase());
-        if (type) {
-            reasonString += " " + type.icon;
-        }
-        else {
-            reasonString += " :sparkles:";
-        }
+    let reasonString = "[" + winObject.reason + "](" + winObject.link + ")";
+    
+    let type = getFanWorkTypes().find(element => element.typeString.toUpperCase() == winObject.workType.toUpperCase());
+    if (type) {
+        reasonString += " " + type.icon;
     }
-
-    reasonString += "](" + winObject.link + ")";
-
+    else {
+        reasonString += " :sparkles:";
+    }
 
     return reasonString;
 }
@@ -90,7 +85,6 @@ formatWinnerString = (winnerObject) => {
         }
     }
     return winnerString;
-
 }
 
 isMemberModJs = (serverConfig, callingMember) => {
@@ -189,21 +183,23 @@ getMutex = () => {
 
 getFanWorkTypes = () => {
     return [
-        { typeString: "Fan Fiction", icon: "📝", colapseMultiple: "chapters" },
-        { typeString: "Art", icon: "🎨", colapseMultiple: "pieces" },
-        { typeString: "Poetry", icon: "📜", colapseMultiple: "poems" },
-        { typeString: "Event", icon: "📆", colapseMultiple: "events" },
+        { typeString: "Fan Fiction", icon: ":pencil:", colapseMultiple: "chapters" },
+        { typeString: "Art", icon: ":art:", colapseMultiple: "pieces" },
+        { typeString: "Poetry", icon: ":scroll:", colapseMultiple: "poems" },
+        { typeString: "Event", icon: ":calendar:", colapseMultiple: "events" },
         { typeString: "Emoji", icon: "", colapseMultiple: "emojis" },
-        { typeString: "Ceramics", icon: "🏺", colapseMultiple: "pieces" },
-        { typeString: "Fiber Art (yarn)", icon: "🧶", colapseMultiple: "pieces" },
-        { typeString: "Fiber Art (thread)", icon: "🧵", colapseMultiple: "pieces" },
-        { typeString: "Carving", icon: "🪚", colapseMultiple: "pieces" },
-        { typeString: "Game", icon: "♟️", colapseMultiple: "updates" },
-        { typeString: "Bot Work", icon: "🤖", colapseMultiple: "updates" },
-        { typeString: "Server Boost", icon: "🚀", colapseMultiple: "boosts" },
-        { typeString: "Sticker", icon: "🖼️", colapseMultiple: "stickers" },
+        { typeString: "Ceramics", icon: ":amphora:", colapseMultiple: "pieces" },
+        { typeString: "Fiber Art (yarn)", icon: ":yarn:", colapseMultiple: "pieces" },
+        { typeString: "Fiber Art (thread)", icon: ":thread:", colapseMultiple: "pieces" },
+        { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces" },
+        { typeString: "Game", icon: ":chess_pawn:", colapseMultiple: "updates" },
+        { typeString: "Bot Work", icon: ":robot:", colapseMultiple: "updates" },
+        { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts" },
+        { typeString: "Sticker", icon: ":frame_photo:", colapseMultiple: "stickers" },
         { typeString: "Origami", icon: ":origamiInGlory:", colapseMultiple: "pieces" },
-        { typeString: "Animation/Video", icon: "🎦", colapseMultiple: "pieces" },
+        { typeString: "Animation", icon: ":cinema:", colapseMultiple: "animations" },
+        { typeString: "Video", icon: ":cinema:", colapseMultiple: "pieces" },
+        { typeString: "Music", icon: ":harp:", colapseMultiple: "pieces" },
     ]
 }
 
