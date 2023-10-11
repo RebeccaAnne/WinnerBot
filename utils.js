@@ -203,6 +203,7 @@ getFanWorkTypes = () => {
         { typeString: "Server Boost", icon: "🚀", colapseMultiple: "boosts" },
         { typeString: "Sticker", icon: "🖼️", colapseMultiple: "stickers" },
         { typeString: "Origami", icon: ":origamiInGlory:", colapseMultiple: "pieces" },
+        { typeString: "Animation/Video", icon: "🎦", colapseMultiple: "pieces" },
     ]
 }
 
