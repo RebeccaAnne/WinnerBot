@@ -22,7 +22,7 @@ getOrdinal = (n) => {
 formatWinnerReason = (winObject) => {
 
     let reasonString = "[" + winObject.reason + "](" + winObject.link + ")";
-    
+
     let type = getFanWorkTypes().find(element => element.typeString.toUpperCase() == winObject.workType.toUpperCase());
     if (type) {
         reasonString += " " + type.icon;
@@ -35,7 +35,7 @@ formatWinnerReason = (winObject) => {
 }
 
 normalizeString = (string) => {
-    return string.toUpperCase().trim().replace('`', '\'').replace('’', '\'').replace('‘', '\'').replace('“', '\"').replace('”', '\"');
+    return string.toUpperCase().trim().replaceAll('`', '\'').replaceAll('’', '\'').replaceAll('‘', '\'').replaceAll('“', '\"').replaceAll('”', '\"');
 }
 
 formatWinnerString = (winnerObject) => {
@@ -183,23 +183,23 @@ getMutex = () => {
 
 getFanWorkTypes = () => {
     return [
-        { typeString: "Fan Fiction", icon: ":pencil:", colapseMultiple: "chapters" },
-        { typeString: "Art", icon: ":art:", colapseMultiple: "pieces" },
-        { typeString: "Poetry", icon: ":scroll:", colapseMultiple: "poems" },
-        { typeString: "Event", icon: ":calendar:", colapseMultiple: "events" },
-        { typeString: "Emoji", icon: "", colapseMultiple: "emojis" },
-        { typeString: "Ceramics", icon: ":amphora:", colapseMultiple: "pieces" },
-        { typeString: "Fiber Art (yarn)", icon: ":yarn:", colapseMultiple: "pieces" },
-        { typeString: "Fiber Art (thread)", icon: ":thread:", colapseMultiple: "pieces" },
-        { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces" },
-        { typeString: "Game", icon: ":chess_pawn:", colapseMultiple: "updates" },
-        { typeString: "Bot Work", icon: ":robot:", colapseMultiple: "updates" },
-        { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts" },
-        { typeString: "Sticker", icon: ":frame_photo:", colapseMultiple: "stickers" },
-        { typeString: "Origami", icon: "<:origamiInGlory:1161416674021486652>", colapseMultiple: "pieces" },
-        { typeString: "Animation", icon: ":cinema:", colapseMultiple: "animations" },
-        { typeString: "Video", icon: ":cinema:", colapseMultiple: "pieces" },
-        { typeString: "Music", icon: "<:harp:851693676711378946>", colapseMultiple: "pieces" },
+        { typeString: "Fan Fiction", icon: ":pencil:", colapseMultiple: "chapters", isVisualArt: false },
+        { typeString: "Art", icon: ":art:", colapseMultiple: "pieces", isVisualArt: true },
+        { typeString: "Poetry", icon: ":scroll:", colapseMultiple: "poems", isVisualArt: false },
+        { typeString: "Event", icon: ":calendar:", colapseMultiple: "events", isVisualArt: false },
+        { typeString: "Emoji", icon: "", colapseMultiple: "emojis", isVisualArt: true, isVisualArt: false },
+        { typeString: "Ceramics", icon: ":amphora:", colapseMultiple: "pieces", isVisualArt: true },
+        { typeString: "Fiber Art (yarn)", icon: ":yarn:", colapseMultiple: "pieces", isVisualArt: true },
+        { typeString: "Fiber Art (thread)", icon: ":thread:", colapseMultiple: "pieces", isVisualArt: true },
+        { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces", isVisualArt: true },
+        { typeString: "Game", icon: ":chess_pawn:", colapseMultiple: "updates", isVisualArt: false },
+        { typeString: "Bot Work", icon: ":robot:", colapseMultiple: "updates", isVisualArt: false },
+        { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts", isVisualArt: false },
+        { typeString: "Sticker", icon: ":frame_photo:", colapseMultiple: "stickers", isVisualArt: true },
+        { typeString: "Origami", icon: "<:origamiInGlory:1161416674021486652>", colapseMultiple: "pieces", isVisualArt: true },
+        { typeString: "Animation", icon: ":cinema:", colapseMultiple: "animations", isVisualArt: true },
+        { typeString: "Video", icon: ":cinema:", colapseMultiple: "pieces", isVisualArt: true },
+        { typeString: "Music", icon: "<:harp:851693676711378946>", colapseMultiple: "pieces", isVisualArt: false },
     ]
 }
 
