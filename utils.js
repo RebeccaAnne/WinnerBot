@@ -200,6 +200,7 @@ getFanWorkTypes = () => {
         { typeString: "Animation", icon: ":cinema:", colapseMultiple: "animations", isVisualArt: true },
         { typeString: "Video", icon: ":cinema:", colapseMultiple: "pieces", isVisualArt: true },
         { typeString: "Music", icon: "<:harp:851693676711378946>", colapseMultiple: "pieces", isVisualArt: false },
+        { typeString: "Riddle", icon: ":question", colapseMultiple: "riddles", isVisualArt: false },
     ]
 }
 
