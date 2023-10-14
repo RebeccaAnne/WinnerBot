@@ -79,11 +79,11 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
             winnerListFile[guild.id] = {};
         }
 
-        let winnerList = winnerListFile[guild.id];
+        let serverData = winnerListFile[guild.id];
 
         // Create a winner list for this server if one doesn't already exist
-        if (winnerList.winners == null) {
-            winnerList.winners = [];
+        if (serverData.winners == null) {
+            serverData.winners = [];
         }
 
         for (i = 0; i < newWinners.length; i++) {
@@ -94,7 +94,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
             let newWinner = true;
 
             // Check if this user is already a winner
-            existingWinner = getWinObject(winnerList, winner.id);
+            existingWinner = getWinObject(serverData, winner.id);
             if (existingWinner) {
                 winnerObject = existingWinner;
                 newWinner = false;
@@ -121,6 +121,14 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
             win.workType = workType;
             winnerObject.wins.push(win);
 
+            // Update the work type count
+            if (!serverData.workTypeCounts[workType]) {
+                serverData.workTypeCounts[workType] = 1;
+            }
+            else {
+                serverData.workTypeCounts[workType]++;
+            }
+
             // If we were passed a dateTimeParameter, re-sort the wins in case this was added as an older win
             winnerObject.wins.sort((a, b) => {
                 let aDate = dayjs(a.date);
@@ -139,7 +147,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
             await scheduleWinExpirationCheck(win, guild, serverConfig)
 
             if (newWinner) {
-                winnerList.winners.push(winnerObject);
+                serverData.winners.push(winnerObject);
             }
 
             let logstring = dayjs(winnerObject.date).format() + "\t" + winner.displayName + "\t" + reason;
@@ -158,9 +166,8 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
             " on winning the discord for " +
             formatWinnerReason({ reason: reason, link: link, workType: workType });
 
-
         // Check for a terror
-        if (winnerList.winners.length >= winnerList.currentTerrorThreshold) {
+        if (serverData.winners.length >= serverData.currentTerrorThreshold) {
 
             // Update the congrats and response messages to indicate the terror
             congratsMessage += " and triggering a Terror of Astandalas";
@@ -185,7 +192,7 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
         if (terror) {
             // declareTerror will manage removing the winners from the list, 
             // removing their roles, and posting the terror message.
-            await declareTerror(guild, serverConfig, winnerList);
+            await declareTerror(guild, serverConfig, serverData);
         }
 
         fs.writeFileSync(winnerFilename, JSON.stringify(winnerListFile), () => { });
