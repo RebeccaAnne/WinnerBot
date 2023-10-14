@@ -181,6 +181,16 @@ getMutex = () => {
     return globalMutex;
 }
 
+getPluralString = (count, string, alternatePlural) => {
+
+    if (alternatePlural) {
+        return (count != 1) ? alternatePlural : string;
+    }
+    else {
+        return string + ((count != 1) ? "s" : "");
+    }
+}
+
 getFanWorkTypes = () => {
     return [
         { typeString: "Fan Fiction", icon: ":pencil:", colapseMultiple: "chapters", isVisualArt: false },
@@ -200,10 +210,10 @@ getFanWorkTypes = () => {
         { typeString: "Animation", icon: ":cinema:", colapseMultiple: "animations", isVisualArt: true },
         { typeString: "Video", icon: ":cinema:", colapseMultiple: "pieces", isVisualArt: true },
         { typeString: "Music", icon: "<:harp:851693676711378946>", colapseMultiple: "pieces", isVisualArt: false },
-        { typeString: "Riddle", icon: ":question", colapseMultiple: "riddles", isVisualArt: false },
+        { typeString: "Riddle", icon: ":question:", colapseMultiple: "riddles", isVisualArt: false },
     ]
 }
 
 module.exports = {
-    getFanWorkTypes, normalizeString, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
+    getPluralString, getFanWorkTypes, normalizeString, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
 }
