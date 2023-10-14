@@ -39,7 +39,7 @@ module.exports = {
 
 		let reason = commandInteraction.options.getString('reason');
 		let link = commandInteraction.options.getString('link');
-		let workType = interaction.options.getString('work-type');
+		let workType = commandInteraction.options.getString('work-type');
 		let dateTimeString = commandInteraction.options.getString('win-date-time');
 
 		let dateTime = null;
