@@ -208,7 +208,7 @@ getFanWorkTypes = () => {
         { typeString: "Sticker", icon: ":frame_photo:", colapseMultiple: "stickers", statDescriptionString:"Sticker", isVisualArt: true },
         { typeString: "Calligraphy", icon: ":pen_fountain:", colapseMultiple: "pieces", statDescriptionString:"Calligraphy Piece", isVisualArt: true },
         { typeString: "Origami", icon: "<:origamiInGlory:1161416674021486652>", colapseMultiple: "pieces", statDescriptionString:"Origami Piece", isVisualArt: true },
-        { typeString: "Data Chart", icon: ":chart_with_upwards_trend:", colapseMultiple: "charts", statDescriptionString:"Chart", isVisualArt: true },
+        { typeString: "Data and Charts", icon: ":chart_with_upwards_trend:", colapseMultiple: "data analyses", statDescriptionString:"Data Analysis", isVisualArt: true },
         { typeString: "Animation", icon: ":cinema:", colapseMultiple: "animations", statDescriptionString:"Animation", isVisualArt: true },
         { typeString: "Video", icon: ":cinema:", colapseMultiple: "pieces", statDescriptionString:"Video", isVisualArt: true },
         { typeString: "Music", icon: "<:harp:851693676711378946>", colapseMultiple: "pieces", statDescriptionString:"Song", isVisualArt: false },
