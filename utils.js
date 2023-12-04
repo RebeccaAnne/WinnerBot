@@ -206,7 +206,7 @@ getFanWorkTypes = () => {
         { typeString: "Bot Work", icon: ":robot:", colapseMultiple: "updates", statDescriptionString:"Bot Improvement", isVisualArt: false },
         { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts", statDescriptionString:"Server Boost", isVisualArt: false },
         { typeString: "Sticker", icon: ":frame_photo:", colapseMultiple: "stickers", statDescriptionString:"Sticker", isVisualArt: true },
-        { typeString: "Calligraphy", icon: "::pen_fountain::", colapseMultiple: "pieces", statDescriptionString:"Calligraphy Piece", isVisualArt: true },
+        { typeString: "Calligraphy", icon: ":pen_fountain:", colapseMultiple: "pieces", statDescriptionString:"Calligraphy Piece", isVisualArt: true },
         { typeString: "Origami", icon: "<:origamiInGlory:1161416674021486652>", colapseMultiple: "pieces", statDescriptionString:"Origami Piece", isVisualArt: true },
         { typeString: "Data Chart", icon: ":chart_with_upwards_trend:", colapseMultiple: "charts", statDescriptionString:"Chart", isVisualArt: true },
         { typeString: "Animation", icon: ":cinema:", colapseMultiple: "animations", statDescriptionString:"Animation", isVisualArt: true },
