@@ -33,7 +33,7 @@ function getEventsDisplyStringForSeries(eventSeries, showAll, maxEvents) {
     eventSeries.events.sort((a, b) => {
 
         // For all day events, sort by the earliest time this event starts anywhere (UTC+14)
-        // If it's not alldat, the date will already be the full date time
+        // If it's not allday, the date will already be the full date time
         let aDate = a.allDayEvent ? dayjs.tz(a.date, "Pacific/Kiritimati") : dayjs(a.date);
         let bDate = b.allDayEvent ? dayjs.tz(b.date, "Pacific/Kiritimati") : dayjs(b.date);
 

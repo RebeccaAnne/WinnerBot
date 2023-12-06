@@ -20,8 +20,8 @@ handleSeriesAutoComplete = async (interaction) => {
     // Load the data from file
     let filename = "winner-and-event-data.json";
     let dataFile = require("./" + filename);
-    if (dataFile[interaction.guild] == null) {
-        dataFile[interaction.guild] = {};
+    if (dataFile[interaction.guild.id] == null) {
+        dataFile[interaction.guild.id] = {};
     }
 
     let serverData = dataFile[interaction.guild.id];
