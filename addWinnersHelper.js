@@ -21,8 +21,13 @@ async function declareTerror(guild, serverConfig, winnerList) {
         await currentMember.roles.remove(serverConfig.winnerRoleId);
     };
 
-    let terrorChannel = await guild.channels.fetch(serverConfig.terrorAnnouncementChannel);
+    let terrorChannel = await guild.channels.fetch(serverConfig.terrorRecordingChannel);
     await terrorChannel.send(terrorString);
+
+    // for (terrorAnnouncementChannel of serverConfig.terrorAnnouncementChannels) {
+    //     let terrorChannel = await guild.channels.fetch(serverConfig.terrorRecordingChannel);
+    //     await terrorChannel.send(terrorString);
+    // }
 
     if (winnerList.lastTerrorDate) {
         let lastTerrorDate = dayjs(winnerList.lastTerrorDate);
@@ -167,7 +172,8 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
             formatWinnerReason({ reason: reason, link: link, workType: workType });
 
         // Check for a terror
-        if (serverData.winners.length >= serverData.currentTerrorThreshold) {
+        if (serverConfig.supportsTerrors &&
+            serverData.winners.length >= serverData.currentTerrorThreshold) {
 
             // Update the congrats and response messages to indicate the terror
             congratsMessage += " and triggering a Terror of Astandalas";

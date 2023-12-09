@@ -38,7 +38,11 @@ module.exports = {
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
 					.setTitle("No current winners!")
-					.setFooter({ text: winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas" })
+					.setFooter({
+						text: serverConfig.supportsTerrors ?
+							winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas" :
+							null
+					})
 					.setColor(0xd81b0e)]
 			});
 		}
@@ -94,15 +98,17 @@ module.exports = {
 				}
 			};
 
+			footer = serverConfig.supportsTerrors ?
+				winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas" :
+				null
+
 			if (!haveReplied) {
 				// Reply to the command if we haven't already
 				await interaction.reply({
 					embeds: [new EmbedBuilder()
 						.setTitle("Current Winners of the Discord")
 						.setDescription(winnerString)
-						.setFooter({
-							text: winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas"
-						})
+						.setFooter({ text: footer })
 						.setColor(0xd81b0e)]
 				});
 				console.log("Current Winner String Length: " + stringLength);
@@ -113,9 +119,7 @@ module.exports = {
 					embeds: [new EmbedBuilder()
 						.setTitle("Current Winners of the Discord (continued)")
 						.setDescription(winnerString)
-						.setFooter({
-							text: winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas"
-						})
+						.setFooter({ text: footer })
 						.setColor(0xd81b0e)]
 				});
 				console.log("Final batched message, length: " + stringLength);

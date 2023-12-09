@@ -121,30 +121,33 @@ client.once(Events.ClientReady, async c => {
 			await scheduleNMinusOneCheck(guild, serverConfig);
 		}
 
-		console.log("Scheduling event updates for " + serverConfig.guildId);
-		const upcomingEventsJob = new CronJob(serverConfig.eventUpdateSchedule, async function () {
 
-			let filename = "winner-and-event-data.json";
-			let dataFile = require("./" + filename);
-			if (dataFile[guild.id] == null) {
-				dataFile[guild.id] = {};
-			}
-			let serverData = dataFile[guild.id];
+		if (serverConfig.eventUpdateSchedule) {
+			console.log("Scheduling event updates for " + serverConfig.guildId);
+			const upcomingEventsJob = new CronJob(serverConfig.eventUpdateSchedule, async function () {
 
-			let description = await getEventsDisplyString(guild, serverData.eventSeries, false, true);
-			if (description) {
-				let channel = await client.channels.fetch(serverConfig.eventUpdateChannel, { force: true });
+				let filename = "winner-and-event-data.json";
+				let dataFile = require("./" + filename);
+				if (dataFile[guild.id] == null) {
+					dataFile[guild.id] = {};
+				}
+				let serverData = dataFile[guild.id];
 
-				await channel.send({
-					embeds: [new EmbedBuilder()
-						.setTitle("Upcoming Events ")
-						.setDescription(description)
-						.setColor(0xff)
-						.setFooter({ text: "(Use /show-event-details for more information on an event)" })]
-				});
-			}
-		}, null, true, "America/Los_Angeles");
+				let description = await getEventsDisplyString(guild, serverData.eventSeries, false, true);
+				if (description) {
+					let channel = await client.channels.fetch(serverConfig.eventUpdateChannel, { force: true });
 
+					await channel.send({
+						embeds: [new EmbedBuilder()
+							.setTitle("Upcoming Events ")
+							.setDescription(description)
+							.setColor(0xff)
+							.setFooter({ text: "(Use /show-event-details for more information on an event)" })]
+					});
+				}
+			}, null, true, "America/Los_Angeles");
+		}
+		
 		// Run a just-in-case expiration for everything at midnight
 		console.log("Scheduling check for midnight for " + serverConfig.guildId);
 		const job = new CronJob("0 0 0 * * *", async function () {

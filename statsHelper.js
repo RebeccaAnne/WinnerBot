@@ -26,10 +26,9 @@ getStatsDisplayString = (guildId, useTerrorString) => {
             " of the discord";
     }
     else {
-        // BECKYTODO
-        // displayString += winnerCount +
-        //     " winners of the discord have achieved a Terror of Astandalas and had their names commemorated in " +
-        //     "";
+        displayString += winnerCount +
+            " winners of the discord have achieved a Terror of Astandalas and had their names commemorated in <#" +
+            serverConfig.terrorRecordingChannel + ">!"
     }
 
     let total = 0;
@@ -122,19 +121,13 @@ getStatsDisplayString = (guildId, useTerrorString) => {
         let aDate = dayjs(a.earliestWinDate);
         let bDate = dayjs(b.earliestWinDate);
 
-        if (aDate.isBefore(bDate)) {
-            console.log(aDate.format() + " is before " + bDate.format() + ", so " + a.statDescriptionString + " comes before " + b.statDescriptionString)
-            return -1;
-        }
-        else if (bDate.isBefore(aDate)) {
-            console.log(bDate.format() + " is before " + aDate.format() + ", so " + b.statDescriptionString + " comes before " + a.statDescriptionString)
-            return 1;
-        }
+        if (aDate.isBefore(bDate)) { return -1; }
+        else if (bDate.isBefore(aDate)) { return 1; }
         else { return 0; }
     });
 
     if (total != 0) {
-        displayString += " with a total of " + total + handlePlural(total, " win") + ". ";
+        if (!useTerrorString) { displayString += " with a total of " + total + handlePlural(total, " win") + ". "; }
 
         displayString += "Since <t:" + firstWinDate.unix() + ":D>" + " at <t:" + firstWinDate.unix() + ":t> they have shared:\n"
 
@@ -146,7 +139,9 @@ getStatsDisplayString = (guildId, useTerrorString) => {
         displayString += ".";
     }
 
-    displayString += "\n" + (serverData.currentTerrorThreshold - winnerCount) + " more winners are required to achieve a Terror of Astandalas"
+    if (serverConfig.supportsTerrors) {
+        displayString += "\n" + (serverData.currentTerrorThreshold - winnerCount) + " more winners are required to achieve a Terror of Astandalas"
+    }
 
     console.log(displayString);
     return displayString;

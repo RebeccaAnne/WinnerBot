@@ -1,0 +1,18 @@
+{
+    "guildId": "1182155789897584681",
+    "winnerListAllowed": [
+        "1182157678940790905"
+    ],
+    "supportsTerrors": false,
+    "winnerListAllowedDescription": "#fanworks",
+    "fanworksAnnouncementChannel": "1182157678940790905",
+    "winnerRoleId": "",
+    "modChannel": "",
+    "modChannelDescription": "",
+    "modRoles": [
+        "942206606790242374",
+        "1055915710372659260"
+    ],
+    "accessDescription": "mods",
+    "winDurationInDays": 7
+}

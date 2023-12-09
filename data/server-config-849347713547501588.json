@@ -6,9 +6,13 @@
         "1121213519078109224",
         "1144334128704143410"
     ],
+    "supportsTerrors": true,
     "winnerListAllowedDescription": "#nine-worlds-fanworks or #2-fan-2-work",
     "fanworksAnnouncementChannel": "849350971544830013",
-    "terrorAnnouncementChannel": "1103753786889081012",
+    "terrorAnnouncementChannels": [
+        "1103753786889081012"
+    ],
+    "terrorRecordingChannel": "1103753786889081012",
     "baseTerrorThreshold": 10,
     "winnerRoleId": "886049644038201345",
     "modChannel": "1116126155569897514",
