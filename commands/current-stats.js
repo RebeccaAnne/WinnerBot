@@ -10,12 +10,21 @@ module.exports = {
 	async execute(interaction) {
 
 		let guild = interaction.guild;
-		let descriptionString = getStatsDisplayString(guild.id);
+		let statsDisplayString = getStatsDisplayString(guild.id);
+
+		let dataFile = require("../winner-and-event-data.json");
+		let serverConfig = require("../data/server-config-" + guild.id + ".json");
+		let serverData = dataFile[guild.id];
+
+		footer = serverConfig.supportsTerrors ?
+			serverData.winners.length + " out of " + serverData.currentTerrorThreshold + " winners needed for Terror of Astandalas" :
+			null
 
 		await interaction.reply({
 			embeds: [new EmbedBuilder()
 				.setTitle("This Week in the Arts")
-				.setDescription(descriptionString)
+				.setDescription(statsDisplayString)
+				.setFooter({ text: footer })
 				.setColor(0xd81b0e)]
 		});
 	},

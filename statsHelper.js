@@ -139,10 +139,6 @@ getStatsDisplayString = (guildId, useTerrorString) => {
         displayString += ".";
     }
 
-    if (serverConfig.supportsTerrors) {
-        displayString += "\n" + (serverData.currentTerrorThreshold - winnerCount) + " more winners are required to achieve a Terror of Astandalas"
-    }
-
     console.log(displayString);
     return displayString;
 }
