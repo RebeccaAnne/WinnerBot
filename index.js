@@ -43,6 +43,9 @@ for (const serverConfigFile of serverConfigFiles) {
 	const filePath = path.join(dataPath, serverConfigFile);
 	const serverConfig = require(filePath);
 
+	if (!dataFile[serverConfig.guildId]) {
+		dataFile[serverConfig.guildId] = {};
+	}
 	let serverData = dataFile[serverConfig.guildId];
 
 	if (!serverData.currentTerrorThreshold) {
@@ -147,7 +150,7 @@ client.once(Events.ClientReady, async c => {
 				}
 			}, null, true, "America/Los_Angeles");
 		}
-		
+
 		// Run a just-in-case expiration for everything at midnight
 		console.log("Scheduling check for midnight for " + serverConfig.guildId);
 		const job = new CronJob("0 0 0 * * *", async function () {
