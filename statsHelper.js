@@ -4,17 +4,11 @@ const { handlePlural } = require('./utils');
 getStatsDisplayString = (guildId, useTerrorString) => {
 
     // Load the data from file
-    let filename = "winner-and-event-data.json";
-    let dataFile = require("./" + filename);
-
+    let dataFile = require("./winner-and-event-data.json");
     let serverData = dataFile[guildId];
 
     let serverConfig = require("./data/server-config-" + guildId + ".json");
-
     let winnerCount = serverData.winners.length
-
-    let lastTerrorDate = dayjs(serverData.lastTerrorDate);
-    let xDaysAgo = dayjs().subtract(serverConfig.winDurationInDays, "day");
 
     let displayString = "";
     if (!useTerrorString) {
@@ -27,12 +21,11 @@ getStatsDisplayString = (guildId, useTerrorString) => {
     }
     else {
         displayString += winnerCount +
-            " winners of the discord have achieved a Terror of Astandalas and had their names commemorated in <#" +
-            serverConfig.terrorRecordingChannel + ">!"
+            " Winners of the Discord have achieved a Terror of Astandalas and had their names commemorated in <#" +
+            serverConfig.terrorRecordingChannel + ">! "
     }
 
     let total = 0;
-    let visualArt = 0;
     let winDataArray = [];
     let firstWinDate = dayjs();
     for (const winner of serverData.winners) {
@@ -77,7 +70,6 @@ getStatsDisplayString = (guildId, useTerrorString) => {
                 winData = {
                     workType: win.workType,
                     count: 1,
-                    isVisualArt: workTypeDefinition ? workTypeDefinition.isVisualArt : false,
                     statDescriptionString: workTypeDefinition ? workTypeDefinition.statDescriptionString : win.workType,
                     icon: workTypeDefinition ? workTypeDefinition.icon : ":sparkles:",
                     statDescriptionStringPlural: workTypeDefinition ? workTypeDefinition.statDescriptionStringCustomPlural : null,
@@ -97,11 +89,7 @@ getStatsDisplayString = (guildId, useTerrorString) => {
                 }
             }
 
-            if (winData.isVisualArt) {
-                visualArt++;
-            }
             total++;
-
 
             console.log(firstWinDate.format())
             if (dayjs(win.date).isBefore(firstWinDate)) {

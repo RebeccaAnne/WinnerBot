@@ -24,10 +24,16 @@ async function declareTerror(guild, serverConfig, winnerList) {
     let terrorChannel = await guild.channels.fetch(serverConfig.terrorRecordingChannel);
     await terrorChannel.send(terrorString);
 
-    // for (terrorAnnouncementChannel of serverConfig.terrorAnnouncementChannels) {
-    //     let terrorChannel = await guild.channels.fetch(serverConfig.terrorRecordingChannel);
-    //     await terrorChannel.send(terrorString);
-    // }
+    let announcmentString = getStatsDisplayString(guild.id, true);
+    for (terrorAnnouncementChannelId of serverConfig.terrorAnnouncementChannels) {
+        let terrorAnnouncementChannel = await guild.channels.fetch(terrorAnnouncementChannelId);
+        await terrorAnnouncementChannel.send({
+            embeds: [new EmbedBuilder()
+                .setTitle("The Terrors of Astandalas have Struck Again!")
+                .setDescription(announcmentString)
+                .setColor(0xd81b0e)]
+        })
+    }
 
     if (winnerList.lastTerrorDate) {
         let lastTerrorDate = dayjs(winnerList.lastTerrorDate);
@@ -41,7 +47,7 @@ async function declareTerror(guild, serverConfig, winnerList) {
             winnerList.currentTerrorThreshold++;
 
             let fanworksAnnouncementChannel = await guild.channels.fetch(serverConfig.fanworksAnnouncementChannel);
-            fanworksAnnouncementChannel.send({
+            await fanworksAnnouncementChannel.send({
                 embeds: [new EmbedBuilder()
                     .setTitle("The Terrors of Astandalas have Leveled Up!")
                     .setDescription("Due to Terrors successfully striking the glorious Empire of Astandalas twice in one week, the empire has increased its guard. It will now take "
