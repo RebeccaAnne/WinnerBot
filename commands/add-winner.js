@@ -83,9 +83,7 @@ module.exports = {
 			}
 		}
 
-		// There was an unknown interaction crash in this code after a large terror. I think possibly the issue is
-		// that with so many things to do we actually reach the timeout? Although 3 seconds should be plenty of 
-		// time... Anyway, deferring reply, just in case. 
+		// Defer the reply to prevent timeouts, because this code has a lot of things to do if we hit a terror.
 		await interaction.deferReply();
 
 		let replyString = "**Winner added:**\n";

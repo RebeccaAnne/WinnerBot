@@ -24,16 +24,16 @@ async function declareTerror(guild, serverConfig, winnerList) {
     let terrorChannel = await guild.channels.fetch(serverConfig.terrorRecordingChannel);
     await terrorChannel.send(terrorString);
 
-    let announcmentString = getStatsDisplayString(guild.id, true);
-    for (terrorAnnouncementChannelId of serverConfig.terrorAnnouncementChannels) {
-        let terrorAnnouncementChannel = await guild.channels.fetch(terrorAnnouncementChannelId);
-        await terrorAnnouncementChannel.send({
-            embeds: [new EmbedBuilder()
-                .setTitle("The Terrors of Astandalas have Struck Again!")
-                .setDescription(announcmentString)
-                .setColor(0xd81b0e)]
-        })
-    }
+    // let announcmentString = getStatsDisplayString(guild.id, true);
+    // for (terrorAnnouncementChannelId of serverConfig.terrorAnnouncementChannels) {
+    //     let terrorAnnouncementChannel = await guild.channels.fetch(terrorAnnouncementChannelId);
+    //     await terrorAnnouncementChannel.send({
+    //         embeds: [new EmbedBuilder()
+    //             .setTitle("The Terrors of Astandalas have Struck Again!")
+    //             .setDescription(announcmentString)
+    //             .setColor(0xd81b0e)]
+    //     })
+    // }
 
     if (winnerList.lastTerrorDate) {
         let lastTerrorDate = dayjs(winnerList.lastTerrorDate);
