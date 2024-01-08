@@ -207,7 +207,7 @@ getFanWorkTypes = () => {
         { typeString: "Calligraphy", icon: ":pen_fountain:", colapseMultiple: "pieces", statDescriptionString: "Calligraphy Piece", isVisualArt: true },
         { typeString: "Data and Charts", icon: ":chart_with_upwards_trend:", colapseMultiple: "data analyses", statDescriptionString: "Data Analysis", statDescriptionStringCustomPlural: "Data Analyses", isVisualArt: true },
         { typeString: "Music", icon: "<:harp:851693676711378946>", colapseMultiple: "pieces", statDescriptionString: "Song", isVisualArt: false },
-        { typeString: "Food", icon: "<:cake:>", colapseMultiple: "foods", statDescriptionString: "Food", isVisualArt: false },
+        { typeString: "Food", icon: "<:fork_knife_plate:>", colapseMultiple: "foods", statDescriptionString: "Food", isVisualArt: false },
         { typeString: "Wiki Update", icon: ":card_index:", colapseMultiple: "updates", statDescriptionString: "Wiki Update", isVisualArt: false },
         { typeString: "Riddle", icon: ":question:", colapseMultiple: "posts", statDescriptionString: "Riddle Post", isVisualArt: false },
         { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces", statDescriptionString: "Carving", isVisualArt: true },
