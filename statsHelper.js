@@ -43,11 +43,13 @@ getStatsDisplayString = (guildId, useTerrorString) => {
                 if (workTypeDefinition) {
                     // See if we have win data with the same statDescriptionString already in our array
                     existingWinData = winDataArray.find(winData => winData.statDescriptionString == workTypeDefinition.statDescriptionString);
+
                     if (existingWinData) {
-                        // In this case we're consolidating two types (ie Fiber Arts (Yarn) and Fiber Arts (Thread))
-                        // That are described the same way in the stats block "Fiber Arts Project" but have different icons.
-                        // Make sure we've included both icons.
+
                         if (!existingWinData.icon.includes(workTypeDefinition.icon)) {
+                            // In this case we're consolidating two types (ie Fiber Arts (Yarn) and Fiber Arts (Thread))
+                            // That are described the same way in the stats block "Fiber Arts Project" but have different icons.
+                            // Make sure we've included both icons.
                             existingWinData.icon += " " + workTypeDefinition.icon;
                         }
                     }
@@ -55,13 +57,23 @@ getStatsDisplayString = (guildId, useTerrorString) => {
             }
 
             if (existingWinData) {
-                // Set the earliest win date for this type of work
-                if (dayjs(existingWinData.earliestWinDate).isAfter(dayjs(win.date))) {
-                    existingWinData.earliestWinDate = win.data;
+
+                // Confirm that this is a unique win. Is there already a win with the same reason/link?
+                if (!existingWinData.winDataArray.find(winData => (winData.link == win.link) && (winData.reason == win.reason))) {
+
+                    // Set the earliest win date for this type of work
+                    if (dayjs(existingWinData.earliestWinDate).isAfter(dayjs(win.date))) {
+                        existingWinData.earliestWinDate = win.data;
+                    }
+
+                    // Add the new data to the array
+                    existingWinData.winDataArray.push({ reason: win.reason, link: win.link });
+
+                    // Update the count
+                    total++;
+                    existingWinData.count++;
+                    winData = existingWinData;
                 }
-                // Update the count
-                existingWinData.count++;
-                winData = existingWinData;
             }
             else {
 
@@ -73,28 +85,40 @@ getStatsDisplayString = (guildId, useTerrorString) => {
                     statDescriptionString: workTypeDefinition ? workTypeDefinition.statDescriptionString : win.workType,
                     icon: workTypeDefinition ? workTypeDefinition.icon : ":sparkles:",
                     statDescriptionStringPlural: workTypeDefinition ? workTypeDefinition.statDescriptionStringCustomPlural : null,
-                    earliestWinDate: win.date
+                    earliestWinDate: win.date,
+                    winDataArray: [{ reason: win.reason, link: win.link }]
                 };
 
                 winDataArray.push(winData);
+                total++;
             }
 
             // Special case handling for emojis. If this is an emoji win, pull the emoji out of the win 
             // reason and add it to the icon
             if (winData.workType == "Emoji") {
                 const regex = /<:\w+:\d+>/g;
-                let customEmoji = win.reason.match(regex);
-                if (customEmoji) {
-                    winData.icon += customEmoji + " ";
+                let customEmojis = win.reason.match(regex);
+
+                for (const customEmoji of customEmojis) {
+
+                    // If this emoji is not already part of our string, add it
+                    if (!winData.icon.includes(customEmoji)) {
+
+                        winData.icon += customEmoji + " ";
+
+                        // Special case for the count of emojis being different than the count of wins. 
+                        // If someone gets one win for 3 new emojis it should still show up as 3 emojis. 
+                        // Keep track of the emoji count separately 
+                        winData.emojiCount = winData.emojiCount ? winData.emojiCount + 1 : 1;
+                    }
                 }
+
+                // Override the main count with the emoji count here.
+                winData.count = winData.emojiCount;
             }
 
-            total++;
-
-            console.log(firstWinDate.format())
             if (dayjs(win.date).isBefore(firstWinDate)) {
                 firstWinDate = dayjs(win.date);
-                console.log(firstWinDate.format())
             }
         }
     }
