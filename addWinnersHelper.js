@@ -1,5 +1,6 @@
 const dayjs = require('dayjs');
-var fs = require("fs");
+const fs = require("fs");
+const { URL } = require('url');
 const { EmbedBuilder } = require('discord.js');
 const { winnerNameList, getListSeparator } = require('./utils');
 
@@ -72,6 +73,87 @@ function getWinObject(winnerList, winnerId) {
     };
 
     return null;
+}
+
+async function callGalleryBot(guild, serverConfig, newWinners, link, workType) {
+
+    let workTypeDefinition =
+        getFanWorkTypes().find(typeDefinition => typeDefinition.typeString.toUpperCase() == workType.toUpperCase());
+
+    // Is this a type we put in the gallery?
+    if (workTypeDefinition && workTypeDefinition.isVisualArt) {
+        let workUrl = new URL(link);
+
+        // Path format for a discord message is discord.com/channels/[serverId]/[channelId]/[messageId]
+        let winHostName = workUrl.hostname;
+        let pathSegments = workUrl.pathname.split("/")
+        let workServerId = pathSegments[2];
+        let workChannelId = pathSegments[3];
+        let workMessageId = pathSegments[4];
+
+        // Do we have a valid discord message link in the current server?
+        if (winHostName == "discord.com" &&
+            pathSegments[1] == "channels" &&
+            workServerId && workServerId == guild.id &&
+            workChannelId && workMessageId) {
+
+            // Get the messages that came in this channel after the winning work. We're looking to see if
+            // the gallery bot has already been called.
+            let workChannel = await guild.channels.fetch(workChannelId);
+            let messagesAfterWin = await workChannel.messages.fetch({ after: workMessageId })
+
+            // Look for a reply to the winning message from the gallery bot
+            if (!messagesAfterWin.find(message =>
+                (message.reference?.messageId == workMessageId) &&
+                (message.author.id == serverConfig.galleryBot))) {
+
+                // The gallery bot hasn't been called yet, let's call the bot!
+
+                // Get the message we're going to reply to 
+                let workMessage = await workChannel.messages.fetch(workMessageId)
+
+                // If the art was posted in the fanworks announcements channel, simply reply with 
+                // an @ to the gallery bot since we've just posted the congrats message here and we
+                // don't want to be too verbose. If we're in a different channel, go ahead and make
+                //  a little embed to describe what's happening.
+                if (workChannelId == serverConfig.fanworksAnnouncementChannel) {
+                    await workMessage.reply({
+                        content: "<@" + serverConfig.galleryBot + ">"
+                    });
+                }
+                else {
+
+                    // Build up the description string for the embed
+                    let galleryBotEmbedDescription = "";
+                    for (i = 0; i < newWinners.length; i++) {
+                        // Add the winner(s) name(s) to the string
+                        galleryBotEmbedDescription += getListSeparator(i, newWinners.length);
+                        galleryBotEmbedDescription += "**" + newWinners[i].displayName + "** ";
+                    }
+
+                    galleryBotEmbedDescription += handlePlural(newWinners.length, "has", "have");
+                    galleryBotEmbedDescription += " released a new work. Sources say curator ";
+                    galleryBotEmbedDescription += "<@" + serverConfig.galleryBot + ">";
+                    galleryBotEmbedDescription += " hopes to acquire it for the gallery."
+
+                    // Send a reply
+                    await workMessage.reply({
+                        embeds: [new EmbedBuilder()
+                            .setTitle("Arts and Entertainment")
+                            .setDescription(galleryBotEmbedDescription)
+                            .setColor(0xd81b0e)]
+                    });
+                }
+            }
+            else {
+                console.log("Not calling gallery bot because it has already responded.")
+            }
+        }
+        else {
+            console.log("Not calling gallery bot because link is not a discord message: " + workUrl)
+        }
+
+    }
 }
 
 async function addWinners(guild, serverConfig, newWinners, reason, link, workType, dateTimeParameter) {
@@ -213,6 +295,10 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
     if (terror) {
         // Schedule an n-1 check if this winner caused us to hit a terror
         await scheduleNMinusOneCheck(guild, serverConfig);
+    }
+
+    if (serverConfig.galleryBot) {
+        callGalleryBot(guild, serverConfig, newWinners, link, workType);
     }
 
     return winResponseString;

@@ -25,5 +25,6 @@
     "eventUpdateSchedule": "0 0 * * *",
     "eventUpdateChannel": "1148828954023710781",
     "nMinusOneThreshold": 3,
-    "nMinusOneThresholdUnits": "day"
+    "nMinusOneThresholdUnits": "day",
+    "galleryBot":"1115385513629728919"
 }
