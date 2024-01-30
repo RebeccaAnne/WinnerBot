@@ -81,7 +81,7 @@ async function callGalleryBot(guild, serverConfig, newWinners, link, workType) {
         getFanWorkTypes().find(typeDefinition => typeDefinition.typeString.toUpperCase() == workType.toUpperCase());
 
     // Is this a type we put in the gallery?
-    if (workTypeDefinition && workTypeDefinition.isVisualArt) {
+    if (workTypeDefinition && workTypeDefinition.isGalleryType) {
         let workUrl = new URL(link);
 
         // Path format for a discord message is discord.com/channels/[serverId]/[channelId]/[messageId]
