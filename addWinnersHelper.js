@@ -116,39 +116,40 @@ async function callGalleryBot(guild, serverConfig, newWinners, link, workType) {
                 // an @ to the gallery bot since we've just posted the congrats message here and we
                 // don't want to be too verbose. If we're in a different channel, go ahead and make
                 //  a little embed to describe what's happening.
-                //NOTE: The embed version didn't work :( commenting it out and trying just a direct @ for now
-                if (workChannelId == serverConfig.fanworksAnnouncementChannel) {
+                // NOTE: The embed version didn't work, I think it's confusing G. Bot :(
+                // Commenting it out and trying just a direct @ for now
+                //if (workChannelId == serverConfig.fanworksAnnouncementChannel) {
                 await workMessage.reply({
                     content: "<@" + serverConfig.galleryBot + ">"
                 });
-                }
-                    else {
+                //}
+                //         else {
 
-                        // Build up the description string for the embed
-                        let galleryBotEmbedDescription = "";
-                        for (i = 0; i < newWinners.length; i++) {
-                            // Add the winner(s) name(s) to the string
-                            galleryBotEmbedDescription += getListSeparator(i, newWinners.length);
-                            galleryBotEmbedDescription += "**" + newWinners[i].displayName + "** ";
-                        }
+                //             // Build up the description string for the embed
+                //             let galleryBotEmbedDescription = "";
+                //             for (i = 0; i < newWinners.length; i++) {
+                //                 // Add the winner(s) name(s) to the string
+                //                 galleryBotEmbedDescription += getListSeparator(i, newWinners.length);
+                //                 galleryBotEmbedDescription += "**" + newWinners[i].displayName + "** ";
+                //             }
 
-                        // Get the gallery bot's name 
-                        let galleryBotMember = await guild.members.fetch(serverConfig.galleryBot);
+                //             // Get the gallery bot's name 
+                //             let galleryBotMember = await guild.members.fetch(serverConfig.galleryBot);
 
-                        galleryBotEmbedDescription += handlePlural(newWinners.length, "has", "have");
-                        galleryBotEmbedDescription += " released a new work. Sources say curator ";
-                        galleryBotEmbedDescription += galleryBotMember.displayName;
-                        galleryBotEmbedDescription += " hopes to acquire it for the gallery."
+                //             galleryBotEmbedDescription += handlePlural(newWinners.length, "has", "have");
+                //             galleryBotEmbedDescription += " released a new work. Sources say curator ";
+                //             galleryBotEmbedDescription += galleryBotMember.displayName;
+                //             galleryBotEmbedDescription += " hopes to acquire it for the gallery."
 
-                        // Send a reply
-                        await workMessage.reply({
-                            content: "<@" + serverConfig.galleryBot + ">",
-                            embeds: [new EmbedBuilder()
-                                .setTitle("Arts and Entertainment")
-                                .setDescription(galleryBotEmbedDescription)
-                                .setColor(0xd81b0e)]
-                        });
-                    }
+                //             // Send a reply
+                //             await workMessage.reply({
+                //                 content: "<@" + serverConfig.galleryBot + ">",
+                //                 embeds: [new EmbedBuilder()
+                //                     .setTitle("Arts and Entertainment")
+                //                     .setDescription(galleryBotEmbedDescription)
+                //                     .setColor(0xd81b0e)]
+                //             });
+                //         }
             }
             else {
                 console.log("Not calling gallery bot because it has already responded.")
