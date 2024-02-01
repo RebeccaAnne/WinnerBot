@@ -24,9 +24,9 @@
     ],
     "accessDescription": "mods and junior secretaries",
     "winDurationInDays": 7,
-    "eventUpdateSchedule": "5 5 * * 4",
+    "eventUpdateSchedule": "10 15 1 2 4",
     "eventUpdateChannel": "1201227043266896012",
     "nMinusOneThreshold": 2,
     "nMinusOneThresholdUnits": "month",
-    "galleryBot":"1148021081068797962"
+    "galleryBot": "1148021081068797962"
 }
