@@ -303,9 +303,10 @@ async function addWinners(guild, serverConfig, newWinners, reason, link, workTyp
         await scheduleNMinusOneCheck(guild, serverConfig);
     }
 
-    if (serverConfig.galleryBot) {
-        callGalleryBot(guild, serverConfig, newWinners, link, workType);
-    }
+    // This doesn't work on the gallery bot end. Commenting out for now.
+    // if (serverConfig.galleryBot) {
+    //     callGalleryBot(guild, serverConfig, newWinners, link, workType);
+    // }
 
     return winResponseString;
 }
