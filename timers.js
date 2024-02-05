@@ -327,11 +327,11 @@ getNMinusOneTime = (serverConfig) => {
             // If we haven't had an n-1, the next one should be nMinusOneThreshold units (months) after the most recent terror
             nextNMinusOneTime = dayjs(serverData.lastTerrorDate);
             nextNMinusOneTime = nextNMinusOneTime.add(serverConfig.nMinusOneThreshold, serverConfig.nMinusOneThresholdUnits)
-
-            // Add an extra hour of buffer
-            nextNMinusOneTime = nextNMinusOneTime.add(1, "hour");
         }
     }
+
+    console.log("N-1 time is: " + nextNMinusOneTime.format() + " for " + serverConfig.guildId);
+
     return nextNMinusOneTime;
 }
 
