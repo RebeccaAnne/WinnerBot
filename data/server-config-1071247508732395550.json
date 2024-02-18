@@ -24,7 +24,9 @@
     "winDurationInDays": 2,
     "eventUpdateSchedule": "0 0 * * *",
     "eventUpdateChannel": "1148828954023710781",
+    "winnerUpdateSchedule": "0 1 * * *",
+    "winnerUpdateChannel": "1148828954023710781",
     "nMinusOneThreshold": 3,
     "nMinusOneThresholdUnits": "day",
-    "galleryBot":"1115385513629728919"
+    "galleryBot": "1115385513629728919"
 }

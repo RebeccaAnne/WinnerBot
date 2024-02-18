@@ -8,6 +8,7 @@ const { ServerResponse } = require('node:http');
 const { scheduleWinnerExpirationCheck, winnerExpirationCheck } = require('./timers');
 const { Mutex } = require('async-mutex');
 const { getEventsDisplyString } = require('./showEventsHelper')
+const { getWinnerListDisplyStrings, getWinnerListFooterString } = require("./showWinnersHelper")
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -129,6 +130,8 @@ client.once(Events.ClientReady, async c => {
 			console.log("Scheduling event updates for " + serverConfig.guildId);
 			const upcomingEventsJob = new CronJob(serverConfig.eventUpdateSchedule, async function () {
 
+				console.log("Showing event update for " + serverConfig.guildId);
+
 				let filename = "winner-and-event-data.json";
 				let dataFile = require("./" + filename);
 				if (dataFile[guild.id] == null) {
@@ -147,6 +150,46 @@ client.once(Events.ClientReady, async c => {
 							.setColor(0xff)
 							.setFooter({ text: "(Use /show-event-details for more information on an event)" })]
 					});
+				}
+			}, null, true, "America/Los_Angeles");
+		}
+
+		if (serverConfig.winnerUpdateSchedule) {
+			console.log("Scheduling winner updates for " + serverConfig.guildId);
+			const currentWinnersJob = new CronJob(serverConfig.winnerUpdateSchedule, async function () {
+
+				console.log("Showing winner update for " + serverConfig.guildId);
+
+				// The winner string may be too big for a single message. If so, winnerStringArray 
+				// will contain multiple message sized strings. 
+				let winnerStringArray = getWinnerListDisplyStrings(guild);
+
+				if (winnerStringArray.length != 0) {
+					let channel = await client.channels.fetch(serverConfig.winnerUpdateChannel, { force: true });
+
+					for (let index = 0; index < winnerStringArray.length; index++) {
+						let winnerString = winnerStringArray[index];
+
+						// If this is the first message, set the title
+						let title = null;
+						if (index == 0) {
+							title = "Current Winners of the Discord";
+						}
+
+						// If this is the last message, set the footer
+						let footer = null;
+						if (index == winnerStringArray.length - 1) {
+							footer = getWinnerListFooterString(guild, serverConfig.supportsTerrors);
+						}
+
+						await channel.send({
+							embeds: [new EmbedBuilder()
+								.setTitle(title)
+								.setDescription(winnerString)
+								.setFooter({ text: footer })
+								.setColor(0xd81b0e)]
+						});
+					}
 				}
 			}, null, true, "America/Los_Angeles");
 		}

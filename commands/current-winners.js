@@ -1,8 +1,6 @@
 var fs = require("fs");
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const dayjs = require('dayjs');
-const { } = require("../utils");
-const { format } = require("path");
+const { getWinnerListDisplyStrings, getWinnerListFooterString } = require("../showWinnersHelper")
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -29,101 +27,52 @@ module.exports = {
 			return;
 		}
 
-		// Load the winner array from file
-		winnerFilename = "winner-and-event-data.json";
-		let winnerListFile = require("../" + winnerFilename);
-		let winnerList = winnerListFile[guild.id];
+		// The winner string may be too big for a single message. If so, winnerStringArray 
+		// will contain multiple message sized strings.
+		let winnerStringArray = getWinnerListDisplyStrings(guild);
 
-		if (winnerList.winners == null || winnerList.winners.length == 0) {
+		if (winnerStringArray.length == 0) {
+
+			// Special case for no current winners
 			await interaction.reply({
 				embeds: [new EmbedBuilder()
 					.setTitle("No current winners!")
-					.setFooter({
-						text: serverConfig.supportsTerrors ?
-							winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas" :
-							null
-					})
+					.setFooter({ text: getWinnerListFooterString(guild, serverConfig.supportsTerrors) })
 					.setColor(0xd81b0e)]
 			});
 		}
 		else {
-			winnerList.winners.sort((a, b) => {
-				let aDate = dayjs(a.wins[a.wins.length - 1].date);
-				let bDate = dayjs(b.wins[b.wins.length - 1].date);
+			// If we have more than one string, send the first string as a reply, and 
+			// subsequent strings in in follow up message(s). 
+			for (let index = 0; index < winnerStringArray.length; index++) {
+				let winnerString = winnerStringArray[index];
 
-				if (aDate.isBefore(bDate)) { return -1; }
-				else if (bDate.isBefore(aDate)) { return 1; }
-				else { return 0; }
-			});
+				// If this is the last message, set the footer
+				let footer = null;
+				if (index == winnerStringArray.length - 1) {
+					footer = getWinnerListFooterString(guild, serverConfig.supportsTerrors);
+				}
 
-			let winnerString = "";
-			let stringLength = 0;
-			let haveReplied = false;
-			for (let winner of winnerList.winners) {
-				let newWinner = formatWinnerString(winner) + "\n";
-				let newWinnerLength = newWinner.length;
-
-				if ((stringLength + newWinnerLength) <= 4096) {
-					winnerString += formatWinnerString(winner) + "\n";
-					stringLength += newWinnerLength;
+				if (index == 0) {
+					await interaction.reply({
+						embeds: [new EmbedBuilder()
+							.setTitle("Current Winners of the Discord")
+							.setDescription(winnerString)
+							.setFooter({ text: footer })
+							.setColor(0xd81b0e)]
+					});
 				}
 				else {
-					// The string has gotten too big for a single message. Send a reply now, and 
-					// include the rest of the winners in follow up message(s). Don't include the footer here, 
-					// that will go on the last follow up message.
-					if (!haveReplied) {
-						await interaction.reply({
-							embeds: [new EmbedBuilder()
-								.setTitle("Current Winners of the Discord")
-								.setDescription(winnerString)
-								.setColor(0xd81b0e)]
-						});
-						haveReplied = true;
-						console.log("Batching Winner List, first batch length " + stringLength);
-					}
-					else {
-						// If we've already replied at least once, send this set of winners as a followup
-						await interaction.followUp({
-							embeds: [new EmbedBuilder()
-								.setTitle("Current Winners of the Discord (continued)")
-								.setDescription(winnerString)
-								.setColor(0xd81b0e)]
-						});
-						console.log("Additional batched message, length: " + stringLength);
-					}
 
-					// Reset the winnerString to the winner who was too long
-					winnerString = newWinner;
-					stringLength = newWinnerLength;
+					await interaction.followUp({
+						embeds: [new EmbedBuilder()
+							.setTitle("Current Winners of the Discord (continued)")
+							.setDescription(winnerString)
+							.setFooter({ text: footer })
+							.setColor(0xd81b0e)]
+					});
 				}
-			};
-
-			footer = serverConfig.supportsTerrors ?
-				winnerList.winners.length + " out of " + winnerList.currentTerrorThreshold + " winners needed for Terror of Astandalas" :
-				null
-
-			if (!haveReplied) {
-				// Reply to the command if we haven't already
-				await interaction.reply({
-					embeds: [new EmbedBuilder()
-						.setTitle("Current Winners of the Discord")
-						.setDescription(winnerString)
-						.setFooter({ text: footer })
-						.setColor(0xd81b0e)]
-				});
-				console.log("Current Winner String Length: " + stringLength);
-			}
-			else {
-				// If we have already replied at least once, send this message as a followup
-				await interaction.followUp({
-					embeds: [new EmbedBuilder()
-						.setTitle("Current Winners of the Discord (continued)")
-						.setDescription(winnerString)
-						.setFooter({ text: footer })
-						.setColor(0xd81b0e)]
-				});
-				console.log("Final batched message, length: " + stringLength);
 			}
 		}
-	},
-};
+	}
+}
