@@ -317,7 +317,7 @@ getNMinusOneTime = (serverConfig) => {
     serverData = dataFile[serverConfig.guildId];
 
     let nextNMinusOneTime;
-    if (serverConfig.nMinusOneThreshold) {
+    if (serverConfig.nMinusOneInitialThreshold) {
         if (serverData.lastNMinusOne) {
             // If we've already had an n-1, the next one should use the subsequent threshold
             nextNMinusOneTime = dayjs(serverData.lastNMinusOne);
@@ -367,7 +367,7 @@ scheduleNMinusOneCheck = (guild, serverConfig) => {
     let serverData = dataFile[serverConfig.guildId];
 
     // We only need to schedule an n-1 check if we're above the baseTerrorThreshold
-    if (serverConfig.nMinusOneThreshold &&
+    if (serverConfig.nMinusOneInitialThreshold &&
         serverData.currentTerrorThreshold > serverConfig.baseTerrorThreshold) {
 
         // Get the time and schedule a cron job
