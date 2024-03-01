@@ -28,7 +28,9 @@
     "eventUpdateChannel": "1201227043266896012",
     "winnerUpdateSchedule": "5 5 * * 1",
     "winnerUpdateChannel": "1201227043266896012",
-    "nMinusOneThreshold": 2,
-    "nMinusOneThresholdUnits": "month",
+    "nMinusOneInitialThreshold": 1,
+    "nMinusOneInitialThresholdUnits": "month",
+    "nMinusOneSubsequentThreshold": 2,
+    "nMinusOneSubsequentThresholdUnits": "week",
     "galleryBot": "1148021081068797962"
 }

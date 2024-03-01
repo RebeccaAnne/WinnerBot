@@ -319,14 +319,19 @@ getNMinusOneTime = (serverConfig) => {
     let nextNMinusOneTime;
     if (serverConfig.nMinusOneThreshold) {
         if (serverData.lastNMinusOne) {
-            // If we've already had an n-1, the next one should be one unit (month) later
+            // If we've already had an n-1, the next one should use the subsequent threshold
             nextNMinusOneTime = dayjs(serverData.lastNMinusOne);
-            nextNMinusOneTime = nextNMinusOneTime.add(1, serverConfig.nMinusOneThresholdUnits)
+            nextNMinusOneTime = nextNMinusOneTime.add(
+                serverConfig.nMinusOneSubsequentThreshold, 
+                serverConfig.nMinusOneSubsequentThresholdUnits)
         }
         else {
-            // If we haven't had an n-1, the next one should be nMinusOneThreshold units (months) after the most recent terror
+            // If we haven't had an n-1, the next one should be nMinusOneInitialThreshold units 
+            // after the most recent terror
             nextNMinusOneTime = dayjs(serverData.lastTerrorDate);
-            nextNMinusOneTime = nextNMinusOneTime.add(serverConfig.nMinusOneThreshold, serverConfig.nMinusOneThresholdUnits)
+            nextNMinusOneTime = nextNMinusOneTime.add(
+                serverConfig.nMinusOneInitialThreshold, 
+                serverConfig.nMinusOneInitialThresholdUnits)
         }
     }
 
