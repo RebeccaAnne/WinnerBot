@@ -177,7 +177,7 @@ async function getEventsDisplyString(guild, eventSeriesArray, showAll, includeVo
 
             seriesEventString = getEventsDisplyStringForSeries(eventSeries, showAll, 3);
 
-            if (seriesEventString) {
+            if (seriesEventString || showAll) {
                 eventListString += "**" + eventSeries.name + "**\n";
                 eventListString += "*(organized by " + eventSeries.organizers[0].username + "";
                 if (eventSeries.eventThread) {
