@@ -211,7 +211,7 @@ getFanWorkTypes = () => {
         { typeString: "Wiki Update", icon: ":card_index:", colapseMultiple: "updates", statDescriptionString: "Wiki Update", isGalleryType: false },
         { typeString: "Riddle", icon: ":question:", colapseMultiple: "posts", statDescriptionString: "Riddle Post", isGalleryType: false },
         { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces", statDescriptionString: "Carving", isGalleryType: true },
-        { typeString: "Game", icon: ":chess_pawn:", colapseMultiple: "updates", statDescriptionString: "Game", isGalleryType: false },
+        { typeString: "Game", icon: ":game_die:", colapseMultiple: "updates", statDescriptionString: "Game", isGalleryType: false },
         { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts", statDescriptionString: "Server Boost", isGalleryType: false },
         { typeString: "Origami", icon: "<:origamiInGlory:1161416674021486652>", colapseMultiple: "pieces", statDescriptionString: "Origami Piece", isGalleryType: true },
         { typeString: "Video", icon: ":cinema:", colapseMultiple: "pieces", statDescriptionString: "Video", isGalleryType: true },
