@@ -66,9 +66,11 @@ module.exports = {
 
 		if (workType.toUpperCase() == "EMOJI") {
 			// If the type is emoji, we won't be adding a workType emoji to the display. Confirm that the caller has 
-			// included the new emoji (or at least *an* emoji) in the reason. 
-			const regex = /:\w+:/g;
+			// included the new emoji in the reason. The regex will look for a custom emoji string of the form:
+			// <:customEmojiName:1161416674021486652>
+			const regex = /<a?:\w+:\d+>/g;
 			if (!reason.match(regex)) {
+				console.log("Bad emoji: " + reason);
 				await interaction.reply({
 					content: "For Emoji win types please include the emoji in the win reason.",
 					ephemeral: true
