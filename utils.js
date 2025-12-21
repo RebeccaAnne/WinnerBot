@@ -208,7 +208,7 @@ getFanWorkTypes = () => {
         { typeString: "Music", icon: "<:harp:851693676711378946>", colapseMultiple: "pieces", statDescriptionString: "Musical Fanwork", isGalleryType: false },
         { typeString: "Food", icon: ":fork_and_knife:", colapseMultiple: "foods", statDescriptionString: "Food or beverage", isGalleryType: true },
         { typeString: "Wiki Update", icon: ":card_index:", colapseMultiple: "updates", statDescriptionString: "Wiki Update", isGalleryType: false },
-        { typeString: "Riddle", icon: ":question:", colapseMultiple: "posts", statDescriptionString: "Riddle Post", isGalleryType: false },
+        { typeString: "Riddle/Puzzle", icon: ":question:", colapseMultiple: "posts", statDescriptionString: "Riddle/Puzzle", isGalleryType: false },
         { typeString: "Carving", icon: ":carpentry_saw:", colapseMultiple: "pieces", statDescriptionString: "Carving", isGalleryType: true },
         { typeString: "Game", icon: ":game_die:", colapseMultiple: "updates", statDescriptionString: "Game", isGalleryType: false },
         { typeString: "Server Boost", icon: ":rocket:", colapseMultiple: "boosts", statDescriptionString: "Server Boost", isGalleryType: false },
