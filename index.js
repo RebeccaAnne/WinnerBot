@@ -39,10 +39,12 @@ const { channel } = require('node:diagnostics_channel');
 const dataPath = path.join(__dirname, 'data');
 const serverConfigFiles = fs.readdirSync("./data").filter(file => file.startsWith('server-config-'));
 
+console.log("reading server configs")
 
 for (const serverConfigFile of serverConfigFiles) {
 	const filePath = path.join(dataPath, serverConfigFile);
 	const serverConfig = require(filePath);
+	console.log(serverConfigFile)
 
 	if (!dataFile[serverConfig.guildId]) {
 		dataFile[serverConfig.guildId] = {};
@@ -53,6 +55,8 @@ for (const serverConfigFile of serverConfigFiles) {
 		serverData.currentTerrorThreshold = serverConfig.terrorThreshold;
 	}
 }
+
+console.log("updating winnerfile")
 
 fs.writeFileSync("winner-and-event-data.json", JSON.stringify(dataFile), () => { });
 
@@ -203,6 +207,8 @@ client.once(Events.ClientReady, async c => {
 		}, null, true);
 	}
 });
+
+console.log("logging in")
 
 // Log in to Discord with your client's token
 client.login(token);
