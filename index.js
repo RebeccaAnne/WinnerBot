@@ -208,7 +208,13 @@ client.once(Events.ClientReady, async c => {
 	}
 });
 
+
+
 console.log("logging in")
+
+client
+    .on("debug", console.log)
+    .on("warn", console.log)
 
 // Log in to Discord with your client's token
 client.login(token);
