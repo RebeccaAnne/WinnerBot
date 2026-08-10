@@ -17,10 +17,6 @@
     "winnerRoleId": "1115079835912507433",
     "modChannel": "1116125287021805702",
     "modChannelDescription": "thread off junior-secretaries",
-    "modRoles": [
-        "1115384280504340623"
-    ],
-    "accessDescription": "mods and junior secretaries",
     "winDurationInDays": 2,
     "eventUpdateSchedule": "0 0 * * *",
     "eventUpdateChannel": "1148828954023710781",

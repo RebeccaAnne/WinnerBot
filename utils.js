@@ -87,26 +87,9 @@ formatWinnerString = (winnerObject) => {
     return winnerString;
 }
 
-isMemberModJs = (serverConfig, callingMember) => {
-    let hasPermission = false;
-    serverConfig.modRoles.forEach(modRole => {
-        if (callingMember.roles.cache.some(role => role.id === modRole)) {
-            hasPermission = true;
-        }
-    });
-
-    return hasPermission;
-}
-
 modjsPermissionChannelCheck = async (interaction) => {
     let guild = interaction.guild;
     let serverConfig = require("./data/server-config-" + guild.id + ".json");
-
-    // Does this user have permission to edit winners?
-    let callingMember = await guild.members.fetch(interaction.user.id);
-    if (!isMemberModJs(serverConfig, callingMember)) {
-        return "Only " + serverConfig.accessDescription + " can add and remove winners and event series";
-    }
 
     // Are we in the correct channel to manage winners?
     if (interaction.channelId != serverConfig.modChannel) {
@@ -222,5 +205,5 @@ getFanWorkTypes = () => {
 }
 
 module.exports = {
-    handlePlural, getFanWorkTypes, normalizeString, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, isMemberModJs, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
+    handlePlural, getFanWorkTypes, normalizeString, getMutex, formatWinnerString, formatWinnerReason, getOrdinal, modjsPermissionChannelCheck, winnerNameList, getListSeparator, tryParseYYYYMMDD, tryParseHammerTime
 }
